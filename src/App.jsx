@@ -1,49 +1,45 @@
-import { Suspense, useState } from "react";
-import { Example } from "./components/Example";
+import { Suspense, useEffect } from "react";
+import { AnimatePresence } from "framer-motion";
+import BoxLayout from "./components/BoxLayout";
 import ErrorBoundary from "./utils/ErrorBoundary";
-
-const URLS = {
-  USERS: "https://jsonplaceholder.typicode.com/users",
-  POSTS: "https://jsonplaceholder.typicode.com/posts",
-  COMMENTS: "https://jsonplaceholder.typicode.com/comments",
-};
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { routes } from "./routes";
 
 export default function App() {
-  const [url, setUrl] = useState(URLS.USERS);
+  const url = "https://jsonplaceholder.typicode.com/users";
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    document.documentElement.scrollTop = 0;
+    document.scrollingElement.scrollTop = 0;
+  }, [pathname]);
+
+  const getRoutes = (allRoutes) =>
+    allRoutes.map((route) => {
+      return (
+        <Route
+          exact
+          path={route.route}
+          element={
+            <ErrorBoundary fallback={<div>Error...</div>}>
+              <Suspense fallback={<div>Loading...</div>}>
+                {route.component}
+              </Suspense>
+            </ErrorBoundary>
+          }
+          key={route.key}
+        />
+      );
+    });
 
   return (
-    <>
-      <div>
-        <label>
-          <input
-            type="radio"
-            checked={url === URLS.USERS}
-            onChange={() => setUrl(URLS.USERS)}
-          />
-          Users
-        </label>
-        <label>
-          <input
-            type="radio"
-            checked={url === URLS.POSTS}
-            onChange={() => setUrl(URLS.POSTS)}
-          />
-          Posts
-        </label>
-        <label>
-          <input
-            type="radio"
-            checked={url === URLS.COMMENTS}
-            onChange={() => setUrl(URLS.COMMENTS)}
-          />
-          Comments
-        </label>
-      </div>
-      <ErrorBoundary fallback={<div>Error...</div>}>
-        <Suspense fallback={<div>Loading...</div>}>
-          <Example url={url} />
-        </Suspense>
-      </ErrorBoundary>
-    </>
+    <AnimatePresence mode="wait">
+      <BoxLayout>
+        <Routes>
+          {getRoutes(routes)}
+          <Route path="*" element={<Navigate to="/home" />} />
+        </Routes>
+      </BoxLayout>
+    </AnimatePresence>
   );
 }

@@ -9,8 +9,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emotion/react": "^11.10.0",
+    "@emotion/styled": "^11.10.0",
+    "@mui/icons-material": "^5.8.4",
+    "@mui/material": "^5.10.0",
+    "framer-motion": "4.1.17",
+    "randomcolor": "^0.6.2",
     "react": "experimental",
-    "react-dom": "experimental"
+    "react-dom": "experimental",
+    "react-intersection-observer": "^9.4.3",
+    "react-router-dom": "6.2.1"
   },
   "devDependencies": {
     "@types/react": "^18.0.27",
