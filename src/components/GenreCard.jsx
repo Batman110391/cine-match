@@ -1,36 +1,32 @@
 import React from "react";
-import { motion } from "framer-motion";
-import randomColor from "randomcolor";
-import { Box, Typography } from "@mui/material";
+import { Card, Typography, darken, lighten } from "@mui/material";
 
-export default function GenreCard({ name, index }) {
-  const visible = { opacity: 1, y: 0, transition: { duration: 0.1 * index } };
-  const color = randomColor();
-
+export default function GenreCard({ name, bg }) {
   return (
-    <Box
-      component={motion.div}
-      variants={{
-        hidden: { opacity: 0, y: -20 },
-        visible,
-      }}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.95 }}
+    <Card
       sx={{
-        background: (theme) => theme.palette.gradient.main,
-        borderRadius: "5px",
-        width: "275px",
-        height: "70px",
-        border: `2px solid ${color}`,
+        position: "relative",
+        backgroundImage: `linear-gradient(-180deg, rgba(54,54,54,0.2), rgba(32,32,32,0.6)), url(${bg})`,
+        backgroundSize: "cover",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center center",
+        objectFit: "cover",
+        width: "100%",
+        height: "120px",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
         cursor: "pointer",
       }}
     >
-      <Typography sx={{ userSelect: "none" }} variant="body1">
+      <Typography
+        sx={{ userSelect: "none" }}
+        variant="button"
+        fontWeight="bold"
+        fontSize="1.5rem"
+      >
         {name}
       </Typography>
-    </Box>
+    </Card>
   );
 }

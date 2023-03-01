@@ -6,7 +6,6 @@ import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { routes } from "./routes";
 
 export default function App() {
-  const url = "https://jsonplaceholder.typicode.com/users";
   const { pathname } = useLocation();
 
   useEffect(() => {

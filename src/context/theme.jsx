@@ -13,6 +13,11 @@ const primaryDark = {
 };
 
 export const darkTheme = createTheme({
+  typography: {
+    allVariants: {
+      fontFamily: "Poppins, sans-serif",
+    },
+  },
   palette: {
     mode: "dark",
     gradient: {
