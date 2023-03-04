@@ -21,8 +21,9 @@ export const darkTheme = createTheme({
   palette: {
     mode: "dark",
     gradient: {
-      main: `linear-gradient(-39deg, ${primaryDark[800]} 0%, ${primaryDark[700]} 100%)`,
+      main: `linear-gradient(-180deg, ${primaryDark[800]} 0%, ${primaryDark[700]} 100%)`,
       light: `linear-gradient(135deg, ${primaryDark[600]} 0%, ${primaryDark[500]} 100%)`,
+      extraLight: `linear-gradient(135deg, ${primaryDark[400]} 0%, ${primaryDark[300]} 100%)`,
     },
     background: {
       default: primaryDark[900],

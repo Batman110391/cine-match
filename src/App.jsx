@@ -17,6 +17,7 @@ export default function App() {
     allRoutes.map((route) => {
       return (
         <Route
+          key={route.key}
           exact
           path={route.route}
           element={
@@ -26,7 +27,6 @@ export default function App() {
               </Suspense>
             </ErrorBoundary>
           }
-          key={route.key}
         />
       );
     });

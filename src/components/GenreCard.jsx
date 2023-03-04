@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, Typography, darken, lighten } from "@mui/material";
+import { Card, Typography } from "@mui/material";
 
 export default function GenreCard({ name, bg }) {
   return (
@@ -20,7 +20,12 @@ export default function GenreCard({ name, bg }) {
       }}
     >
       <Typography
-        sx={{ userSelect: "none" }}
+        sx={{
+          userSelect: "none",
+          letterSpacing: ".1em",
+          textShadow: `-1px -1px 1px #1111116b,
+          2px 2px 1px #36363691`,
+        }}
         variant="button"
         fontWeight="bold"
         fontSize="1.5rem"

@@ -4,7 +4,7 @@ import { useInView } from "react-intersection-observer";
 import { Typography } from "@mui/material";
 import { Box } from "@mui/system";
 
-export default function AnimatedTitle({ text }) {
+export default function AnimatedTitle({ text, sx, ...rest }) {
   const ctrls = useAnimation();
 
   const { ref, inView } = useInView({
@@ -44,9 +44,10 @@ export default function AnimatedTitle({ text }) {
   return (
     <Typography
       variant="h2"
-      sx={{ fontSize: "3rem", fontWeight: "600" }}
+      sx={{ fontSize: { xs: "2rem", md: "3rem" }, fontWeight: "600", ...sx }}
       aria-label={text}
       role="heading"
+      {...rest}
     >
       {text.split(" ").map((word, index) => {
         return (

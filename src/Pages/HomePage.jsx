@@ -10,22 +10,29 @@ export default function HomePage() {
   const visible = { opacity: 1, y: 0, transition: { duration: 0.5 } };
 
   return (
-    <Stack flexDirection={"column"}>
-      <AnimatedTitle text={"Animated text"} />
+    <Stack
+      flexDirection={"column"}
+      alignItems={"center"}
+      gap={2}
+      sx={{ p: 1.5, height: "100%" }}
+    >
+      <AnimatedTitle text={"Cine Match"} sx={{ py: 2 }} />
       <TypographyAnimated
         component={"span"}
-        variant={"h5"}
+        sx={{ maxWidth: "500px", textAlign: "center", py: 2 }}
+        variant={"h6"}
         variants={{
           hidden: { opacity: 0, y: -20 },
           visible,
         }}
         gutterBottom
-        text="CineMatch ti suggerisce i film più adatti ai tuoi gusti cinematografici.
+        text="I film più adatti ai tuoi gusti cinematografici.
         Filtra per attore, regista, genere e altro ancora per trovare il film
         perfetto per la tua giornata."
       />
       <TypographyAnimated
         component={"span"}
+        sx={{ pt: 10 }}
         variant={"subtitle1"}
         variants={{
           hidden: { opacity: 0, y: -20 },
@@ -39,8 +46,10 @@ export default function HomePage() {
           hidden: { opacity: 0, y: -20 },
           visible,
         }}
+        sx={{ background: (theme) => theme.palette.gradient.extraLight }}
         LinkComponent={Link}
         to={"/movie-finder-generes"}
+        color={"action"}
         variant="contained"
         title="Scoprilo"
       />
