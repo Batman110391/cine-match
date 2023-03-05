@@ -4,23 +4,22 @@ import Grid from "@mui/material/Unstable_Grid2";
 import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
 import { useState } from "react";
 import ScrollContainer from "react-indiana-drag-scroll";
+import { useQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { genresList } from "../api/tmdbApis";
+import { fetchGenres } from "../api/tmdbApis";
 import AnimatedTitle from "../components/AnimatedTitle";
 import FloatingActionButton from "../components/FloatingActionButton";
 import GenreCard from "../components/GenreCard";
 import { setQuery } from "../store/movieQuery";
 
 export default function SearchGeneres() {
-  const data = genresList;
-
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const prevSelectedItems = useSelector((state) => state.movieQuery.genres);
 
-  const [selectedItems, setSelectedItems] = useState(prevSelectedItems || []);
+  const [selectedItems, setSelectedItems] = useState(prevSelectedItems);
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -28,6 +27,12 @@ export default function SearchGeneres() {
     damping: 30,
     restDelta: 0.001,
   });
+
+  const { isLoading, error, data } = useQuery(["genres"], () => fetchGenres());
+
+  if (isLoading) return "Loading...";
+
+  if (error) return "An error has occurred: " + error.message;
 
   const handleNavigateNextStep = () => {
     dispatch(setQuery({ genres: selectedItems }));
