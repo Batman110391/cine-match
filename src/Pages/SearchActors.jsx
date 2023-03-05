@@ -2,7 +2,7 @@ import ArrowCircleRightOutlinedIcon from "@mui/icons-material/ArrowCircleRightOu
 import { Avatar, Box, Chip } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import ScrollContainer from "react-indiana-drag-scroll";
 import { useInfiniteQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,6 +11,8 @@ import { fetchActors } from "../api/tmdbApis";
 import ActorsCard from "../components/ActorsCard";
 import AnimatedTitle from "../components/AnimatedTitle";
 import FloatingActionButton from "../components/FloatingActionButton";
+import { areEqual } from "../utils/areEqual";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 const MIN_RESULT = 10;
 
@@ -163,45 +165,17 @@ export default function SearchActors() {
         <AnimatedTitle text="Seleziona attori" />
       </Box>
       <Box sx={{ overflow: "hidden", pb: 5 }}>
-        <Grid container spacing={{ xs: 1 }} columns={{ xs: 1, sm: 8, md: 12 }}>
-          <AnimatePresence mode={"popLayout"}>
-            {visibleData?.map((actor, i) => {
-              return (
-                <Grid
-                  component={motion.div}
-                  key={actor.id}
-                  xs={2}
-                  sm={4}
-                  md={4}
-                  lg={3}
-                  layout
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  initial={{
-                    scale: 0.8,
-                    opacity: 0,
-                    duration: 0.1 * i,
-                  }}
-                  exit={{ scale: 0.8, opacity: 0 }}
-                  transition={{ type: "spring" }}
-                  sx={{
-                    padding: 1.5,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                  onClick={() => handleSelectedItem(actor.id)}
-                >
-                  <ActorsCard
-                    name={actor.name}
-                    bg={`http://image.tmdb.org/t/p/w500${actor.profile_path}`}
-                  />
-                </Grid>
-              );
-            })}
-          </AnimatePresence>
-        </Grid>
+        <InfiniteScroll
+          dataLength={visibleData.length || 0}
+          next={() => fetchNextPage()}
+          hasMore={hasNextPage}
+          loader={<div>Loading...</div>}
+        >
+          <ItemRow
+            itemData={visibleData}
+            handleSelectedItem={handleSelectedItem}
+          />
+        </InfiniteScroll>
       </Box>
       <FloatingActionButton
         onClick={() => handleNavigateNextStep()}
@@ -212,5 +186,54 @@ export default function SearchActors() {
         <ArrowCircleRightOutlinedIcon fontSize="large" color="action" />
       </FloatingActionButton>
     </Box>
+  );
+}
+
+const ItemRow = memo(RenderRow, areEqual);
+
+function RenderRow({ itemData, handleSelectedItem }) {
+  return (
+    <Grid
+      container
+      spacing={{ xs: 1 }}
+      columns={{ xs: 1, sm: 8, md: 12 }}
+      sx={{ overflow: "hidden" }}
+    >
+      <AnimatePresence mode={"popLayout"}>
+        {itemData.map((actor, i) => (
+          <Grid
+            component={motion.div}
+            key={actor.id}
+            xs={2}
+            sm={4}
+            md={4}
+            lg={3}
+            layout
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            animate={{ scale: 1, opacity: 1 }}
+            initial={{
+              scale: 0.8,
+              opacity: 0,
+              duration: 0.1 * i,
+            }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            transition={{ type: "spring" }}
+            sx={{
+              padding: 1.5,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            onClick={() => handleSelectedItem(actor.id)}
+          >
+            <ActorsCard
+              name={actor.name}
+              bg={`http://image.tmdb.org/t/p/w500${actor.profile_path}`}
+            />
+          </Grid>
+        ))}
+      </AnimatePresence>
+    </Grid>
   );
 }
