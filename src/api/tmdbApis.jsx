@@ -102,7 +102,25 @@ const genresList = [
   },
 ];
 
-export function fetchActors(page) {
+export function fetchActors(page, keyword) {
+  if (keyword) {
+    return fetchPromise(
+      `https://api.themoviedb.org/3/search/person?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}&query="${keyword}"`
+    ).then((data) => {
+      const hasNext = page <= data.total_pages;
+
+      const currActors = {
+        results: data?.results?.filter(
+          (person) => person.known_for_department === "Acting"
+        ),
+        nextPage: hasNext ? page + 1 : undefined,
+        previousPage: page > 1 ? page - 1 : undefined,
+      };
+
+      return currActors;
+    });
+  }
+
   return fetchPromise(
     `https://api.themoviedb.org/3/person/popular?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}`
   ).then((data) => {

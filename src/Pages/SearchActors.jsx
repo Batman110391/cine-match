@@ -1,8 +1,16 @@
 import ArrowCircleRightOutlinedIcon from "@mui/icons-material/ArrowCircleRightOutlined";
-import { Avatar, Box, Chip } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  Chip,
+  alpha,
+  InputBase,
+  IconButton,
+  Button,
+} from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import ScrollContainer from "react-indiana-drag-scroll";
 import { useInfiniteQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,6 +21,7 @@ import AnimatedTitle from "../components/AnimatedTitle";
 import FloatingActionButton from "../components/FloatingActionButton";
 import { areEqual } from "../utils/areEqual";
 import InfiniteScroll from "react-infinite-scroll-component";
+import SearchIcon from "@mui/icons-material/Search";
 
 const MIN_RESULT = 10;
 
@@ -22,6 +31,8 @@ export default function SearchActors() {
 
   const prevSelectedItems = useSelector((state) => state.movieQuery.actors);
   const [selectedItems, setSelectedItems] = useState(prevSelectedItems);
+  const [keywordSearchInput, setKeywordSearchInput] = useState("");
+  const [queryKeyword, setQueryKeyword] = useState("");
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -38,9 +49,9 @@ export default function SearchActors() {
     hasNextPage,
     fetchNextPage,
   } = useInfiniteQuery({
-    queryKey: ["actors", "infinite"],
+    queryKey: ["actors", queryKeyword],
     getNextPageParam: (prevData) => prevData.nextPage,
-    queryFn: ({ pageParam = 1 }) => fetchActors(pageParam),
+    queryFn: ({ pageParam = 1 }) => fetchActors(pageParam, queryKeyword),
   });
 
   if (status === "loading") return <h1>Loading...</h1>;
@@ -74,6 +85,23 @@ export default function SearchActors() {
     );
 
     setSelectedItems(newSelectedItems);
+  };
+
+  const handleChangeInput = (e) => {
+    const keyword = e.target.value;
+
+    setKeywordSearchInput(keyword);
+  };
+
+  const handleSearchByKeyword = () => {
+    if (keywordSearchInput) {
+      setQueryKeyword(keywordSearchInput);
+    }
+  };
+
+  const handleRemoveQueryKeyword = () => {
+    setKeywordSearchInput("");
+    setQueryKeyword(null);
   };
 
   const visibleData = actors?.results?.filter(
@@ -164,11 +192,72 @@ export default function SearchActors() {
       <Box sx={{ textAlign: "center", pt: 9, pb: 3 }}>
         <AnimatedTitle text="Seleziona attori" />
       </Box>
+
+      <Box
+        component={"form"}
+        onSubmit={handleSearchByKeyword}
+        sx={{
+          position: "relative",
+          borderRadius: (theme) => theme.shape.borderRadius,
+          backgroundColor: (theme) => alpha(theme.palette.common.white, 0.15),
+          "&:hover": {
+            backgroundColor: (theme) => alpha(theme.palette.common.white, 0.25),
+          },
+          margin: "0  auto 15px auto",
+          width: "85%",
+        }}
+      >
+        <InputBase
+          sx={{
+            color: "inherit",
+            width: "100%",
+            "& .MuiInputBase-input": {
+              padding: (theme) => theme.spacing(1, 1, 1, 0),
+              // vertical padding + font size from searchIcon
+              paddingLeft: (theme) => `calc(1em + ${theme.spacing(1)})`,
+              transition: (theme) => theme.transitions.create("width"),
+              width: "100%",
+            },
+          }}
+          onChange={handleChangeInput}
+          value={keywordSearchInput || ""}
+          placeholder="Attore…"
+          inputProps={{ "aria-label": "search" }}
+          endAdornment={
+            <Button
+              sx={{ margin: "5px 10px", p: 0 }}
+              variant="outlined"
+              size="small"
+              onClick={handleSearchByKeyword}
+            >
+              cerca
+            </Button>
+          }
+        />
+      </Box>
+      {queryKeyword && (
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            marginBottom: "15px",
+          }}
+        >
+          <Chip
+            label={queryKeyword}
+            size="small"
+            color="secondary"
+            onDelete={handleRemoveQueryKeyword}
+          />
+        </Box>
+      )}
       <Box sx={{ overflow: "hidden", pb: 5 }}>
         <InfiniteScroll
+          style={{ overflow: "hidden" }}
           dataLength={visibleData.length || 0}
           next={() => fetchNextPage()}
-          hasMore={hasNextPage}
+          hasMore={isFetchingNextPage}
           loader={<div>Loading...</div>}
         >
           <ItemRow
@@ -209,8 +298,6 @@ function RenderRow({ itemData, handleSelectedItem }) {
             md={4}
             lg={3}
             layout
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.95 }}
             animate={{ scale: 1, opacity: 1 }}
             initial={{
               scale: 0.8,

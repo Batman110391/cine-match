@@ -143,8 +143,6 @@ export default function SearchGeneres() {
                   md={4}
                   lg={3}
                   layout
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
                   animate={{ scale: 1, opacity: 1 }}
                   initial={{
                     scale: 0.8,

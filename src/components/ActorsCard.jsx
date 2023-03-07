@@ -1,9 +1,13 @@
 import React from "react";
 import { Card, Typography } from "@mui/material";
+import { motion } from "framer-motion";
 
 export default function ActorsCard({ name, bg }) {
   return (
     <Card
+      component={motion.div}
+      whileHover={{ scale: 1.04 }}
+      whileTap={{ scale: 0.95 }}
       sx={{
         position: "relative",
         backgroundImage: `linear-gradient(-180deg, rgba(54,54,54,0.2), rgba(32,32,32,0.6)), url(${bg})`,
@@ -17,6 +21,7 @@ export default function ActorsCard({ name, bg }) {
         alignItems: "end",
         justifyContent: "center",
         cursor: "pointer",
+        border: "1px solid #ffffff70",
       }}
     >
       <Typography
