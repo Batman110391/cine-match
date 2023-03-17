@@ -4,6 +4,7 @@ import BoxLayout from "./components/BoxLayout";
 import ErrorBoundary from "./utils/ErrorBoundary";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { routes } from "./routes";
+import LoadingPage from "./components/LoadingPage";
 
 export default function App() {
   const { pathname } = useLocation();
@@ -22,9 +23,7 @@ export default function App() {
           path={route.route}
           element={
             <ErrorBoundary fallback={<div>Error...</div>}>
-              <Suspense fallback={<div>Loading...</div>}>
-                {route.component}
-              </Suspense>
+              <Suspense fallback={<LoadingPage />}>{route.component}</Suspense>
             </ErrorBoundary>
           }
         />

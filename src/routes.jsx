@@ -2,10 +2,8 @@ import React from "react";
 
 const HomePage = React.lazy(() => import("./Pages/HomePage"));
 const MovieFinder = React.lazy(() => import("./Pages/MovieFinder"));
-const SearchActors = React.lazy(() => import("./Pages/SearchActors"));
-const SearchDirectors = React.lazy(() => import("./Pages/SearchDirectors"));
+const SearchCast = React.lazy(() => import("./Pages/SearchCast"));
 const SearchGeneres = React.lazy(() => import("./Pages/SearchGeneres"));
-const SearchPeriods = React.lazy(() => import("./Pages/SearchPeriods"));
 
 export const routes = [
   {
@@ -21,22 +19,10 @@ export const routes = [
     component: <SearchGeneres />,
   },
   {
-    name: "MovieFinderActors",
-    key: "moviefinderactors",
-    route: "/movie-finder-actors",
-    component: <SearchActors />,
-  },
-  {
-    name: "MovieFinderDirectors",
-    key: "moviefinderdirectors",
-    route: "/movie-finder-directors",
-    component: <SearchDirectors />,
-  },
-  {
-    name: "MovieFinderPeriods",
-    key: "moviefinderperiods",
-    route: "/movie-finder-periods",
-    component: <SearchPeriods />,
+    name: "MovieFinderCast",
+    key: "moviefindercast",
+    route: "/movie-finder-cast",
+    component: <SearchCast />,
   },
   {
     name: "MovieFinderPage",

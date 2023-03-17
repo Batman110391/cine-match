@@ -102,22 +102,22 @@ const genresList = [
   },
 ];
 
-export function fetchActors(page, keyword) {
+export async function fetchCasts(page, keyword) {
   if (keyword) {
     return fetchPromise(
-      `https://api.themoviedb.org/3/search/person?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}&query="${keyword}"`
+      `https://api.themoviedb.org/3/search/person?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}&query=${encodeURI(
+        keyword
+      )}&include_adult=true`
     ).then((data) => {
       const hasNext = page <= data.total_pages;
 
-      const currActors = {
-        results: data?.results?.filter(
-          (person) => person.known_for_department === "Acting"
-        ),
+      const currCasts = {
+        results: data?.results,
         nextPage: hasNext ? page + 1 : undefined,
         previousPage: page > 1 ? page - 1 : undefined,
       };
 
-      return currActors;
+      return currCasts;
     });
   }
 
@@ -126,18 +126,121 @@ export function fetchActors(page, keyword) {
   ).then((data) => {
     const hasNext = page <= data.total_pages;
 
-    const currActors = {
-      results: data?.results?.filter(
-        (person) => person.known_for_department === "Acting"
-      ),
+    const currCasts = {
+      results: data?.results,
       nextPage: hasNext ? page + 1 : undefined,
       previousPage: page > 1 ? page - 1 : undefined,
     };
 
-    return currActors;
+    return currCasts;
   });
 }
 
 export function fetchGenres() {
   return new Promise((resolve, _) => resolve(genresList));
+}
+
+export async function fetchSimilarMoviesByGenres(page, keyword, genres) {
+  const genresQuery = genres?.map((g) => g.id).join(",") || null;
+
+  if (keyword) {
+    return fetchPromise(
+      `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}&query=${encodeURI(
+        keyword
+      )}&include_adult=true`
+    ).then((data) => {
+      const hasNext = page <= data.total_pages;
+
+      const currCasts = {
+        results: data?.results,
+        nextPage: hasNext ? page + 1 : undefined,
+        previousPage: page > 1 ? page - 1 : undefined,
+      };
+
+      return currCasts;
+    });
+  }
+
+  return fetchPromise(
+    `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}${
+      genresQuery && "&with_genres=" + genresQuery
+    }`
+  ).then((data) => {
+    const hasNext = page <= data.total_pages;
+
+    const currMovieByGenres = {
+      results: data?.results,
+      nextPage: hasNext ? page + 1 : undefined,
+      previousPage: page > 1 ? page - 1 : undefined,
+    };
+
+    return currMovieByGenres;
+  });
+}
+
+export async function fetchSimilarMoviesById(page, id) {
+  return fetchPromise(
+    `https://api.themoviedb.org/3/movie/${id}/similar?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}`
+  ).then((data) => {
+    return data?.results;
+  });
+}
+
+export async function fetchMovies(page, genres, casts, similarMovies) {
+  const genresQuery = genres?.map((g) => g.id).join("|") || null;
+  const castsQuery = casts?.map((c) => c.id).join("|") || null;
+
+  //01/01/2000
+  //14/03/2023
+
+  //YYYY-MM-DD // &release_date.gte=PRIMA &release_date.lte=DOPO
+
+  let totalPage = 0;
+
+  const currMoviesByGeneres = await fetchPromise(
+    `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}${
+      genresQuery && "&with_genres=" + genresQuery
+    }`
+  ).then((data) => {
+    if (data?.total_pages > totalPage) {
+      totalPage = data.total_pages;
+    }
+    return data?.results;
+  });
+
+  const currMoviesByPeople = await fetchPromise(
+    `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}${
+      castsQuery && "&with_people=" + castsQuery
+    }`
+  ).then((data) => {
+    if (data?.total_pages > totalPage) {
+      totalPage = data.total_pages;
+    }
+    return data?.results;
+  });
+
+  const hasNext = page <= totalPage;
+
+  const uniqueIds = [];
+
+  const filterUniqueResult = [
+    ...currMoviesByGeneres,
+    ...currMoviesByPeople,
+  ].filter((element) => {
+    const isDuplicate = uniqueIds.includes(element.id);
+
+    if (!isDuplicate) {
+      uniqueIds.push(element.id);
+
+      return true;
+    }
+
+    return false;
+  });
+
+  return {
+    results: filterUniqueResult,
+    nextPage: hasNext ? page + 1 : undefined,
+    previousPage: page > 1 ? page - 1 : undefined,
+  };
 }

@@ -1,35 +1,34 @@
 import ArrowCircleRightOutlinedIcon from "@mui/icons-material/ArrowCircleRightOutlined";
 import {
+  alpha,
   Avatar,
   Box,
-  Chip,
-  alpha,
-  InputBase,
-  IconButton,
   Button,
+  Chip,
+  CircularProgress,
+  InputBase,
 } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useState } from "react";
 import ScrollContainer from "react-indiana-drag-scroll";
+import InfiniteScroll from "react-infinite-scroll-component";
 import { useInfiniteQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { fetchActors } from "../api/tmdbApis";
-import ActorsCard from "../components/ActorsCard";
+import { fetchCasts } from "../api/tmdbApis";
+import CastsCard from "../components/CastsCard";
 import AnimatedTitle from "../components/AnimatedTitle";
 import FloatingActionButton from "../components/FloatingActionButton";
+import LoadingPage from "../components/LoadingPage";
+import { setQuery } from "../store/movieQuery";
 import { areEqual } from "../utils/areEqual";
-import InfiniteScroll from "react-infinite-scroll-component";
-import SearchIcon from "@mui/icons-material/Search";
 
-const MIN_RESULT = 10;
-
-export default function SearchActors() {
+export default function SearchCast() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const prevSelectedItems = useSelector((state) => state.movieQuery.actors);
+  const prevSelectedItems = useSelector((state) => state.movieQuery.cast);
   const [selectedItems, setSelectedItems] = useState(prevSelectedItems);
   const [keywordSearchInput, setKeywordSearchInput] = useState("");
   const [queryKeyword, setQueryKeyword] = useState("");
@@ -49,15 +48,15 @@ export default function SearchActors() {
     hasNextPage,
     fetchNextPage,
   } = useInfiniteQuery({
-    queryKey: ["actors", queryKeyword],
+    queryKey: ["cast", queryKeyword],
     getNextPageParam: (prevData) => prevData.nextPage,
-    queryFn: ({ pageParam = 1 }) => fetchActors(pageParam, queryKeyword),
+    queryFn: ({ pageParam = 1 }) => fetchCasts(pageParam, queryKeyword),
   });
 
-  if (status === "loading") return <h1>Loading...</h1>;
+  if (status === "loading") return <LoadingPage />;
   if (status === "error") return <h1>{JSON.stringify(error)}</h1>;
 
-  const actors = data?.pages
+  const cast = data?.pages
     ?.flatMap((data) => data)
     .reduce((prev, curr) => {
       return {
@@ -69,13 +68,13 @@ export default function SearchActors() {
     }, {});
 
   const handleNavigateNextStep = () => {
-    dispatch(setQuery({ genres: selectedItems }));
+    dispatch(setQuery({ cast: selectedItems }));
 
-    navigate("/movie-finder-actors");
+    navigate("/movie-finder");
   };
 
   const handleSelectedItem = (id) => {
-    const currSelection = actors?.results?.filter((item) => item.id === id);
+    const currSelection = cast?.results?.filter((item) => item.id === id);
     setSelectedItems([...selectedItems, ...currSelection]);
   };
 
@@ -104,7 +103,7 @@ export default function SearchActors() {
     setQueryKeyword(null);
   };
 
-  const visibleData = actors?.results?.filter(
+  const visibleData = cast?.results?.filter(
     (item) => !selectedItems?.find((sItem) => sItem.id === item.id)
   );
 
@@ -158,10 +157,7 @@ export default function SearchActors() {
             <AnimatePresence mode={"popLayout"}>
               {selectedItems.map((sItem) => {
                 const existPath = sItem?.profile_path ? (
-                  <Avatar
-                    alt={sItem.name}
-                    src={`http://image.tmdb.org/t/p/w500${sItem.profile_path}`}
-                  />
+                  <Avatar alt={sItem.name} src={sItem.profile_path} />
                 ) : (
                   <Avatar>{sItem.name.charAt(0)}</Avatar>
                 );
@@ -190,7 +186,7 @@ export default function SearchActors() {
         </Box>
       )}
       <Box sx={{ textAlign: "center", pt: 9, pb: 3 }}>
-        <AnimatedTitle text="Seleziona attori" />
+        <AnimatedTitle text="Seleziona cast" />
       </Box>
 
       <Box
@@ -221,7 +217,7 @@ export default function SearchActors() {
           }}
           onChange={handleChangeInput}
           value={keywordSearchInput || ""}
-          placeholder="Attore…"
+          placeholder="Cerca per nome…"
           inputProps={{ "aria-label": "search" }}
           endAdornment={
             <Button
@@ -257,8 +253,12 @@ export default function SearchActors() {
           style={{ overflow: "hidden" }}
           dataLength={visibleData.length || 0}
           next={() => fetchNextPage()}
-          hasMore={isFetchingNextPage}
-          loader={<div>Loading...</div>}
+          hasMore={hasNextPage}
+          loader={
+            <Box sx={{ display: "flex", justifyContent: "center" }}>
+              <CircularProgress />
+            </Box>
+          }
         >
           <ItemRow
             itemData={visibleData}
@@ -289,10 +289,10 @@ function RenderRow({ itemData, handleSelectedItem }) {
       sx={{ overflow: "hidden" }}
     >
       <AnimatePresence mode={"popLayout"}>
-        {itemData.map((actor, i) => (
+        {itemData.map((cast, i) => (
           <Grid
             component={motion.div}
-            key={actor.id}
+            key={cast.id}
             xs={2}
             sm={4}
             md={4}
@@ -312,11 +312,12 @@ function RenderRow({ itemData, handleSelectedItem }) {
               alignItems: "center",
               justifyContent: "center",
             }}
-            onClick={() => handleSelectedItem(actor.id)}
+            onClick={() => handleSelectedItem(cast.id)}
           >
-            <ActorsCard
-              name={actor.name}
-              bg={`http://image.tmdb.org/t/p/w500${actor.profile_path}`}
+            <CastsCard
+              known_for_department={cast.known_for_department}
+              name={cast.name}
+              bg={`http://image.tmdb.org/t/p/w500${cast.profile_path}`}
             />
           </Grid>
         ))}

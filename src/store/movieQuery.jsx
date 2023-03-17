@@ -2,9 +2,10 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   genres: [],
-  actors: [],
-  directors: [],
-  rangeDate: "",
+  cast: [],
+  similarMovies: [],
+  prevExcludeItems: [],
+  rangeDate: { from: null, to: null },
   watch: [],
 };
 

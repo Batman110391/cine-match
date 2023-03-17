@@ -11,6 +11,7 @@ import { fetchGenres } from "../api/tmdbApis";
 import AnimatedTitle from "../components/AnimatedTitle";
 import FloatingActionButton from "../components/FloatingActionButton";
 import GenreCard from "../components/GenreCard";
+import LoadingPage from "../components/LoadingPage";
 import { setQuery } from "../store/movieQuery";
 
 export default function SearchGeneres() {
@@ -30,14 +31,14 @@ export default function SearchGeneres() {
 
   const { isLoading, error, data } = useQuery(["genres"], () => fetchGenres());
 
-  if (isLoading) return "Loading...";
+  if (isLoading) return <LoadingPage />;
 
-  if (error) return "An error has occurred: " + error.message;
+  if (error) return <h1>{JSON.stringify(error)}</h1>;
 
   const handleNavigateNextStep = () => {
     dispatch(setQuery({ genres: selectedItems }));
 
-    navigate("/movie-finder-actors");
+    navigate("/movie-finder-cast");
   };
 
   const handleSelectedItem = (id) => {
