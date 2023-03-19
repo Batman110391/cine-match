@@ -12,7 +12,7 @@ function BoxLayout({ children }) {
       variants={{ visible: { transition: { staggerChildren: 0.3 } } }}
       sx={{
         width: "100%",
-        height: "100vh",
+        height: "100%",
         bgcolor: "background.default",
       }}
     >

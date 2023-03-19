@@ -197,27 +197,33 @@ export async function fetchMovies(page, genres, casts, similarMovies) {
 
   let totalPage = 0;
 
-  const currMoviesByGeneres = await fetchPromise(
-    `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}${
-      genresQuery && "&with_genres=" + genresQuery
-    }`
-  ).then((data) => {
-    if (data?.total_pages > totalPage) {
-      totalPage = data.total_pages;
-    }
-    return data?.results;
-  });
+  const currMoviesByGeneres =
+    genresQuery || (!genresQuery && !castsQuery)
+      ? await fetchPromise(
+          `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}${
+            genresQuery && "&with_genres=" + genresQuery
+          }`
+        ).then((data) => {
+          if (data?.total_pages > totalPage) {
+            totalPage = data.total_pages;
+          }
+          return data?.results;
+        })
+      : [];
 
-  const currMoviesByPeople = await fetchPromise(
-    `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}${
-      castsQuery && "&with_people=" + castsQuery
-    }`
-  ).then((data) => {
-    if (data?.total_pages > totalPage) {
-      totalPage = data.total_pages;
-    }
-    return data?.results;
-  });
+  const currMoviesByPeople =
+    castsQuery || (!castsQuery && !genresQuery)
+      ? await fetchPromise(
+          `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}${
+            castsQuery && "&with_people=" + castsQuery
+          }`
+        ).then((data) => {
+          if (data?.total_pages > totalPage) {
+            totalPage = data.total_pages;
+          }
+          return data?.results;
+        })
+      : [];
 
   const hasNext = page <= totalPage;
 
@@ -243,4 +249,48 @@ export async function fetchMovies(page, genres, casts, similarMovies) {
     nextPage: hasNext ? page + 1 : undefined,
     previousPage: page > 1 ? page - 1 : undefined,
   };
+}
+
+export async function fetchDetailMovieById(id) {
+  return fetchPromise(
+    `https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+  ).then(async (data) => {
+    const currCreditsMovie = await fetchPromise(
+      `https://api.themoviedb.org/3/movie/${id}/credits?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+    );
+
+    const currImagesMovie = await fetchPromise(
+      `https://api.themoviedb.org/3/movie/${id}/images?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+    );
+
+    const currWatchProviders = await fetchPromise(
+      `https://api.themoviedb.org/3/movie/${id}/watch/providers?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+    );
+
+    const currVideosIT = await fetchPromise(
+      `https://api.themoviedb.org/3/movie/${id}/videos?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+    );
+
+    if (currVideosIT?.results?.length > 0) {
+      return {
+        ...data,
+        videos: currVideosIT,
+        credits: currCreditsMovie,
+        images: currImagesMovie,
+        providers: currWatchProviders?.results?.["IT"],
+      };
+    } else {
+      const currVideosEN = await fetchPromise(
+        `https://api.themoviedb.org/3/movie/${id}/videos?api_key=${API_KEY}`
+      );
+
+      return {
+        ...data,
+        videos: currVideosEN,
+        credits: currCreditsMovie,
+        images: currImagesMovie,
+        providers: currWatchProviders?.results?.["IT"],
+      };
+    }
+  });
 }

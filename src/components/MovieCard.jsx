@@ -1,0 +1,41 @@
+import { Card, Typography } from "@mui/material";
+import React from "react";
+
+export default function MovieCard({ title, bg, selected }) {
+  return (
+    <Card
+      elevation={3}
+      sx={{
+        backgroundImage: `url(http://image.tmdb.org/t/p/w500${bg})`,
+        backgroundSize: "cover",
+        backgroundRepeat: "no-repeat",
+        height: "200px",
+        width: "133px",
+        display: "flex",
+        alignItems: "end",
+        justifyContent: "center",
+        border: "1px solid #ffffff70",
+        transform: selected ? "scale(1.3)" : "scale(1)",
+        transition: "all 0.4s ease-out",
+      }}
+    >
+      {!bg && (
+        <Typography
+          sx={{
+            mb: 1,
+            textAlign: "center",
+            userSelect: "none",
+            letterSpacing: ".1em",
+            textShadow: `-1px -1px 1px #1111116b,
+          2px 2px 1px #36363691`,
+          }}
+          variant="button"
+          fontWeight="bold"
+          fontSize="1.5rem"
+        >
+          {title}
+        </Typography>
+      )}
+    </Card>
+  );
+}

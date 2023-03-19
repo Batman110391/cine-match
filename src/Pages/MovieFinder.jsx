@@ -1,11 +1,22 @@
-import { Box, Button, Card, IconButton, alpha } from "@mui/material";
-import React, { useState } from "react";
+import {
+  Box,
+  Button,
+  Card,
+  IconButton,
+  alpha,
+  CardContent,
+} from "@mui/material";
+import React, { useEffect, useMemo, useState } from "react";
 import { useInfiniteQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMovies } from "../api/tmdbApis";
 import LoadingPage from "../components/LoadingPage";
 import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
 import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
+import MovieCard from "../components/MovieCard";
+import CarouselMovie from "../components/CarouselMovie";
+import { motion } from "framer-motion";
+import DetailMovie from "../components/DetailMovie";
 
 function Navigation({ pagination, movielength, handlePagination }) {
   console.log("pag", pagination, "lenght", movielength);
@@ -17,9 +28,10 @@ function Navigation({ pagination, movielength, handlePagination }) {
         onClick={() => handlePagination("P")}
         sx={{
           position: "absolute",
-          left: "2%",
+          left: "-10px",
           top: "50%",
           transform: "translateY(-50%)",
+          zIndex: 2,
         }}
       >
         <ArrowCircleLeftIcon fontSize="large" />
@@ -29,9 +41,10 @@ function Navigation({ pagination, movielength, handlePagination }) {
         onClick={() => handlePagination("N")}
         sx={{
           position: "absolute",
-          right: "2%",
+          right: "-10px",
           top: "50%",
           transform: "translateY(-50%)",
+          zIndex: 2,
         }}
       >
         <ArrowCircleRightIcon fontSize="large" />
@@ -52,6 +65,8 @@ export default function MovieFinder() {
   );
   const [pagination, setPagination] = useState(0);
   const [excludeMovie, setExcludeMovie] = useState(prevExcludeItems);
+  const [bgWrapperIndex, setBgWrapperIndex] = useState(0);
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   const {
     status,
@@ -81,55 +96,111 @@ export default function MovieFinder() {
       };
     }, {});
 
-  const handlePagination = (type) => {
+  /*   const handlePagination = (type) => {
     if (type === "N") {
       setPagination(pagination + 1);
     } else {
       setPagination(pagination - 1);
     }
-  };
+  }; */
 
   const visibleData = movies?.results?.filter(
-    (item) => !excludeMovie?.find((sItem) => sItem.id === item.id)
+    (item) =>
+      !excludeMovie?.find((sItem) => sItem.id === item.id) &&
+      Boolean(item?.overview)
   );
 
-  console.log("visible movie", visibleData[pagination]);
+  console.log("visible", visibleData);
 
-  const currentMovie = visibleData[pagination];
+  const currentMovie = visibleData[bgWrapperIndex];
 
   return (
     <Box
-      sx={{
-        position: "relative",
-        backgroundImage: `linear-gradient(-180deg, rgba(24,24,24,0.8), rgba(32,32,32,0.9)), url(http://image.tmdb.org/t/p/original${currentMovie.backdrop_path})`,
-        backgroundSize: "cover",
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center center",
-        objectFit: "cover",
-        height: "100%",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+      component={motion.div}
+      initial={{ opacity: 0, scale: 0.5 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{
+        duration: 0.8,
+        delay: 0.5,
+        ease: [0, 0.71, 0.2, 1.01],
       }}
-    >
-      <Card
-        sx={{
-          position: "relative",
-          background: (theme) => alpha(theme.palette.background.default, 0.8),
+      sx={{
+        width: "100%",
+        height: "100%",
+        position: "relative",
+        "&:after": {
+          content: "''",
+          backgroundImage: (theme) => theme.palette.gradient.opacityBgBottom,
+          backgroundRepeat: "no-repeat",
+          display: "block",
+          height: "100%",
+          left: "50%",
+          pointerEvents: "none",
+          position: "absolute",
+          top: 0,
+          transform: "translateX(-50%)",
+          width: "100%",
+          zIndex: 0,
+        },
+        "&:before": {
+          content: "''",
+          backgroundImage: `url(http://image.tmdb.org/t/p/original${currentMovie?.backdrop_path})`,
           backgroundSize: "cover",
           backgroundRepeat: "no-repeat",
           backgroundPosition: "center center",
-          objectFit: "cover",
-          width: "92%",
-          height: "90%",
-          borderRadius: "2%",
+          position: "absolute",
+          top: "0px",
+          right: "0px",
+          bottom: "0px",
+          left: "0px",
+          opacity: 0.35,
+          transition: "background-image 0.8s cubic-bezier(0, 0.71, 0.2, 1.01)",
+        },
+      }}
+    >
+      <Box sx={{ width: "100%" }}>
+        <CarouselMovie
+          slides={visibleData}
+          currentSlide={currentSlide}
+          setCurrentSlide={setCurrentSlide}
+          setBgWrapperIndex={setBgWrapperIndex}
+          hasNextPage={hasNextPage}
+          fetchNextPage={fetchNextPage}
+        />
+      </Box>
+      <Box
+        sx={{
+          position: "relative",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          marginX: "auto",
+          width: { xs: "100%", sm: "90%" },
+          //height: "100%",
+          overflowX: "hidden",
+          zIndex: 1,
         }}
-      ></Card>
-      <Navigation
-        pagination={pagination}
-        movielength={visibleData?.length - 1}
-        handlePagination={handlePagination}
-      />
+      >
+        <Card
+          elevation={12}
+          sx={{
+            position: "relative",
+            background: (theme) => alpha(theme.palette.background.paper, 0.8),
+            width: "100%",
+            height: "100%",
+            minHeight: "80vh",
+            borderRadius: "2%",
+            mb: 3,
+          }}
+        >
+          <DetailMovie id={currentMovie?.id} />
+        </Card>
+        {/*  <Navigation
+          pagination={pagination}
+          movielength={visibleData?.length - 1}
+          handlePagination={handlePagination}
+        /> */}
+      </Box>
     </Box>
   );
 }
