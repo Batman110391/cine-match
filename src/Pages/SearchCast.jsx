@@ -157,7 +157,10 @@ export default function SearchCast() {
             <AnimatePresence mode={"popLayout"}>
               {selectedItems.map((sItem) => {
                 const existPath = sItem?.profile_path ? (
-                  <Avatar alt={sItem.name} src={sItem.profile_path} />
+                  <Avatar
+                    alt={sItem.name}
+                    src={`http://image.tmdb.org/t/p/w500${sItem.profile_path}`}
+                  />
                 ) : (
                   <Avatar>{sItem.name.charAt(0)}</Avatar>
                 );

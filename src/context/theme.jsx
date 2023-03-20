@@ -1,5 +1,6 @@
 import { createTheme } from "@mui/material/styles";
 import darkScrollbar from "@mui/material/darkScrollbar";
+import { yellow } from "@mui/material/colors";
 
 const primaryDarkBlu = {
   100: "#CEE0F3",
@@ -53,6 +54,10 @@ export const darkTheme = createTheme({
       default: "#14181c",
       paperDark: primaryDarkBlu[900],
       paper: primaryDarkBlu[700],
+      light: primaryDarkBlu[400],
+    },
+    chartPrimary: {
+      default: yellow[400],
     },
   },
 });

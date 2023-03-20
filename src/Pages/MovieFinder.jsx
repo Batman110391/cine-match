@@ -188,9 +188,9 @@ export default function MovieFinder() {
             background: (theme) => alpha(theme.palette.background.paper, 0.8),
             width: "100%",
             height: "100%",
-            minHeight: "80vh",
+            minHeight: "50vh",
             borderRadius: "2%",
-            mb: 3,
+            my: 3,
           }}
         >
           <DetailMovie id={currentMovie?.id} />
