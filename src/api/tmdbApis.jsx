@@ -1,4 +1,5 @@
 import { fetchPromise } from "../utils/fetchPromise";
+import { uniqueArray } from "../utils/uniqueArray";
 
 const API_KEY = import.meta.env.VITE_API_KEY;
 const CURRENT_LANGUAGE = "language=it-IT";
@@ -190,6 +191,8 @@ export async function fetchMovies(page, genres, casts, similarMovies) {
   const genresQuery = genres?.map((g) => g.id).join("|") || null;
   const castsQuery = casts?.map((c) => c.id).join("|") || null;
 
+  console.log("page", page);
+
   //01/01/2000
   //14/03/2023
 
@@ -227,22 +230,10 @@ export async function fetchMovies(page, genres, casts, similarMovies) {
 
   const hasNext = page <= totalPage;
 
-  const uniqueIds = [];
-
-  const filterUniqueResult = [
-    ...currMoviesByGeneres,
-    ...currMoviesByPeople,
-  ].filter((element) => {
-    const isDuplicate = uniqueIds.includes(element.id);
-
-    if (!isDuplicate) {
-      uniqueIds.push(element.id);
-
-      return true;
-    }
-
-    return false;
-  });
+  const filterUniqueResult = uniqueArray(
+    currMoviesByGeneres,
+    currMoviesByPeople
+  );
 
   return {
     results: filterUniqueResult,
@@ -260,7 +251,7 @@ export async function fetchDetailMovieById(id) {
     );
 
     const currImagesMovie = await fetchPromise(
-      `https://api.themoviedb.org/3/movie/${id}/images?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+      `https://api.themoviedb.org/3/movie/${id}/images?api_key=${API_KEY}`
     );
 
     const currWatchProviders = await fetchPromise(
@@ -293,4 +284,37 @@ export async function fetchDetailMovieById(id) {
       };
     }
   });
+}
+
+export async function fetchMoviesByCasts(cast) {
+  if (!cast) {
+    return null;
+  }
+
+  const castsQuery = cast?.id;
+
+  console.log("castsQuery", castsQuery);
+
+  const currMoviesByPeople = castsQuery
+    ? await fetchPromise(
+        `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=1&${CURRENT_LANGUAGE}${
+          castsQuery && "&with_people=" + castsQuery
+        }`
+      ).then((data) => {
+        return data?.results;
+      })
+    : [];
+
+  const currMoviesByPeopleWithIdCast = currMoviesByPeople.map((c) => {
+    return {
+      ...c,
+      castId: castsQuery,
+    };
+  });
+
+  console.log("currMoviesByPeopleWithIdCast", currMoviesByPeopleWithIdCast);
+
+  return {
+    results: currMoviesByPeopleWithIdCast,
+  };
 }

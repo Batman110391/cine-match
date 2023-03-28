@@ -38,6 +38,7 @@ export default function FloatingActionButton({
   onClick,
   path,
   bottom,
+  sx,
 }) {
   const Component = path ? Link : "button";
 
@@ -57,6 +58,7 @@ export default function FloatingActionButton({
         left:
           position === "left" ? 20 : position === "center" ? "50%" : "unset",
         transform: position === "center" ? "translateX(-50%)" : "unset",
+        ...sx,
       }}
       variant="extended"
       size={size || "medium"}

@@ -1,11 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { EffectCoverflow, Pagination, Virtual } from "swiper";
+import {
+  EffectCoverflow,
+  Navigation,
+  Pagination,
+  Virtual,
+  Keyboard,
+} from "swiper";
 import MovieCard from "./MovieCard";
 // Import Swiper styles
 import "swiper/css";
 import "swiper/css/effect-coverflow";
 import "swiper/css/pagination";
+import "swiper/css/navigation";
+import { useMediaQuery, useTheme } from "@mui/material";
 
 export default function CarouselMovie({
   slides,
@@ -15,9 +23,14 @@ export default function CarouselMovie({
   hasNextPage,
   fetchNextPage,
 }) {
-  useEffect(() => {
-    console.log("currentSlide", currentSlide);
+  const swiperRef = useRef(null);
+  const theme = useTheme();
 
+  useEffect(() => {
+    /*   if (currentSlide > 0 && swiperRef?.current != null) {
+      swiperRef?.current?.swiper?.slideTo(currentSlide); // vai alla terza slide
+    }
+ */
     if (slides && currentSlide >= slides?.length - 10 && hasNextPage) {
       fetchNextPage();
     }
@@ -25,6 +38,7 @@ export default function CarouselMovie({
 
   return (
     <Swiper
+      ref={swiperRef}
       style={{
         width: "100%",
         height: "100%",
@@ -37,6 +51,10 @@ export default function CarouselMovie({
       effect={"coverflow"}
       grabCursor={true}
       centeredSlides={true}
+      navigation={useMediaQuery(theme.breakpoints.up("sm")) ? true : false}
+      keyboard={{
+        enabled: useMediaQuery(theme.breakpoints.up("sm")) ? true : false,
+      }}
       coverflowEffect={{
         rotate: 10,
         stretch: 0,
@@ -48,7 +66,7 @@ export default function CarouselMovie({
         type: "progressbar",
       }}
       //loop={true}
-      modules={[EffectCoverflow, Pagination, Virtual]}
+      modules={[EffectCoverflow, Pagination, Virtual, Navigation, Keyboard]}
     >
       {slides &&
         slides.length > 0 &&

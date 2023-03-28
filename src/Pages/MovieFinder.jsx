@@ -1,57 +1,16 @@
-import {
-  Box,
-  Button,
-  Card,
-  IconButton,
-  alpha,
-  CardContent,
-} from "@mui/material";
-import React, { useEffect, useMemo, useState } from "react";
-import { useInfiniteQuery } from "react-query";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchMovies } from "../api/tmdbApis";
-import LoadingPage from "../components/LoadingPage";
-import ArrowCircleLeftIcon from "@mui/icons-material/ArrowCircleLeft";
-import ArrowCircleRightIcon from "@mui/icons-material/ArrowCircleRight";
-import MovieCard from "../components/MovieCard";
-import CarouselMovie from "../components/CarouselMovie";
+import { alpha, Box, Card } from "@mui/material";
 import { motion } from "framer-motion";
+import React, { useState } from "react";
+import { useInfiniteQuery, useQuery } from "react-query";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchMovies, fetchMoviesByCasts } from "../api/tmdbApis";
+import CarouselMovie from "../components/CarouselMovie";
 import DetailMovie from "../components/DetailMovie";
-
-function Navigation({ pagination, movielength, handlePagination }) {
-  console.log("pag", pagination, "lenght", movielength);
-
-  return (
-    <>
-      <IconButton
-        disabled={pagination <= 0}
-        onClick={() => handlePagination("P")}
-        sx={{
-          position: "absolute",
-          left: "-10px",
-          top: "50%",
-          transform: "translateY(-50%)",
-          zIndex: 2,
-        }}
-      >
-        <ArrowCircleLeftIcon fontSize="large" />
-      </IconButton>
-      <IconButton
-        disabled={pagination >= movielength}
-        onClick={() => handlePagination("N")}
-        sx={{
-          position: "absolute",
-          right: "-10px",
-          top: "50%",
-          transform: "translateY(-50%)",
-          zIndex: 2,
-        }}
-      >
-        <ArrowCircleRightIcon fontSize="large" />
-      </IconButton>
-    </>
-  );
-}
+import FloatingActionButton from "../components/FloatingActionButton";
+import LoadingPage from "../components/LoadingPage";
+import SettingsIcon from "@mui/icons-material/Settings";
+import DialogSettingMovies from "../components/DialogSettingMovies";
+import { uniqueArray } from "../utils/uniqueArray";
 
 export default function MovieFinder() {
   const dispatch = useDispatch();
@@ -67,6 +26,8 @@ export default function MovieFinder() {
   const [excludeMovie, setExcludeMovie] = useState(prevExcludeItems);
   const [bgWrapperIndex, setBgWrapperIndex] = useState(0);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [openSettingMovie, setOpenSettingMovie] = useState(false);
+  const [currSelectedCast, setCurrSelectedCast] = useState([]);
 
   const {
     status,
@@ -76,7 +37,7 @@ export default function MovieFinder() {
     hasNextPage,
     fetchNextPage,
   } = useInfiniteQuery({
-    queryKey: ["movies", genres, casts, similarMovies],
+    queryKey: ["movies"],
     getNextPageParam: (prevData) => prevData.nextPage,
     queryFn: ({ pageParam = 1 }) =>
       fetchMovies(pageParam, genres, casts, similarMovies),
@@ -84,6 +45,15 @@ export default function MovieFinder() {
 
   if (status === "loading") return <LoadingPage />;
   if (status === "error") return <h1>{JSON.stringify(error)}</h1>;
+
+  const handleAddMoviesByInsertPeople = (castMovie) => {
+    console.log("castMovie", castMovie);
+    setCurrSelectedCast([...currSelectedCast, ...castMovie]);
+  };
+  const handleRemoveMoviesByInsertPeople = (id) => {
+    const newCurrSelectedCast = currSelectedCast.filter((c) => c.castId !== id);
+    setCurrSelectedCast(newCurrSelectedCast);
+  };
 
   const movies = data?.pages
     ?.flatMap((data) => data)
@@ -96,21 +66,18 @@ export default function MovieFinder() {
       };
     }, {});
 
-  /*   const handlePagination = (type) => {
-    if (type === "N") {
-      setPagination(pagination + 1);
-    } else {
-      setPagination(pagination - 1);
-    }
-  }; */
-
-  const visibleData = movies?.results?.filter(
-    (item) =>
-      !excludeMovie?.find((sItem) => sItem.id === item.id) &&
-      Boolean(item?.overview)
+  const visibleData = uniqueArray(
+    currSelectedCast,
+    movies?.results?.filter(
+      (item) =>
+        !excludeMovie?.find((sItem) => sItem.id === item.id) &&
+        Boolean(item?.overview)
+    )
   );
 
   console.log("visible", visibleData);
+
+  console.log("currSelectedCast", currSelectedCast);
 
   const currentMovie = visibleData[bgWrapperIndex];
 
@@ -191,16 +158,28 @@ export default function MovieFinder() {
             minHeight: "50vh",
             borderRadius: "2%",
             my: 3,
+            marginBottom: { xs: 0, sm: 3 },
           }}
         >
-          <DetailMovie id={currentMovie?.id} />
+          <DetailMovie
+            id={currentMovie?.id}
+            handleAddMoviesByInsertPeople={handleAddMoviesByInsertPeople}
+            handleRemoveMoviesByInsertPeople={handleRemoveMoviesByInsertPeople}
+          />
         </Card>
-        {/*  <Navigation
-          pagination={pagination}
-          movielength={visibleData?.length - 1}
-          handlePagination={handlePagination}
-        /> */}
       </Box>
+      <DialogSettingMovies
+        open={openSettingMovie}
+        setOpen={setOpenSettingMovie}
+      />
+      <FloatingActionButton
+        onClick={() => setOpenSettingMovie(true)}
+        position={"right"}
+        size={"large"}
+        sx={{ padding: 0 }}
+      >
+        <SettingsIcon fontSize="large" color="action" />
+      </FloatingActionButton>
     </Box>
   );
 }

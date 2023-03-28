@@ -13,7 +13,7 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import YouTubePlayer from "react-player/youtube";
 import TypographyAnimated from "./TypographyAnimated";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
@@ -26,10 +26,17 @@ import { useTheme } from "@emotion/react";
 import ChartCompatibility from "./ChartCompatibility";
 import Highlighter from "react-highlight-words";
 import { useSelector } from "react-redux";
+import CastListDetail from "./CastListDetail";
+import useElementSize from "../utils/useElementSize";
+import ListImagesMovie from "./ListImagesMovie";
 
 const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
-export default function DetailMovie({ id }) {
+export default function DetailMovie({
+  id,
+  handleAddMoviesByInsertPeople,
+  handleRemoveMoviesByInsertPeople,
+}) {
   const visible = { opacity: 1, y: 0, transition: { duration: 0.5 } };
   const theme = useTheme();
 
@@ -39,12 +46,15 @@ export default function DetailMovie({ id }) {
   const [openTrailerDialog, setOpenTrailerDialog] = React.useState(false);
 
   const genres = useSelector((state) => state.movieQuery.genres);
+  const cast = useSelector((state) => state.movieQuery.cast);
+
+  const [infoMovieRef, { height }] = useElementSize();
 
   const { isLoading, error, data } = useQuery(["detailMovie", id], () =>
     fetchDetailMovieById(id)
   );
 
-  if (isLoading || !data)
+  if (isLoading)
     return (
       <Box sx={{ width: "100%" }}>
         <LinearProgress />
@@ -54,6 +64,10 @@ export default function DetailMovie({ id }) {
   if (error) return <h1>{JSON.stringify(error)}</h1>;
 
   const detail = data;
+
+  const bgContainerPoster = detail?.images?.logos?.find(
+    (p) => p?.iso_639_1 === "en"
+  )?.file_path;
 
   console.log("data", data);
   // const currProgress = Math.round((progress / duration) * 100);
@@ -100,7 +114,7 @@ export default function DetailMovie({ id }) {
             width="100%"
             height="100%"
             url={`${YOUTUBE_URL}${
-              detail?.videos.results[0]?.key || "L3oOldViIgY"
+              detail?.videos?.results[0]?.key || "L3oOldViIgY"
             }`}
             style={{ position: "absolute", top: 0 }}
             //onProgress={({ playedSeconds }) => setProgress(playedSeconds)}
@@ -108,119 +122,48 @@ export default function DetailMovie({ id }) {
           />
         </Box>
       </Dialog>
-      <Container
+      <Box
         sx={{
           height: "100%",
+          px: 3,
           py: 2,
           //px: { xs: 2, sm: 3, md: 5 },
+          "&:before": {
+            content: "''",
+            backgroundImage: `url(http://image.tmdb.org/t/p/original${bgContainerPoster})`,
+            backgroundSize: "contain",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center center",
+            position: "absolute",
+            top: "20px",
+            right: "20px",
+            bottom: "20px",
+            left: "20px",
+            opacity: 0.02,
+            transition:
+              "background-image 0.8s cubic-bezier(0, 0.71, 0.2, 1.01)",
+          },
         }}
       >
         <Grid container spacing={5}>
-          <Grid item xs={12} sm={9}>
-            <TypographyAnimated
-              component={"div"}
-              sx={{ mb: 1, fontSize: "1.2rem" }}
-              variant={"h6"}
-              variants={{
-                hidden: { opacity: 0, y: -20 },
-                visible,
-              }}
-              text={
-                detail?.title +
-                " (" +
-                detail?.release_date.substring(0, 4) +
-                ")"
-              }
-            />
-            <TypographyAnimated
-              component={"div"}
-              variant={"body2"}
-              variants={{
-                hidden: { opacity: 0, y: -20 },
-                visible,
-              }}
-              text={
-                <Highlighter
-                  searchWords={genres?.map((g) => g.name)}
-                  autoEscape={true}
-                  highlightStyle={{
-                    backgroundColor: "#ffee58b3",
-                  }}
-                  textToHighlight={`Genere : ${detail?.genres
-                    .map((g) => g.name)
-                    .join(", ")}`}
-                />
-              }
-            />
-            {detail?.videos.results[0]?.key && (
-              <Button
-                sx={{ pl: 0, mt: 1 }}
-                component={motion.div}
-                variants={{
-                  hidden: { opacity: 0, y: -20 },
-                  visible,
-                }}
-                variant="text"
-                startIcon={<PlayArrowIcon />}
-                onClick={handleClickOpenDialogTrailer}
-              >
-                Guarda Trailer
-              </Button>
-            )}
-
-            {detail?.tagline && (
+          <Grid item xs={12} sm={8}>
+            <Box ref={infoMovieRef}>
               <TypographyAnimated
-                component={"p"}
-                sx={{
-                  display: "inline",
-                  m: 0,
-                  bgcolor: (theme) =>
-                    alpha(theme.palette.background.light, 0.3),
-                  borderLeft: "10px solid #ccc",
-                  padding: "0.5em 10px",
-                  "&:before": {
-                    color: "#ccc",
-                    content: "open-quote",
-                    fontSize: "4em",
-                    lineHeight: "0.1em",
-                    marginRight: "0.25em",
-                    verticalAlign: "-0.4em",
-                  },
-                }}
-                variant={"body2"}
+                component={"div"}
+                sx={{ mb: 1, fontSize: "1.2rem" }}
+                variant={"h6"}
                 variants={{
                   hidden: { opacity: 0, y: -20 },
                   visible,
                 }}
-                text={detail?.tagline}
+                text={
+                  detail?.title +
+                  " (" +
+                  detail?.release_date?.substring(0, 4) +
+                  ")"
+                }
               />
-            )}
 
-            <TypographyAnimated
-              fontWeight={200}
-              component={"div"}
-              sx={{ mt: 3 }}
-              variant={"body2"}
-              variants={{
-                hidden: { opacity: 0, y: -20 },
-                visible,
-              }}
-              text={detail?.overview}
-            />
-            <Divider sx={{ my: 2 }} />
-            <Box
-              sx={{ mt: 2 }}
-              component={motion.div}
-              variants={{
-                hidden: { opacity: 0, y: -20 },
-                visible,
-              }}
-            >
-              <ChartCompatibility movie={detail} />
-            </Box>
-          </Grid>
-          <Grid item xs={12} sm={3}>
-            {detail?.providers?.flatrate && (
               <TypographyAnimated
                 component={"div"}
                 variant={"body2"}
@@ -228,21 +171,132 @@ export default function DetailMovie({ id }) {
                   hidden: { opacity: 0, y: -20 },
                   visible,
                 }}
-                text={"Disponibile su :"}
+                text={
+                  <Highlighter
+                    searchWords={genres?.map((g) => g.name)}
+                    autoEscape={true}
+                    highlightStyle={{
+                      backgroundColor: "#ffee58b3",
+                      padding: "0 4px",
+                    }}
+                    textToHighlight={`Genere : ${detail?.genres
+                      ?.map((g) => g.name)
+                      .join(", ")}`}
+                  />
+                }
               />
-            )}
-            <Stack flexDirection={"row"} gap={2} sx={{ mt: 2 }}>
-              {detail?.providers?.flatrate?.map((provider) => (
-                <Avatar
-                  key={progress?.provider_id}
-                  alt={provider?.provider_name}
-                  src={`http://image.tmdb.org/t/p/w500${provider?.logo_path}`}
+              {detail?.videos?.results[0]?.key && (
+                <Button
+                  sx={{ pl: 0, mt: 1 }}
+                  component={motion.div}
+                  variants={{
+                    hidden: { opacity: 0, y: -20 },
+                    visible,
+                  }}
+                  variant="text"
+                  startIcon={<PlayArrowIcon />}
+                  onClick={handleClickOpenDialogTrailer}
+                >
+                  Guarda Trailer
+                </Button>
+              )}
+
+              {detail?.tagline && (
+                <TypographyAnimated
+                  component={"p"}
+                  sx={{
+                    display: "inline",
+                    m: 0,
+                    bgcolor: (theme) =>
+                      alpha(theme.palette.background.light, 0.3),
+                    borderLeft: "10px solid #ccc",
+                    padding: "0.5em 10px",
+                    "&:before": {
+                      color: "#ccc",
+                      content: "open-quote",
+                      fontSize: "4em",
+                      lineHeight: "0.1em",
+                      marginRight: "0.25em",
+                      verticalAlign: "-0.4em",
+                    },
+                  }}
+                  variant={"body2"}
+                  variants={{
+                    hidden: { opacity: 0, y: -20 },
+                    visible,
+                  }}
+                  text={detail?.tagline}
                 />
-              ))}
-            </Stack>
+              )}
+
+              <TypographyAnimated
+                fontWeight={200}
+                component={"div"}
+                sx={{ mt: 3 }}
+                variant={"body2"}
+                variants={{
+                  hidden: { opacity: 0, y: -20 },
+                  visible,
+                }}
+                text={detail?.overview}
+              />
+              <Divider sx={{ my: 2 }} />
+              <Box
+                sx={{ mt: 2 }}
+                component={motion.div}
+                variants={{
+                  hidden: { opacity: 0, y: -20 },
+                  visible,
+                }}
+              >
+                <ChartCompatibility movie={detail} />
+              </Box>
+              {detail?.providers?.flatrate && (
+                <Box>
+                  <Divider sx={{ my: 2 }} />
+                  <TypographyAnimated
+                    component={"div"}
+                    variant={"body2"}
+                    variants={{
+                      hidden: { opacity: 0, y: -20 },
+                      visible,
+                    }}
+                    text={"Disponibile su :"}
+                  />
+
+                  <Stack flexDirection={"row"} gap={2} sx={{ mt: 2 }}>
+                    {detail?.providers?.flatrate?.map((provider) => (
+                      <Avatar
+                        component={motion.div}
+                        variants={{
+                          hidden: { opacity: 0, y: -20 },
+                          visible,
+                        }}
+                        key={progress?.provider_id}
+                        alt={provider?.provider_name}
+                        src={`http://image.tmdb.org/t/p/w500${provider?.logo_path}`}
+                      />
+                    ))}
+                  </Stack>
+                </Box>
+              )}
+            </Box>
           </Grid>
+          <Grid item xs={12} sm={4}>
+            <CastListDetail
+              person={detail?.credits?.cast}
+              height={height}
+              handleAddMoviesByInsertPeople={handleAddMoviesByInsertPeople}
+              handleRemoveMoviesByInsertPeople={
+                handleRemoveMoviesByInsertPeople
+              }
+            />
+          </Grid>
+          {/*  <Grid item xs={12}>
+            <ListImagesMovie images={detail?.images?.posters} />
+          </Grid> */}
         </Grid>
-      </Container>
+      </Box>
     </Box>
   );
 }

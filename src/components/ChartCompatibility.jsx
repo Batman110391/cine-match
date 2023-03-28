@@ -76,7 +76,6 @@ function CircularProgressWithLabel({ from, to }) {
 }
 
 function ChipGroup({ groups }) {
-  console.log("gruo", groups);
   return (
     <Stack direction="row" spacing={1}>
       {groups &&
