@@ -80,7 +80,7 @@ export default function CastListDetail({
           );
 
           return (
-            <React.Fragment key={id}>
+            <React.Fragment key={id + name + i}>
               <ListItem secondaryAction={actionButton} disableGutters>
                 <ListItemAvatar>
                   <Avatar

@@ -11,6 +11,8 @@ import {
   LinearProgress,
   Stack,
   Typography,
+  Chip,
+  Rating,
   useMediaQuery,
 } from "@mui/material";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -29,6 +31,12 @@ import { useSelector } from "react-redux";
 import CastListDetail from "./CastListDetail";
 import useElementSize from "../utils/useElementSize";
 import ListImagesMovie from "./ListImagesMovie";
+import { formatMinutes } from "../utils/timeFormat";
+import StarsIcon from "@mui/icons-material/Stars";
+import { roundToHalf } from "../utils/numberFormatting";
+import RottenTomatoes from "../components/icons/RottenTomatoes";
+import Imdb from "../components/icons/Imdb";
+import Tmdb from "./icons/Tmdb";
 
 const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
@@ -179,12 +187,68 @@ export default function DetailMovie({
                       backgroundColor: "#ffee58b3",
                       padding: "0 4px",
                     }}
-                    textToHighlight={`Genere : ${detail?.genres
-                      ?.map((g) => g.name)
-                      .join(", ")}`}
+                    textToHighlight={`${formatMinutes(
+                      detail?.runtime
+                    )} - ${detail?.genres?.map((g) => g.name).join(", ")}`}
                   />
                 }
               />
+              <Box
+                sx={{ mt: 2 }}
+                component={motion.div}
+                variants={{
+                  hidden: { opacity: 0, y: -20 },
+                  visible,
+                }}
+              >
+                {detail?.ratings && (
+                  <>
+                    <Chip
+                      sx={{ borderColor: "transparent" }}
+                      variant="outlined"
+                      icon={<RottenTomatoes />}
+                      label={
+                        <Rating
+                          defaultValue={roundToHalf(
+                            detail?.ratings?.find(
+                              (r) => r.source === "rottenTomatoes"
+                            )?.value
+                          )}
+                          precision={0.5}
+                          readOnly
+                        />
+                      }
+                    />
+                    <Chip
+                      sx={{ borderColor: "transparent" }}
+                      variant="outlined"
+                      icon={<Imdb />}
+                      label={
+                        <Rating
+                          defaultValue={roundToHalf(
+                            detail?.ratings?.find((r) => r.source === "Imdb")
+                              ?.value
+                          )}
+                          precision={0.5}
+                          readOnly
+                        />
+                      }
+                    />
+                  </>
+                )}
+                <Chip
+                  sx={{ borderColor: "transparent" }}
+                  variant="outlined"
+                  icon={<Tmdb />}
+                  label={
+                    <Rating
+                      defaultValue={roundToHalf(detail?.vote_average)}
+                      precision={0.5}
+                      readOnly
+                    />
+                  }
+                />
+              </Box>
               {detail?.videos?.results[0]?.key && (
                 <Button
                   sx={{ pl: 0, mt: 1 }}
@@ -202,31 +266,33 @@ export default function DetailMovie({
               )}
 
               {detail?.tagline && (
-                <TypographyAnimated
-                  component={"p"}
-                  sx={{
-                    display: "inline",
-                    m: 0,
-                    bgcolor: (theme) =>
-                      alpha(theme.palette.background.light, 0.3),
-                    borderLeft: "10px solid #ccc",
-                    padding: "0.5em 10px",
-                    "&:before": {
-                      color: "#ccc",
-                      content: "open-quote",
-                      fontSize: "4em",
-                      lineHeight: "0.1em",
-                      marginRight: "0.25em",
-                      verticalAlign: "-0.4em",
-                    },
-                  }}
-                  variant={"body2"}
-                  variants={{
-                    hidden: { opacity: 0, y: -20 },
-                    visible,
-                  }}
-                  text={detail?.tagline}
-                />
+                <Box sx={{ my: 2 }}>
+                  <TypographyAnimated
+                    component={"div"}
+                    sx={{
+                      display: "inline",
+                      m: 0,
+                      bgcolor: (theme) =>
+                        alpha(theme.palette.background.light, 0.3),
+                      borderLeft: "10px solid #ccc",
+                      padding: "0.5em 10px",
+                      "&:before": {
+                        color: "#ccc",
+                        content: "open-quote",
+                        fontSize: "4em",
+                        lineHeight: "0.1em",
+                        marginRight: "0.25em",
+                        verticalAlign: "-0.4em",
+                      },
+                    }}
+                    variant={"body2"}
+                    variants={{
+                      hidden: { opacity: 0, y: -20 },
+                      visible,
+                    }}
+                    text={detail?.tagline}
+                  />
+                </Box>
               )}
 
               <TypographyAnimated
@@ -272,7 +338,7 @@ export default function DetailMovie({
                           hidden: { opacity: 0, y: -20 },
                           visible,
                         }}
-                        key={progress?.provider_id}
+                        key={provider?.provider_id}
                         alt={provider?.provider_name}
                         src={`http://image.tmdb.org/t/p/w500${provider?.logo_path}`}
                       />

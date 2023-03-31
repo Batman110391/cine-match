@@ -17,7 +17,7 @@ export default function MovieFinder() {
 
   const genres = useSelector((state) => state.movieQuery.genres);
   const casts = useSelector((state) => state.movieQuery.cast);
-  const similarMovies = useSelector((state) => state.movieQuery.similarMovies);
+  const sort = useSelector((state) => state.movieQuery.sort);
 
   const prevExcludeItems = useSelector(
     (state) => state.movieQuery.prevExcludeItems
@@ -39,15 +39,13 @@ export default function MovieFinder() {
   } = useInfiniteQuery({
     queryKey: ["movies"],
     getNextPageParam: (prevData) => prevData.nextPage,
-    queryFn: ({ pageParam = 1 }) =>
-      fetchMovies(pageParam, genres, casts, similarMovies),
+    queryFn: ({ pageParam = 1 }) => fetchMovies(pageParam, genres, casts, sort),
   });
 
   if (status === "loading") return <LoadingPage />;
   if (status === "error") return <h1>{JSON.stringify(error)}</h1>;
 
   const handleAddMoviesByInsertPeople = (castMovie) => {
-    console.log("castMovie", castMovie);
     setCurrSelectedCast([...currSelectedCast, ...castMovie]);
   };
   const handleRemoveMoviesByInsertPeople = (id) => {
@@ -67,17 +65,15 @@ export default function MovieFinder() {
     }, {});
 
   const visibleData = uniqueArray(
-    currSelectedCast,
     movies?.results?.filter(
       (item) =>
         !excludeMovie?.find((sItem) => sItem.id === item.id) &&
         Boolean(item?.overview)
-    )
+    ),
+    currSelectedCast
   );
 
   console.log("visible", visibleData);
-
-  console.log("currSelectedCast", currSelectedCast);
 
   const currentMovie = visibleData[bgWrapperIndex];
 

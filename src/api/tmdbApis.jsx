@@ -187,23 +187,28 @@ export async function fetchSimilarMoviesById(page, id) {
   });
 }
 
-export async function fetchMovies(page, genres, casts, similarMovies) {
+export async function fetchMovies(page, genres, casts, sort) {
   const genresQuery = genres?.map((g) => g.id).join("|") || null;
   const castsQuery = casts?.map((c) => c.id).join("|") || null;
-
-  console.log("page", page);
 
   //01/01/2000
   //14/03/2023
 
   //YYYY-MM-DD // &release_date.gte=PRIMA &release_date.lte=DOPO
 
+  /*
+filtri sort
+ popularity.desc, POPOLARITA
+ release_date.desc, RECENTI
+ vote_average.desc, MIGLIOR VOTI
+  */
+
   let totalPage = 0;
 
   const currMoviesByGeneres =
     genresQuery || (!genresQuery && !castsQuery)
       ? await fetchPromise(
-          `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}${
+          `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&sort_by=${sort}&${CURRENT_LANGUAGE}${
             genresQuery && "&with_genres=" + genresQuery
           }`
         ).then((data) => {
@@ -217,7 +222,7 @@ export async function fetchMovies(page, genres, casts, similarMovies) {
   const currMoviesByPeople =
     castsQuery || (!castsQuery && !genresQuery)
       ? await fetchPromise(
-          `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}${
+          `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&sort_by=${sort}&${CURRENT_LANGUAGE}${
             castsQuery && "&with_people=" + castsQuery
           }`
         ).then((data) => {
@@ -243,6 +248,8 @@ export async function fetchMovies(page, genres, casts, similarMovies) {
 }
 
 export async function fetchDetailMovieById(id) {
+  const externalRating = await getRatingMovieById(id);
+
   return fetchPromise(
     `https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
   ).then(async (data) => {
@@ -269,6 +276,7 @@ export async function fetchDetailMovieById(id) {
         credits: currCreditsMovie,
         images: currImagesMovie,
         providers: currWatchProviders?.results?.["IT"],
+        ...(externalRating && { ratings: externalRating.ratings }),
       };
     } else {
       const currVideosEN = await fetchPromise(
@@ -281,6 +289,7 @@ export async function fetchDetailMovieById(id) {
         credits: currCreditsMovie,
         images: currImagesMovie,
         providers: currWatchProviders?.results?.["IT"],
+        ...(externalRating && { ratings: externalRating.ratings }),
       };
     }
   });
@@ -292,8 +301,6 @@ export async function fetchMoviesByCasts(cast) {
   }
 
   const castsQuery = cast?.id;
-
-  console.log("castsQuery", castsQuery);
 
   const currMoviesByPeople = castsQuery
     ? await fetchPromise(
@@ -312,9 +319,37 @@ export async function fetchMoviesByCasts(cast) {
     };
   });
 
-  console.log("currMoviesByPeopleWithIdCast", currMoviesByPeopleWithIdCast);
-
   return {
     results: currMoviesByPeopleWithIdCast,
   };
+}
+
+async function getRatingMovieById(id) {
+  try {
+    const { imdb_id } = await fetchPromise(
+      `https://api.themoviedb.org/3/movie/${id}/external_ids?api_key=${API_KEY}`
+    );
+
+    const response = await fetchPromise(
+      `http://www.omdbapi.com/?i=${imdb_id}&apikey=15eb44fd`
+    );
+
+    const rottenTomatoesValue = response?.Ratings.find(
+      (ele) => ele.Source === "Rotten Tomatoes"
+    ).Value;
+
+    const splitPercent = rottenTomatoesValue.split("%")[0];
+
+    const convertPercent = (parseFloat(splitPercent) * 10) / 100;
+
+    return {
+      ratings: [
+        { source: "Imdb", value: parseFloat(response?.imdbRating) },
+        { source: "rottenTomatoes", value: convertPercent },
+      ],
+    };
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 }

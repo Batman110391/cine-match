@@ -27,7 +27,14 @@ export default function MobileDataPicker({ props }) {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Stack spacing={3}>
+      <Stack
+        flexDirection={"row"}
+        alignItems={"center"}
+        gap={2}
+        sx={{
+          justifyContent: { xs: "space-between", sm: "space-around" },
+        }}
+      >
         <MobileDatePicker
           label="Data Iniziale"
           disableFuture
@@ -57,6 +64,7 @@ export default function MobileDataPicker({ props }) {
             />
           )}
         />
+        -
         <MobileDatePicker
           label="Data finale"
           disableFuture

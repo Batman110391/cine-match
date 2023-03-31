@@ -2,6 +2,9 @@ import { createTheme } from "@mui/material/styles";
 import darkScrollbar from "@mui/material/darkScrollbar";
 import { yellow } from "@mui/material/colors";
 
+const next = "/images/svg/next.svg";
+const prev = "/images/svg/prev.svg";
+
 const primaryDarkBlu = {
   100: "#CEE0F3",
   200: "#91B9E3",
@@ -30,6 +33,28 @@ export const darkTheme = createTheme({
           ...darkScrollbar(),
           height: "100%",
           width: "100%",
+        },
+        ".swiper-button-next": {
+          backgroundImage: `url(${next})`,
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "100% auto",
+          backgroundPosition: "center",
+          width: "40px!important",
+          opacity: "0.9",
+          "&:after": {
+            display: "none",
+          },
+        },
+        ".swiper-button-prev": {
+          backgroundImage: `url(${prev})`,
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "100% auto",
+          backgroundPosition: "center",
+          width: "40px!important",
+          opacity: "0.9",
+          "&:after": {
+            display: "none",
+          },
         },
       },
     },

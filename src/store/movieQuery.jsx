@@ -3,9 +3,9 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   genres: [],
   cast: [],
-  similarMovies: [],
+  sort: "popularity.desc",
   prevExcludeItems: [],
-  rangeDate: { from: null, to: null },
+  rangeDate: { from: null, to: null, error: false },
   watch: [],
 };
 
