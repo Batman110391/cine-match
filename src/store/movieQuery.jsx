@@ -7,11 +7,11 @@ const initialState = {
   cast: [],
   sort: "popularity.desc",
   prevExcludeItems: [],
-  rangeDate: {
+  rangeDate: JSON.stringify({
     from: dayjs(new Date()).subtract(25, "year"),
     to: new Date(),
     error: false,
-  },
+  }),
   watch: [],
 };
 

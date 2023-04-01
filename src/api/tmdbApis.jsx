@@ -215,18 +215,25 @@ filtri sort
 
   let totalPage = 0;
 
-  const periodsQueryString = `&release_date.gte=${dayjs(
-    new Date(periods.from)
-  ).format("YYYY-MM-DD")}&release_date.lte=${dayjs(new Date(periods.to)).format(
+  const { from, to } = JSON.parse(periods);
+
+  const periodsQueryString = `&primary_release_date.gte=${dayjs(
+    new Date(from)
+  ).format("YYYY-MM-DD")}&primary_release_date.lte=${dayjs(new Date(to)).format(
     "YYYY-MM-DD"
   )}`;
+
+  const minVoteCount =
+    sort === "vote_average.desc" ? "&vote_count.gte=100" : "";
 
   if (exactQuery) {
     const currMoviesByGenresAndCast =
       (await fetchPromise(
         `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&sort_by=${sort}&${CURRENT_LANGUAGE}${
           genresQuery && "&with_genres=" + genresQuery
-        }${castsQuery && "&with_people=" + castsQuery}${periodsQueryString}`
+        }${
+          castsQuery && "&with_people=" + castsQuery
+        }${periodsQueryString}${minVoteCount}`
       ).then((data) => {
         if (data?.total_pages > totalPage) {
           totalPage = data.total_pages;
@@ -248,7 +255,7 @@ filtri sort
       ? await fetchPromise(
           `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&sort_by=${sort}&${CURRENT_LANGUAGE}${
             genresQuery && "&with_genres=" + genresQuery
-          }${periodsQueryString}`
+          }${periodsQueryString}${minVoteCount}`
         ).then((data) => {
           if (data?.total_pages > totalPage) {
             totalPage = data.total_pages;
@@ -262,7 +269,7 @@ filtri sort
       ? await fetchPromise(
           `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&sort_by=${sort}&${CURRENT_LANGUAGE}${
             castsQuery && "&with_people=" + castsQuery
-          }${periodsQueryString}`
+          }${periodsQueryString}${minVoteCount}`
         ).then((data) => {
           if (data?.total_pages > totalPage) {
             totalPage = data.total_pages;

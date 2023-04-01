@@ -1,19 +1,20 @@
+import SettingsIcon from "@mui/icons-material/Settings";
 import { alpha, Box, Card } from "@mui/material";
 import { motion } from "framer-motion";
 import React, { useState } from "react";
-import { useInfiniteQuery, useQuery } from "react-query";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchMovies, fetchMoviesByCasts } from "../api/tmdbApis";
+import { useInfiniteQuery } from "react-query";
+import { useSelector } from "react-redux";
+import { fetchMovies } from "../api/tmdbApis";
 import CarouselMovie from "../components/CarouselMovie";
 import DetailMovie from "../components/DetailMovie";
+import DialogSettingMovies from "../components/DialogSettingMovies";
 import FloatingActionButton from "../components/FloatingActionButton";
 import LoadingPage from "../components/LoadingPage";
-import SettingsIcon from "@mui/icons-material/Settings";
-import DialogSettingMovies from "../components/DialogSettingMovies";
+import TypographyAnimated from "../components/TypographyAnimated";
 import { uniqueArray } from "../utils/uniqueArray";
 
 export default function MovieFinder() {
-  const dispatch = useDispatch();
+  const visible = { opacity: 1, y: 0, transition: { duration: 0.5 } };
 
   const genres = useSelector((state) => state.movieQuery.genres);
   const casts = useSelector((state) => state.movieQuery.cast);
@@ -34,6 +35,7 @@ export default function MovieFinder() {
     hasNextPage,
     fetchNextPage,
     refetch,
+    isRefetching,
   } = useInfiniteQuery({
     queryKey: ["movies", changeFilters],
     getNextPageParam: (prevData) => prevData.nextPage,
@@ -67,8 +69,6 @@ export default function MovieFinder() {
     movies?.results?.filter((item) => Boolean(item?.overview)),
     currSelectedCast
   );
-
-  console.log("visible", visibleData);
 
   const currentMovie = visibleData[bgWrapperIndex];
 
@@ -116,53 +116,80 @@ export default function MovieFinder() {
         },
       }}
     >
-      <Box sx={{ width: "100%" }}>
-        <CarouselMovie
-          slides={visibleData}
-          setBgWrapperIndex={setBgWrapperIndex}
-          hasNextPage={hasNextPage}
-          fetchNextPage={fetchNextPage}
-          initzializeSwiper={changeFilters}
-        />
-      </Box>
-      <Box
-        sx={{
-          position: "relative",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          marginX: "auto",
-          width: { xs: "100%", sm: "90%" },
-          //height: "100%",
-          overflowX: "hidden",
-          zIndex: 1,
-        }}
-      >
-        <Card
-          elevation={12}
+      {!visibleData.length > 0 ? (
+        <Box
           sx={{
-            position: "relative",
-            background: (theme) => alpha(theme.palette.background.paper, 0.8),
-            width: "100%",
             height: "100%",
-            minHeight: "50vh",
-            borderRadius: "2%",
-            my: 3,
-            marginBottom: { xs: 0, sm: 3 },
+            width: "100%",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           }}
         >
-          {currentMovie?.id && (
-            <DetailMovie
-              id={currentMovie?.id}
-              changeFilters={changeFilters}
-              handleAddMoviesByInsertPeople={handleAddMoviesByInsertPeople}
-              handleRemoveMoviesByInsertPeople={
-                handleRemoveMoviesByInsertPeople
-              }
+          <TypographyAnimated
+            component={"div"}
+            sx={{ mb: 1, fontSize: "1.2rem" }}
+            variant={"h6"}
+            variants={{
+              hidden: { opacity: 0, y: -20 },
+              visible,
+            }}
+            text={"Nessun contenuto presente"}
+          />
+        </Box>
+      ) : (
+        <>
+          <Box sx={{ width: "100%" }}>
+            <CarouselMovie
+              slides={visibleData}
+              setBgWrapperIndex={setBgWrapperIndex}
+              hasNextPage={hasNextPage}
+              fetchNextPage={fetchNextPage}
+              initzializeSwiper={changeFilters}
+              isLoading={isRefetching}
             />
-          )}
-        </Card>
-      </Box>
+          </Box>
+          <Box
+            sx={{
+              position: "relative",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              marginX: "auto",
+              width: { xs: "100%", sm: "90%" },
+              //height: "100%",
+              overflowX: "hidden",
+              zIndex: 1,
+            }}
+          >
+            <Card
+              elevation={12}
+              sx={{
+                position: "relative",
+                background: (theme) =>
+                  alpha(theme.palette.background.paper, 0.8),
+                width: "100%",
+                height: "100%",
+                minHeight: "50vh",
+                borderRadius: "2%",
+                my: 3,
+                marginBottom: { xs: 0, sm: 3 },
+              }}
+            >
+              {currentMovie?.id && (
+                <DetailMovie
+                  id={currentMovie?.id}
+                  changeFilters={changeFilters}
+                  handleAddMoviesByInsertPeople={handleAddMoviesByInsertPeople}
+                  handleRemoveMoviesByInsertPeople={
+                    handleRemoveMoviesByInsertPeople
+                  }
+                />
+              )}
+            </Card>
+          </Box>
+        </>
+      )}
       <DialogSettingMovies
         open={openSettingMovie}
         setOpen={setOpenSettingMovie}

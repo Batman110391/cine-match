@@ -37,7 +37,6 @@ import { useEffect } from "react";
 
 const ORDERS = [
   { name: "Popolarità", label: "popularity.desc" },
-  { name: "Recente", label: "release_date.desc" },
   { name: "Voto", label: "vote_average.desc" },
 ];
 
@@ -65,7 +64,7 @@ export default function DialogSettingMovies({
   const castsQuery = useSelector((state) => state.movieQuery.cast);
   const exactQuery = useSelector((state) => state.movieQuery.exactQuery);
 
-  const [periods, setPeriods] = useState(periodsQuery);
+  const [periods, setPeriods] = useState(JSON.parse(periodsQuery));
   const [sort, setSort] = useState(sortQuery);
   const [exactSearch, setExactSearch] = useState(exactQuery);
   const [selectedItemsGenres, setSelectedItemsGenres] = useState(genresQuery);
@@ -79,7 +78,7 @@ export default function DialogSettingMovies({
     selectedItemsCasts === castsQuery;
 
   useEffect(() => {
-    setPeriods(periodsQuery);
+    setPeriods(JSON.parse(periodsQuery));
     setSort(sortQuery);
     setExactSearch(exactQuery);
     setSelectedItemsGenres(genresQuery);
@@ -108,7 +107,7 @@ export default function DialogSettingMovies({
         cast: selectedItemsCasts,
         sort: sort,
         genres: selectedItemsGenres,
-        rangeDate: periods,
+        rangeDate: JSON.stringify(periods),
         exactQuery: exactSearch,
       })
     );

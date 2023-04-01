@@ -14,6 +14,7 @@ import "swiper/css/effect-coverflow";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { useMediaQuery, useTheme } from "@mui/material";
+import LoadingPage from "./LoadingPage";
 
 export default function CarouselMovie({
   slides,
@@ -21,6 +22,7 @@ export default function CarouselMovie({
   hasNextPage,
   fetchNextPage,
   initzializeSwiper,
+  isLoading,
 }) {
   const swiperRef = useRef(null);
   const theme = useTheme();
@@ -71,7 +73,9 @@ export default function CarouselMovie({
       //loop={true}
       modules={[EffectCoverflow, Pagination, Virtual, Navigation, Keyboard]}
     >
-      {slides &&
+      {slides && isLoading ? (
+        <LoadingPage />
+      ) : (
         slides.length > 0 &&
         slides.map((slideContent, index) => {
           const selected = index === currentSlide;
@@ -89,7 +93,8 @@ export default function CarouselMovie({
               />
             </SwiperSlide>
           );
-        })}
+        })
+      )}
     </Swiper>
   );
 }
