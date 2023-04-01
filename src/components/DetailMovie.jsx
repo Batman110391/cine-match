@@ -79,7 +79,7 @@ export default function DetailMovie({
     (p) => p?.iso_639_1 === "en"
   )?.file_path;
 
-  //console.log("data", data);
+  console.log("data", data);
   // const currProgress = Math.round((progress / duration) * 100);
 
   const handleClickOpenDialogTrailer = () => {
@@ -282,8 +282,8 @@ export default function DetailMovie({
                         color: "#ccc",
                         content: "open-quote",
                         fontSize: "4em",
-                        lineHeight: "0.1em",
-                        marginRight: "0.25em",
+                        lineHeight: "0.4em",
+                        marginRight: "0.15em",
                         verticalAlign: "-0.4em",
                       },
                     }}
@@ -329,7 +329,7 @@ export default function DetailMovie({
                       hidden: { opacity: 0, y: -20 },
                       visible,
                     }}
-                    text={"Disponibile su :"}
+                    text={"Disponibile sulle piattaforme"}
                   />
 
                   <Stack flexDirection={"row"} gap={2} sx={{ mt: 2 }}>

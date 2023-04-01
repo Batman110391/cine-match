@@ -77,24 +77,21 @@ function CircularProgressWithLabel({ from, to }) {
 
 function ChipGroup({ groups }) {
   return (
-    <Stack direction="row" spacing={1}>
+    <Stack direction="row" flexWrap={"wrap"} gap={1}>
       {groups &&
         groups.length > 0 &&
-        groups
-          .filter((_, index) => index <= 5)
-          .map((item) => {
-            const existPath = item?.profile_path ? (
-              <Avatar
-                alt={item.name}
-                src={`http://image.tmdb.org/t/p/w500${item.profile_path}`}
-              />
-            ) : (
-              <Avatar>{item.name.charAt(0)}</Avatar>
-            );
+        groups.map((item) => {
+          const existPath = item?.profile_path ? (
+            <Avatar
+              alt={item.name}
+              src={`http://image.tmdb.org/t/p/w500${item.profile_path}`}
+            />
+          ) : (
+            <Avatar>{item.name.charAt(0)}</Avatar>
+          );
 
-            return <Chip key={item.id} avatar={existPath} label={item.name} />;
-          })}
-      {groups.length > 5 && <Chip label={`+${groups.length - 5}`} />}
+          return <Chip key={item.id} avatar={existPath} label={item.name} />;
+        })}
     </Stack>
   );
 }
@@ -131,15 +128,29 @@ export default function ChartCompatibility({ movie }) {
     }
   });
   currentCrew.forEach((item) => {
-    if (onlyIdCast.includes(item.id) && !prevIdCast.includes(item.id)) {
+    if (
+      onlyIdCast.includes(item.id) &&
+      !prevIdCast.includes(item.id) &&
+      item.department === "Directing"
+    ) {
       progress += divideProgress;
       prevIdCast.push(item.id);
     }
   });
 
   return (
-    <Stack flexDirection={"row"} gap={4}>
+    <Stack flexDirection={{ xs: "column", sm: "row" }} gap={4}>
       <Box>
+        <TypographyAnimated
+          component={"div"}
+          sx={{ mb: 2 }}
+          variant={"body2"}
+          variants={{
+            hidden: { opacity: 0, y: -20 },
+            visible,
+          }}
+          text={`Compatibilità`}
+        />
         <CircularProgressWithLabel from={0} to={Math.round(progress)} />
       </Box>
       <Box>
@@ -153,7 +164,7 @@ export default function ChartCompatibility({ movie }) {
                   hidden: { opacity: 0, y: -20 },
                   visible,
                 }}
-                text={`Generi presenti nella ricerca :`}
+                text={`Generi presenti nella ricerca`}
               />
               <ChipGroup
                 groups={genres.filter((g) => prevIdGenred.includes(g.id))}
@@ -169,7 +180,7 @@ export default function ChartCompatibility({ movie }) {
                   hidden: { opacity: 0, y: -20 },
                   visible,
                 }}
-                text={`Cast presente nella ricerca :`}
+                text={`Cast presente nella ricerca`}
               />
               <ChipGroup
                 groups={cast.filter((c) => prevIdCast.includes(c.id))}

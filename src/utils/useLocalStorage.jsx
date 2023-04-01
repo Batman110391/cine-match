@@ -39,3 +39,7 @@ export function useLocalStorage(key, initialValue) {
   };
   return [storedValue, setValue];
 }
+
+export function removeLocalStorage(key) {
+  window.localStorage.removeItem(key);
+}

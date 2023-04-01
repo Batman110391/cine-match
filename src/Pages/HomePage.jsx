@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import AnimatedTitle from "../components/AnimatedTitle";
 import ButtonAnimated from "../components/ButtonAnimated";
 import TypographyAnimated from "../components/TypographyAnimated";
+import { removeLocalStorage } from "../utils/useLocalStorage";
 
 export default function HomePage() {
   const visible = { opacity: 1, y: 0, transition: { duration: 0.5 } };
@@ -48,6 +49,7 @@ export default function HomePage() {
         }}
         sx={{ background: (theme) => theme.palette.gradient.extraLight }}
         LinkComponent={Link}
+        onClick={() => removeLocalStorage("configCineMatch")}
         to={"/movie-finder-generes"}
         color={"action"}
         variant="contained"

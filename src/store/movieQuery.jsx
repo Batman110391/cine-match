@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import dayjs from "dayjs";
 
-const initialState = {
+export const initialState = {
   exactQuery: false,
   genres: [],
   cast: [],

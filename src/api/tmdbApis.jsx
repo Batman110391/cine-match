@@ -199,7 +199,15 @@ export async function fetchMovies(
   const genresQuery =
     genres?.map((g) => g.id).join(exactQuery ? "," : "|") || null;
   const castsQuery =
-    casts?.map((c) => c.id).join(exactQuery ? "," : "|") || null;
+    casts
+      ?.filter((c) => c.known_for_department !== "Directing")
+      ?.map((c) => c.id)
+      ?.join(exactQuery ? "," : "|") || null;
+  const crewQuery =
+    casts
+      ?.filter((c) => c.known_for_department === "Directing")
+      ?.map((c) => c.id)
+      ?.join(exactQuery ? "," : "|") || null;
 
   //01/01/2000
   //14/03/2023 dayjs(data.to).format("DD/MM/YYYY")
@@ -231,8 +239,8 @@ filtri sort
       (await fetchPromise(
         `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&sort_by=${sort}&${CURRENT_LANGUAGE}${
           genresQuery && "&with_genres=" + genresQuery
-        }${
-          castsQuery && "&with_people=" + castsQuery
+        }${castsQuery && "&with_cast=" + castsQuery}${
+          crewQuery && "&with_crew=" + crewQuery
         }${periodsQueryString}${minVoteCount}`
       ).then((data) => {
         if (data?.total_pages > totalPage) {
@@ -251,7 +259,7 @@ filtri sort
   }
 
   const currMoviesByGeneres =
-    genresQuery || (!genresQuery && !castsQuery)
+    genresQuery || (!genresQuery && !castsQuery && !crewQuery)
       ? await fetchPromise(
           `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&sort_by=${sort}&${CURRENT_LANGUAGE}${
             genresQuery && "&with_genres=" + genresQuery
@@ -264,11 +272,11 @@ filtri sort
         })
       : [];
 
-  const currMoviesByPeople =
-    castsQuery || (!castsQuery && !genresQuery)
+  const currMoviesByCast =
+    castsQuery || (!castsQuery && !genresQuery && !crewQuery)
       ? await fetchPromise(
           `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&sort_by=${sort}&${CURRENT_LANGUAGE}${
-            castsQuery && "&with_people=" + castsQuery
+            castsQuery && "&with_cast=" + castsQuery
           }${periodsQueryString}${minVoteCount}`
         ).then((data) => {
           if (data?.total_pages > totalPage) {
@@ -278,11 +286,40 @@ filtri sort
         })
       : [];
 
+  const currMoviesByCrew = crewQuery
+    ? await Promise.all(
+        casts
+          ?.filter((c) => c.known_for_department === "Directing")
+          ?.map((crewId) => {
+            return fetchPromise(
+              `https://api.themoviedb.org/3/person/${crewId.id}/movie_credits?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+            );
+          })
+      ).then((data) => {
+        const filtertingForDirector = data?.reduce((prev, curr) => {
+          const onlyDirectoringDepartment = curr.crew.filter(
+            (m) => m?.department === "Directing"
+          );
+
+          return [...prev, ...onlyDirectoringDepartment];
+        }, []);
+
+        const currentSort =
+          sort === "vote_average.desc" ? "vote_average" : "popularity";
+
+        return filtertingForDirector.sort(
+          (a, b) => b?.[currentSort] - a?.[currentSort]
+        );
+      })
+    : [];
+
   const hasNext = page <= totalPage;
+
+  const aggregationPeople = uniqueArray(currMoviesByCast, currMoviesByCrew);
 
   const filterUniqueResult = uniqueArray(
     currMoviesByGeneres,
-    currMoviesByPeople
+    aggregationPeople
   );
 
   return {
@@ -350,7 +387,7 @@ export async function fetchMoviesByCasts(cast) {
   const currMoviesByPeople = castsQuery
     ? await fetchPromise(
         `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=1&${CURRENT_LANGUAGE}${
-          castsQuery && "&with_people=" + castsQuery
+          castsQuery && "&with_cast=" + castsQuery
         }`
       ).then((data) => {
         return data?.results;

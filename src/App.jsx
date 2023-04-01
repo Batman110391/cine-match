@@ -30,9 +30,11 @@ export default function App() {
   useEffect(() => {
     document.documentElement.scrollTop = 0;
     document.scrollingElement.scrollTop = 0;
+  }, [pathname]);
 
+  useEffect(() => {
     setConfigCineMatch(initialStateStore);
-  }, [pathname, initialStateStore]);
+  }, [initialStateStore]);
 
   const getRoutes = (allRoutes) =>
     allRoutes.map((route) => {

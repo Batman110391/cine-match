@@ -73,9 +73,7 @@ export default function CarouselMovie({
       //loop={true}
       modules={[EffectCoverflow, Pagination, Virtual, Navigation, Keyboard]}
     >
-      {slides && isLoading ? (
-        <LoadingPage />
-      ) : (
+      {slides &&
         slides.length > 0 &&
         slides.map((slideContent, index) => {
           const selected = index === currentSlide;
@@ -93,8 +91,7 @@ export default function CarouselMovie({
               />
             </SwiperSlide>
           );
-        })
-      )}
+        })}
     </Swiper>
   );
 }
