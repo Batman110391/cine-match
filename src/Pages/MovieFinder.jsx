@@ -18,16 +18,13 @@ export default function MovieFinder() {
   const genres = useSelector((state) => state.movieQuery.genres);
   const casts = useSelector((state) => state.movieQuery.cast);
   const sort = useSelector((state) => state.movieQuery.sort);
+  const periods = useSelector((state) => state.movieQuery.rangeDate);
+  const exactQuery = useSelector((state) => state.movieQuery.exactQuery);
 
-  const prevExcludeItems = useSelector(
-    (state) => state.movieQuery.prevExcludeItems
-  );
-  const [pagination, setPagination] = useState(0);
-  const [excludeMovie, setExcludeMovie] = useState(prevExcludeItems);
   const [bgWrapperIndex, setBgWrapperIndex] = useState(0);
-  const [currentSlide, setCurrentSlide] = useState(0);
   const [openSettingMovie, setOpenSettingMovie] = useState(false);
   const [currSelectedCast, setCurrSelectedCast] = useState([]);
+  const [changeFilters, setChangeFilters] = useState(false);
 
   const {
     status,
@@ -36,10 +33,12 @@ export default function MovieFinder() {
     isFetchingNextPage,
     hasNextPage,
     fetchNextPage,
+    refetch,
   } = useInfiniteQuery({
-    queryKey: ["movies"],
+    queryKey: ["movies", changeFilters],
     getNextPageParam: (prevData) => prevData.nextPage,
-    queryFn: ({ pageParam = 1 }) => fetchMovies(pageParam, genres, casts, sort),
+    queryFn: ({ pageParam = 1 }) =>
+      fetchMovies(pageParam, genres, casts, sort, periods, exactQuery),
   });
 
   if (status === "loading") return <LoadingPage />;
@@ -65,11 +64,7 @@ export default function MovieFinder() {
     }, {});
 
   const visibleData = uniqueArray(
-    movies?.results?.filter(
-      (item) =>
-        !excludeMovie?.find((sItem) => sItem.id === item.id) &&
-        Boolean(item?.overview)
-    ),
+    movies?.results?.filter((item) => Boolean(item?.overview)),
     currSelectedCast
   );
 
@@ -124,11 +119,10 @@ export default function MovieFinder() {
       <Box sx={{ width: "100%" }}>
         <CarouselMovie
           slides={visibleData}
-          currentSlide={currentSlide}
-          setCurrentSlide={setCurrentSlide}
           setBgWrapperIndex={setBgWrapperIndex}
           hasNextPage={hasNextPage}
           fetchNextPage={fetchNextPage}
+          initzializeSwiper={changeFilters}
         />
       </Box>
       <Box
@@ -157,16 +151,25 @@ export default function MovieFinder() {
             marginBottom: { xs: 0, sm: 3 },
           }}
         >
-          <DetailMovie
-            id={currentMovie?.id}
-            handleAddMoviesByInsertPeople={handleAddMoviesByInsertPeople}
-            handleRemoveMoviesByInsertPeople={handleRemoveMoviesByInsertPeople}
-          />
+          {currentMovie?.id && (
+            <DetailMovie
+              id={currentMovie?.id}
+              changeFilters={changeFilters}
+              handleAddMoviesByInsertPeople={handleAddMoviesByInsertPeople}
+              handleRemoveMoviesByInsertPeople={
+                handleRemoveMoviesByInsertPeople
+              }
+            />
+          )}
         </Card>
       </Box>
       <DialogSettingMovies
         open={openSettingMovie}
         setOpen={setOpenSettingMovie}
+        changeFilters={changeFilters}
+        setChangeFilters={setChangeFilters}
+        refetchPagination={refetch}
+        setCurrSelectedCast={setCurrSelectedCast}
       />
       <FloatingActionButton
         onClick={() => setOpenSettingMovie(true)}

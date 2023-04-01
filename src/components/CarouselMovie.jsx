@@ -17,24 +17,27 @@ import { useMediaQuery, useTheme } from "@mui/material";
 
 export default function CarouselMovie({
   slides,
-  currentSlide,
-  setCurrentSlide,
   setBgWrapperIndex,
   hasNextPage,
   fetchNextPage,
+  initzializeSwiper,
 }) {
   const swiperRef = useRef(null);
   const theme = useTheme();
 
+  const [currentSlide, setCurrentSlide] = useState(0);
+
   useEffect(() => {
-    /*   if (currentSlide > 0 && swiperRef?.current != null) {
-      swiperRef?.current?.swiper?.slideTo(currentSlide); // vai alla terza slide
-    }
- */
-    if (slides && currentSlide >= slides?.length - 10 && hasNextPage) {
+    if (slides && currentSlide >= slides?.length - 5 && hasNextPage) {
       fetchNextPage();
     }
   }, [currentSlide]);
+
+  useEffect(() => {
+    swiperRef?.current?.swiper?.slideTo(0);
+    setBgWrapperIndex(0);
+    setCurrentSlide(0);
+  }, [initzializeSwiper]);
 
   return (
     <Swiper

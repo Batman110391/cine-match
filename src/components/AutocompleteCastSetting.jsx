@@ -170,11 +170,10 @@ const StyledPopper = styled(Popper)({
   },
 });
 
-export default function AutocompleteCastSetting() {
-  const prevSelectedItems = useSelector((state) => state.movieQuery.cast);
-  const [selectedItems, setSelectedItems] = React.useState(prevSelectedItems);
-  const [inputValue, setInputValue] = React.useState(null);
-
+export default function AutocompleteCastSetting({
+  selectedItemsCasts,
+  setSelectedItemsCasts,
+}) {
   const {
     status,
     error,
@@ -203,7 +202,7 @@ export default function AutocompleteCastSetting() {
     }, {});
 
   const visibleData = cast?.results?.filter(
-    (item) => !selectedItems?.find((sItem) => sItem.id === item.id)
+    (item) => !selectedItemsCasts?.find((sItem) => sItem.id === item.id)
   );
 
   const itemData = {
@@ -213,13 +212,13 @@ export default function AutocompleteCastSetting() {
   };
 
   const handleChange = (value) => {
-    setSelectedItems(value);
+    setSelectedItemsCasts(value);
   };
   const handleDelete = (value) => {
-    const newSelectedItems = selectedItems.filter(
+    const newSelectedItems = selectedItemsCasts.filter(
       (sItem) => sItem.id !== value.id
     );
-    setSelectedItems(newSelectedItems);
+    setSelectedItemsCasts(newSelectedItems);
   };
 
   return (
@@ -233,7 +232,7 @@ export default function AutocompleteCastSetting() {
       options={visibleData}
       loading={isFetchingNextPage}
       getOptionLabel={(option) => option.name}
-      value={selectedItems}
+      value={selectedItemsCasts}
       onChange={(event, newValue) => {
         handleChange(newValue);
       }}
@@ -262,7 +261,7 @@ export default function AutocompleteCastSetting() {
         <TextField
           {...params}
           placeholder={
-            selectedItems.length > 0 ? "" : "Aggiungi o rimuovi cast"
+            selectedItemsCasts.length > 0 ? "" : "Aggiungi o rimuovi cast"
           }
         />
       )}

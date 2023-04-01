@@ -3,13 +3,11 @@ import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import MobileDataPicker from "./MobileDataPicker";
 
-export default function SearchPeriods({ onSelectPeriod }) {
-  const { from, to } = useSelector((state) => state.movieQuery.rangeDate);
+export default function SearchPeriods({ periods, onSelectPeriod }) {
+  const { from, to } = periods;
 
-  const [initialDate, setInitialDate] = React.useState(
-    from || dayjs(new Date()).subtract(25, "year")
-  );
-  const [lastDate, setLastDate] = React.useState(to || dayjs(new Date()));
+  const [initialDate, setInitialDate] = React.useState(dayjs(new Date(from)));
+  const [lastDate, setLastDate] = React.useState(dayjs(new Date(to)));
 
   const [errorLastDate, setErrorLastDate] = React.useState(false);
   const [errorInitialDate, setErrorInitialDate] = React.useState(false);

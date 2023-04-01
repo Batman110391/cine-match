@@ -32,7 +32,7 @@ export default function App() {
     document.scrollingElement.scrollTop = 0;
 
     setConfigCineMatch(initialStateStore);
-  }, [pathname]);
+  }, [pathname, initialStateStore]);
 
   const getRoutes = (allRoutes) =>
     allRoutes.map((route) => {

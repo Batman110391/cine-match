@@ -113,8 +113,8 @@ export default function ChartCompatibility({ movie }) {
   const onlyIdCast = cast.map((c) => c.id);
 
   const currentGeneresMovie = movie.genres;
-  const currentCast = movie.credits.cast;
-  const currentCrew = movie.credits.crew;
+  const currentCast = movie?.credits?.cast;
+  const currentCrew = movie?.credits?.crew;
 
   const divideProgress = 100 / (genres.length + cast.length);
 

@@ -23,7 +23,7 @@ import {
 } from "@mui/material";
 import SearchPeriods from "./SearchPeriods";
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import dayjs from "dayjs";
 import TypographyAnimated from "./TypographyAnimated";
 import { motion } from "framer-motion";
@@ -31,6 +31,9 @@ import { Stack } from "@mui/system";
 import ListGenresSetting from "./ListGenresSetting";
 import AutocompleteCastSetting from "./AutocompleteCastSetting";
 import { useTheme } from "@emotion/react";
+import { setQuery } from "../store/movieQuery";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const ORDERS = [
   { name: "Popolarità", label: "popularity.desc" },
@@ -42,25 +45,51 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Grow in={true} ref={ref} {...props} />;
 });
 
-export default function DialogSettingMovies({ open, setOpen }) {
+export default function DialogSettingMovies({
+  open,
+  setOpen,
+  changeFilters,
+  setChangeFilters,
+  refetchPagination,
+  setCurrSelectedCast,
+}) {
   const visible = { opacity: 1, y: 0, transition: { duration: 0.5 } };
 
   const theme = useTheme();
 
+  const dispatch = useDispatch();
+
   const periodsQuery = useSelector((state) => state.movieQuery.rangeDate);
   const genresQuery = useSelector((state) => state.movieQuery.genres);
   const sortQuery = useSelector((state) => state.movieQuery.sort);
+  const castsQuery = useSelector((state) => state.movieQuery.cast);
+  const exactQuery = useSelector((state) => state.movieQuery.exactQuery);
 
   const [periods, setPeriods] = useState(periodsQuery);
   const [sort, setSort] = useState(sortQuery);
-  const [exactSearch, setExactSearch] = React.useState(false);
-
+  const [exactSearch, setExactSearch] = useState(exactQuery);
   const [selectedItemsGenres, setSelectedItemsGenres] = useState(genresQuery);
+  const [selectedItemsCasts, setSelectedItemsCasts] = useState(castsQuery);
+
+  const disableSaveAction =
+    periods === periodsQuery &&
+    sort === sortQuery &&
+    exactSearch === exactQuery &&
+    selectedItemsGenres === genresQuery &&
+    selectedItemsCasts === castsQuery;
+
+  useEffect(() => {
+    setPeriods(periodsQuery);
+    setSort(sortQuery);
+    setExactSearch(exactQuery);
+    setSelectedItemsGenres(genresQuery);
+    setSelectedItemsCasts(castsQuery);
+  }, [periodsQuery, sortQuery, exactQuery, genresQuery, castsQuery, open]);
 
   const onSelectPeriod = (data) => {
     setPeriods({
-      from: dayjs(data.from).format("DD/MM/YYYY"),
-      to: dayjs(data.to).format("DD/MM/YYYY"),
+      from: data.from,
+      to: data.to,
       error: data.error,
     });
   };
@@ -73,24 +102,25 @@ export default function DialogSettingMovies({ open, setOpen }) {
     setOpen(false);
   };
 
-  //option ricerca ESATTA
+  const handleSaveSetting = () => {
+    dispatch(
+      setQuery({
+        cast: selectedItemsCasts,
+        sort: sort,
+        genres: selectedItemsGenres,
+        rangeDate: periods,
+        exactQuery: exactSearch,
+      })
+    );
 
-  //data
+    setCurrSelectedCast([]);
 
-  //01/01/2000
-  //14/03/2023
+    refetchPagination({ pageParam: 1 });
 
-  //YYYY-MM-DD // &release_date.gte=PRIMA &release_date.lte=DOPO
+    setChangeFilters(!changeFilters);
 
-  //sort
-
-  //  popularity.desc, POPOLARITA
-  //  release_date.desc, RECENTI
-  //  vote_average.desc, MIGLIOR VOTI
-
-  //generi  ...
-
-  //cast ...
+    handleClose();
+  };
 
   return (
     <div>
@@ -117,8 +147,13 @@ export default function DialogSettingMovies({ open, setOpen }) {
               variant="h6"
               component="div"
             ></Typography>
-            <Button autoFocus color="inherit" onClick={handleClose}>
-              save
+            <Button
+              disabled={disableSaveAction}
+              autoFocus
+              color="inherit"
+              onClick={handleSaveSetting}
+            >
+              Salva
             </Button>
           </Toolbar>
         </AppBar>
@@ -153,7 +188,7 @@ export default function DialogSettingMovies({ open, setOpen }) {
             <Typography variant="button" gutterBottom>
               Data
             </Typography>
-            <SearchPeriods onSelectPeriod={onSelectPeriod} />
+            <SearchPeriods periods={periods} onSelectPeriod={onSelectPeriod} />
           </Box>
           <Divider sx={{ my: 2 }} />
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -186,7 +221,10 @@ export default function DialogSettingMovies({ open, setOpen }) {
             <Typography variant="button" gutterBottom>
               Cast
             </Typography>
-            <AutocompleteCastSetting />
+            <AutocompleteCastSetting
+              selectedItemsCasts={selectedItemsCasts}
+              setSelectedItemsCasts={setSelectedItemsCasts}
+            />
           </Box>
           <Divider sx={{ my: 2 }} />
         </DialogContent>

@@ -1,11 +1,17 @@
 import { createSlice } from "@reduxjs/toolkit";
+import dayjs from "dayjs";
 
 const initialState = {
+  exactQuery: false,
   genres: [],
   cast: [],
   sort: "popularity.desc",
   prevExcludeItems: [],
-  rangeDate: { from: null, to: null, error: false },
+  rangeDate: {
+    from: dayjs(new Date()).subtract(25, "year"),
+    to: new Date(),
+    error: false,
+  },
   watch: [],
 };
 

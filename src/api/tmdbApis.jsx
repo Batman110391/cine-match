@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { fetchPromise } from "../utils/fetchPromise";
 import { uniqueArray } from "../utils/uniqueArray";
 
@@ -187,12 +188,21 @@ export async function fetchSimilarMoviesById(page, id) {
   });
 }
 
-export async function fetchMovies(page, genres, casts, sort) {
-  const genresQuery = genres?.map((g) => g.id).join("|") || null;
-  const castsQuery = casts?.map((c) => c.id).join("|") || null;
+export async function fetchMovies(
+  page,
+  genres,
+  casts,
+  sort,
+  periods,
+  exactQuery
+) {
+  const genresQuery =
+    genres?.map((g) => g.id).join(exactQuery ? "," : "|") || null;
+  const castsQuery =
+    casts?.map((c) => c.id).join(exactQuery ? "," : "|") || null;
 
   //01/01/2000
-  //14/03/2023
+  //14/03/2023 dayjs(data.to).format("DD/MM/YYYY")
 
   //YYYY-MM-DD // &release_date.gte=PRIMA &release_date.lte=DOPO
 
@@ -205,12 +215,40 @@ filtri sort
 
   let totalPage = 0;
 
+  const periodsQueryString = `&release_date.gte=${dayjs(
+    new Date(periods.from)
+  ).format("YYYY-MM-DD")}&release_date.lte=${dayjs(new Date(periods.to)).format(
+    "YYYY-MM-DD"
+  )}`;
+
+  if (exactQuery) {
+    const currMoviesByGenresAndCast =
+      (await fetchPromise(
+        `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&sort_by=${sort}&${CURRENT_LANGUAGE}${
+          genresQuery && "&with_genres=" + genresQuery
+        }${castsQuery && "&with_people=" + castsQuery}${periodsQueryString}`
+      ).then((data) => {
+        if (data?.total_pages > totalPage) {
+          totalPage = data.total_pages;
+        }
+        return data?.results;
+      })) || [];
+
+    const hasNext = page <= totalPage;
+
+    return {
+      results: currMoviesByGenresAndCast,
+      nextPage: hasNext ? page + 1 : undefined,
+      previousPage: page > 1 ? page - 1 : undefined,
+    };
+  }
+
   const currMoviesByGeneres =
     genresQuery || (!genresQuery && !castsQuery)
       ? await fetchPromise(
           `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&sort_by=${sort}&${CURRENT_LANGUAGE}${
             genresQuery && "&with_genres=" + genresQuery
-          }`
+          }${periodsQueryString}`
         ).then((data) => {
           if (data?.total_pages > totalPage) {
             totalPage = data.total_pages;
@@ -224,7 +262,7 @@ filtri sort
       ? await fetchPromise(
           `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&sort_by=${sort}&${CURRENT_LANGUAGE}${
             castsQuery && "&with_people=" + castsQuery
-          }`
+          }${periodsQueryString}`
         ).then((data) => {
           if (data?.total_pages > totalPage) {
             totalPage = data.total_pages;
@@ -336,16 +374,16 @@ async function getRatingMovieById(id) {
 
     const rottenTomatoesValue = response?.Ratings.find(
       (ele) => ele.Source === "Rotten Tomatoes"
-    ).Value;
+    )?.Value;
 
-    const splitPercent = rottenTomatoesValue.split("%")[0];
+    const splitPercent = rottenTomatoesValue?.split("%")[0];
 
     const convertPercent = (parseFloat(splitPercent) * 10) / 100;
 
     return {
       ratings: [
-        { source: "Imdb", value: parseFloat(response?.imdbRating) },
-        { source: "rottenTomatoes", value: convertPercent },
+        { source: "Imdb", value: parseFloat(response?.imdbRating) || null },
+        { source: "rottenTomatoes", value: convertPercent || null },
       ],
     };
   } catch (err) {
