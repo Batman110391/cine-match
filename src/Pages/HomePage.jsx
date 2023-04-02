@@ -10,8 +10,6 @@ import { useDispatch } from "react-redux";
 import { initialState, setQuery } from "../store/movieQuery";
 
 export default function HomePage() {
-  const visible = { opacity: 1, y: 0, transition: { duration: 0.5 } };
-
   const dispatch = useDispatch();
 
   const handleInitzialiteApp = () => {
@@ -32,10 +30,6 @@ export default function HomePage() {
         component={"span"}
         sx={{ maxWidth: "500px", textAlign: "center", py: 2 }}
         variant={"h6"}
-        variants={{
-          hidden: { opacity: 0, y: -20 },
-          visible,
-        }}
         gutterBottom
         text="I film più adatti ai tuoi gusti cinematografici.
         Filtra per attore, regista, genere e altro ancora per trovare il film
@@ -45,18 +39,10 @@ export default function HomePage() {
         component={"span"}
         sx={{ pt: 10 }}
         variant={"subtitle1"}
-        variants={{
-          hidden: { opacity: 0, y: -20 },
-          visible,
-        }}
         gutterBottom
         text="Che film guarderai oggi ?"
       />
       <ButtonAnimated
-        variants={{
-          hidden: { opacity: 0, y: -20 },
-          visible,
-        }}
         sx={{ background: (theme) => theme.palette.gradient.extraLight }}
         LinkComponent={Link}
         onClick={handleInitzialiteApp}

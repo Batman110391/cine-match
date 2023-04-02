@@ -9,7 +9,12 @@ export default function TypographyAnimated({
   ...rest
 }) {
   return (
-    <Box component={motion[component]} variants={variants}>
+    <Box
+      component={motion[component]}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
       <Typography variant={component} {...rest}>
         {text}
       </Typography>

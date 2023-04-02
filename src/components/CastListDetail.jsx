@@ -18,7 +18,6 @@ export default function CastListDetail({
   handleAddMoviesByInsertPeople,
   handleRemoveMoviesByInsertPeople,
 }) {
-  const visible = { opacity: 1, y: 0, transition: { duration: 0.5 } };
   const cast = useSelector((state) => state.movieQuery.cast);
   const dispatch = useDispatch();
 
@@ -35,10 +34,9 @@ export default function CastListDetail({
   return (
     <List
       component={motion.div}
-      variants={{
-        hidden: { opacity: 0, y: -20 },
-        visible,
-      }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
       sx={{
         width: "100%",
         maxHeight: height ? `${height}px` : "50vh",

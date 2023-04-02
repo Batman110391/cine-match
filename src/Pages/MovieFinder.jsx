@@ -13,8 +13,6 @@ import LoadingPage from "../components/LoadingPage";
 import TypographyAnimated from "../components/TypographyAnimated";
 
 export default function MovieFinder() {
-  const visible = { opacity: 1, y: 0, transition: { duration: 0.5 } };
-
   const genres = useSelector((state) => state.movieQuery.genres);
   const casts = useSelector((state) => state.movieQuery.cast);
   const sort = useSelector((state) => state.movieQuery.sort);
@@ -134,10 +132,6 @@ export default function MovieFinder() {
             component={"div"}
             sx={{ mb: 1, fontSize: "1.2rem" }}
             variant={"h6"}
-            variants={{
-              hidden: { opacity: 0, y: -20 },
-              visible,
-            }}
             text={"Nessun contenuto presente"}
           />
         </Box>

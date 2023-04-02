@@ -36,8 +36,6 @@ export default function DetailMovie({
   handleAddMoviesByInsertPeople,
   handleRemoveMoviesByInsertPeople,
 }) {
-  const visible = { opacity: 1, y: 0, transition: { duration: 0.5 } };
-
   const [mute, setMute] = useState(true);
   const [openTrailerDialog, setOpenTrailerDialog] = React.useState(false);
 
@@ -147,10 +145,7 @@ export default function DetailMovie({
                 component={"div"}
                 sx={{ mb: 1, fontSize: "1.2rem" }}
                 variant={"h6"}
-                variants={{
-                  hidden: { opacity: 0, y: -20 },
-                  visible,
-                }}
+                animate={"visible"}
                 text={
                   detail?.title +
                   " (" +
@@ -162,10 +157,6 @@ export default function DetailMovie({
               <TypographyAnimated
                 component={"div"}
                 variant={"body2"}
-                variants={{
-                  hidden: { opacity: 0, y: -20 },
-                  visible,
-                }}
                 text={
                   <Highlighter
                     searchWords={genres?.map((g) => g.name)}
@@ -183,10 +174,9 @@ export default function DetailMovie({
               <Box
                 sx={{ mt: 2 }}
                 component={motion.div}
-                variants={{
-                  hidden: { opacity: 0, y: -20 },
-                  visible,
-                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
               >
                 {detail?.ratings?.find((r) => r.source === "rottenTomatoes")
                   ?.value && (
@@ -241,10 +231,9 @@ export default function DetailMovie({
                 <Button
                   sx={{ pl: 0, mt: 1 }}
                   component={motion.div}
-                  variants={{
-                    hidden: { opacity: 0, y: -20 },
-                    visible,
-                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   variant="text"
                   startIcon={<PlayArrowIcon />}
                   onClick={handleClickOpenDialogTrailer}
@@ -274,10 +263,6 @@ export default function DetailMovie({
                       },
                     }}
                     variant={"body2"}
-                    variants={{
-                      hidden: { opacity: 0, y: -20 },
-                      visible,
-                    }}
                     text={detail?.tagline}
                   />
                 </Box>
@@ -288,20 +273,15 @@ export default function DetailMovie({
                 component={"div"}
                 sx={{ mt: 3 }}
                 variant={"body2"}
-                variants={{
-                  hidden: { opacity: 0, y: -20 },
-                  visible,
-                }}
                 text={detail?.overview}
               />
               <Divider sx={{ my: 2 }} />
               <Box
                 sx={{ mt: 2 }}
                 component={motion.div}
-                variants={{
-                  hidden: { opacity: 0, y: -20 },
-                  visible,
-                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
               >
                 <ChartCompatibility movie={detail} />
               </Box>
@@ -311,10 +291,6 @@ export default function DetailMovie({
                   <TypographyAnimated
                     component={"div"}
                     variant={"body2"}
-                    variants={{
-                      hidden: { opacity: 0, y: -20 },
-                      visible,
-                    }}
                     text={"Disponibile sulle piattaforme"}
                   />
 
@@ -322,10 +298,9 @@ export default function DetailMovie({
                     {detail?.providers?.flatrate?.map((provider) => (
                       <Avatar
                         component={motion.div}
-                        variants={{
-                          hidden: { opacity: 0, y: -20 },
-                          visible,
-                        }}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
                         key={provider?.provider_id}
                         alt={provider?.provider_name}
                         src={`http://image.tmdb.org/t/p/w500${provider?.logo_path}`}

@@ -6,13 +6,11 @@ export const initialState = {
   genres: [],
   cast: [],
   sort: "popularity.desc",
-  prevExcludeItems: [],
   rangeDate: JSON.stringify({
     from: dayjs("1975/01/01"),
     to: new Date(),
     error: false,
   }),
-  watch: [],
 };
 
 export const movieQuerySlice = createSlice({

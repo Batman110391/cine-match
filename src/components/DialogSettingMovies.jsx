@@ -51,8 +51,6 @@ export default function DialogSettingMovies({
   setChangeFilters,
   refetchPagination,
 }) {
-  const visible = { opacity: 1, y: 0, transition: { duration: 0.5 } };
-
   const theme = useTheme();
 
   const dispatch = useDispatch();
@@ -155,10 +153,9 @@ export default function DialogSettingMovies({
         </AppBar>
         <DialogContent
           component={motion.div}
-          variants={{
-            hidden: { opacity: 0, y: -20 },
-            visible,
-          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
         >
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
             <Typography variant="button" gutterBottom>

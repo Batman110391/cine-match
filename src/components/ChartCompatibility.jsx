@@ -97,8 +97,6 @@ function ChipGroup({ groups }) {
 }
 
 export default function ChartCompatibility({ movie }) {
-  const visible = { opacity: 1, y: 0, transition: { duration: 0.5 } };
-
   let progress = 0;
   const prevIdGenred = [];
   const prevIdCast = [];
@@ -145,10 +143,6 @@ export default function ChartCompatibility({ movie }) {
           component={"div"}
           sx={{ mb: 2 }}
           variant={"body2"}
-          variants={{
-            hidden: { opacity: 0, y: -20 },
-            visible,
-          }}
           text={`Compatibilità`}
         />
         <CircularProgressWithLabel from={0} to={Math.round(progress)} />
@@ -160,10 +154,6 @@ export default function ChartCompatibility({ movie }) {
               <TypographyAnimated
                 component={"div"}
                 variant={"body2"}
-                variants={{
-                  hidden: { opacity: 0, y: -20 },
-                  visible,
-                }}
                 text={`Generi presenti nella ricerca`}
               />
               <ChipGroup
@@ -176,10 +166,6 @@ export default function ChartCompatibility({ movie }) {
               <TypographyAnimated
                 component={"div"}
                 variant={"body2"}
-                variants={{
-                  hidden: { opacity: 0, y: -20 },
-                  visible,
-                }}
                 text={`Cast presente nella ricerca`}
               />
               <ChipGroup
