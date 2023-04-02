@@ -34,6 +34,9 @@ export const darkTheme = createTheme({
           height: "100%",
           width: "100%",
         },
+        ".swiper-slide-active": {
+          zIndex: 3,
+        },
         ".swiper-button-next": {
           backgroundImage: `url(${next})`,
           backgroundRepeat: "no-repeat",

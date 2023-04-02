@@ -309,7 +309,7 @@ filtri sort
     aggregationPeople
   ).sort((a, b) => b?.[currentSort] - a?.[currentSort]);
 
-  console.log("filterUniqueResult", filterUniqueResult);
+  //console.log("filterUniqueResult", filterUniqueResult);
 
   return {
     results: filterUniqueResult,

@@ -10,9 +10,10 @@ import {
 import MovieCard from "./MovieCard";
 // Import Swiper styles
 import "swiper/css";
-import "swiper/css/effect-coverflow";
+//import "swiper/css/effect-coverflow";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
+//import "swiper/css/virtual";
 import { useMediaQuery, useTheme } from "@mui/material";
 import LoadingPage from "./LoadingPage";
 
@@ -46,32 +47,66 @@ export default function CarouselMovie({
       ref={swiperRef}
       style={{
         width: "100%",
-        height: "100%",
+        height: "290px",
         paddingTop: "55px",
       }}
       onSlideChange={(e) => setCurrentSlide(e.realIndex)}
       onTransitionEnd={(e) => setBgWrapperIndex(e.realIndex)}
       watchSlidesProgress={true}
-      slidesPerView={"auto"}
-      effect={"coverflow"}
+      breakpoints={{
+        // quando la larghezza della finestra è >= 320px
+        320: {
+          slidesPerView: 3,
+        },
+        // quando la larghezza della finestra è >= 480px
+        480: {
+          slidesPerView: 4,
+        },
+        // quando la larghezza della finestra è >= 640px
+        640: {
+          slidesPerView: 5,
+        },
+        // quando la larghezza della finestra è >= 800px
+        800: {
+          slidesPerView: 6,
+        },
+        // quando la larghezza della finestra è >= 960px
+        960: {
+          slidesPerView: 7,
+        },
+        // quando la larghezza della finestra è >= 1120px
+        1120: {
+          slidesPerView: 8,
+        },
+        // quando la larghezza della finestra è >= 1300px
+        1300: {
+          slidesPerView: 9,
+        },
+      }}
+      //effect={"coverflow"}
       grabCursor={true}
       centeredSlides={true}
       navigation={useMediaQuery(theme.breakpoints.up("sm")) ? true : false}
       keyboard={{
         enabled: useMediaQuery(theme.breakpoints.up("sm")) ? true : false,
       }}
-      coverflowEffect={{
+      /* coverflowEffect={{
         rotate: 10,
         stretch: 0,
         depth: 40,
         modifier: 1,
         slideShadows: false,
-      }}
+      }} */
       pagination={{
         type: "progressbar",
       }}
       //loop={true}
-      modules={[EffectCoverflow, Pagination, Virtual, Navigation, Keyboard]}
+      modules={[Pagination, Navigation, Keyboard]}
+      /* virtual={{
+        cache: true,
+        addSlidesBefore: 4,
+        addSlidesAfter: 4,
+      }} */
     >
       {slides &&
         slides.length > 0 &&
@@ -82,7 +117,10 @@ export default function CarouselMovie({
             <SwiperSlide
               key={slideContent.id}
               virtualIndex={index}
-              style={{ height: "240px", width: "150px" }}
+              style={{
+                height: "240px",
+                width: "150px",
+              }}
             >
               <MovieCard
                 bg={slideContent.poster_path}

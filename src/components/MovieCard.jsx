@@ -16,7 +16,7 @@ export default function MovieCard({ title, bg, selected }) {
         justifyContent: "center",
         border: "1px solid #ffffff70",
         transform: selected ? "scale(1.3)" : "scale(1)",
-        transition: "all 0.4s ease-out",
+        transition: "all 0.3s ease-out",
       }}
     >
       {!bg && (
