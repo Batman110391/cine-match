@@ -1,21 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
+import { Keyboard, Navigation, Pagination } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
-import {
-  EffectCoverflow,
-  Navigation,
-  Pagination,
-  Virtual,
-  Keyboard,
-} from "swiper";
 import MovieCard from "./MovieCard";
 // Import Swiper styles
 import "swiper/css";
 //import "swiper/css/effect-coverflow";
-import "swiper/css/pagination";
 import "swiper/css/navigation";
+import "swiper/css/pagination";
 //import "swiper/css/virtual";
 import { useMediaQuery, useTheme } from "@mui/material";
-import LoadingPage from "./LoadingPage";
 
 export default function CarouselMovie({
   slides,
@@ -36,11 +29,11 @@ export default function CarouselMovie({
     }
   }, [currentSlide]);
 
-  useEffect(() => {
+  /* useEffect(() => {
     swiperRef?.current?.swiper?.slideTo(0);
     setBgWrapperIndex(0);
     setCurrentSlide(0);
-  }, [initzializeSwiper]);
+  }, [initzializeSwiper]); */
 
   return (
     <Swiper

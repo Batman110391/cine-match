@@ -1,67 +1,52 @@
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import {
-  alpha,
   Avatar,
   Box,
   Button,
-  Container,
+  Chip,
   Dialog,
   Divider,
   Grid,
-  IconButton,
   LinearProgress,
-  Stack,
-  Typography,
-  Chip,
   Rating,
-  useMediaQuery,
+  Stack,
+  alpha,
 } from "@mui/material";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import YouTubePlayer from "react-player/youtube";
-import TypographyAnimated from "./TypographyAnimated";
-import VolumeUpIcon from "@mui/icons-material/VolumeUp";
-import VolumeOffIcon from "@mui/icons-material/VolumeOff";
-import { fetchDetailMovieById } from "../api/tmdbApis";
-import { useQuery } from "react-query";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { motion } from "framer-motion";
-import { useTheme } from "@emotion/react";
-import ChartCompatibility from "./ChartCompatibility";
+import React, { useState } from "react";
 import Highlighter from "react-highlight-words";
+import YouTubePlayer from "react-player/youtube";
+import { useQuery } from "react-query";
 import { useSelector } from "react-redux";
-import CastListDetail from "./CastListDetail";
-import useElementSize from "../utils/useElementSize";
-import ListImagesMovie from "./ListImagesMovie";
-import { formatMinutes } from "../utils/timeFormat";
-import StarsIcon from "@mui/icons-material/Stars";
-import { roundToHalf } from "../utils/numberFormatting";
-import RottenTomatoes from "../components/icons/RottenTomatoes";
+import { fetchDetailMovieById } from "../api/tmdbApis";
 import Imdb from "../components/icons/Imdb";
+import RottenTomatoes from "../components/icons/RottenTomatoes";
+import { roundToHalf } from "../utils/numberFormatting";
+import { formatMinutes } from "../utils/timeFormat";
+import useElementSize from "../utils/useElementSize";
+import CastListDetail from "./CastListDetail";
+import ChartCompatibility from "./ChartCompatibility";
+import TypographyAnimated from "./TypographyAnimated";
 import Tmdb from "./icons/Tmdb";
 
 const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
 export default function DetailMovie({
   id,
-  changeFilters,
   handleAddMoviesByInsertPeople,
   handleRemoveMoviesByInsertPeople,
 }) {
   const visible = { opacity: 1, y: 0, transition: { duration: 0.5 } };
-  const theme = useTheme();
 
   const [mute, setMute] = useState(true);
-  const [progress, setProgress] = useState(0);
-  const [duration, setDuration] = useState(0);
   const [openTrailerDialog, setOpenTrailerDialog] = React.useState(false);
 
   const genres = useSelector((state) => state.movieQuery.genres);
-  const cast = useSelector((state) => state.movieQuery.cast);
 
   const [infoMovieRef, { height }] = useElementSize();
 
-  const { isLoading, error, data } = useQuery(
-    ["detailMovie", id, changeFilters],
-    () => fetchDetailMovieById(id)
+  const { isLoading, error, data } = useQuery(["detailMovie", id], () =>
+    fetchDetailMovieById(id)
   );
 
   if (isLoading)
@@ -353,6 +338,7 @@ export default function DetailMovie({
           </Grid>
           <Grid item xs={12} sm={4}>
             <CastListDetail
+              movieId={id}
               person={detail?.credits?.cast}
               height={height}
               handleAddMoviesByInsertPeople={handleAddMoviesByInsertPeople}

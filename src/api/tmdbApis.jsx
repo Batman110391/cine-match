@@ -269,7 +269,7 @@ filtri sort
       ? await fetchPromise(
           `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}${
             genresQuery && "&with_genres=" + genresQuery
-          }${periodsQueryString}${minVoteCount}`
+          }${periodsQueryString}${minVoteCount}&sort_by=${sort}`
         ).then((data) => {
           if (data?.total_pages > totalPage) {
             totalPage = data.total_pages;
@@ -278,27 +278,29 @@ filtri sort
         })
       : [];
 
-  const currMoviesByCast = castsQuery
-    ? await fetchPromiseAllQueries(
-        casts,
-        genres,
-        null,
-        "cast",
-        formattingPeriod,
-        exactQuery
-      )
-    : [];
+  const currMoviesByCast =
+    castsQuery && page == 1
+      ? await fetchPromiseAllQueries(
+          casts,
+          genres,
+          null,
+          "cast",
+          formattingPeriod,
+          exactQuery
+        )
+      : [];
 
-  const currMoviesByCrew = crewQuery
-    ? await fetchPromiseAllQueries(
-        casts,
-        genres,
-        "Directing",
-        "crew",
-        formattingPeriod,
-        exactQuery
-      )
-    : [];
+  const currMoviesByCrew =
+    crewQuery && page == 1
+      ? await fetchPromiseAllQueries(
+          casts,
+          genres,
+          "Directing",
+          "crew",
+          formattingPeriod,
+          exactQuery
+        )
+      : [];
 
   const hasNext = page <= totalPage || !genresQuery;
 
@@ -411,7 +413,7 @@ async function getRatingMovieById(id) {
       `http://www.omdbapi.com/?i=${imdb_id}&apikey=15eb44fd`
     );
 
-    const rottenTomatoesValue = response?.Ratings.find(
+    const rottenTomatoesValue = response?.Ratings?.find(
       (ele) => ele.Source === "Rotten Tomatoes"
     )?.Value;
 
@@ -461,7 +463,7 @@ async function fetchPromiseAllQueries(
           : curr?.[type];
 
         const onlyGenere =
-          Boolean(currGenres.length) && !exactQuery
+          Boolean(currGenres.length) && exactQuery
             ? onlyDepartment?.filter((od) =>
                 od.genre_ids.some((g) => currGenres.includes(g))
               )

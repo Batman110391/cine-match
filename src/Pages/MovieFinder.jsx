@@ -11,7 +11,6 @@ import DialogSettingMovies from "../components/DialogSettingMovies";
 import FloatingActionButton from "../components/FloatingActionButton";
 import LoadingPage from "../components/LoadingPage";
 import TypographyAnimated from "../components/TypographyAnimated";
-import { uniqueArray } from "../utils/uniqueArray";
 
 export default function MovieFinder() {
   const visible = { opacity: 1, y: 0, transition: { duration: 0.5 } };
@@ -24,7 +23,6 @@ export default function MovieFinder() {
 
   const [bgWrapperIndex, setBgWrapperIndex] = useState(0);
   const [openSettingMovie, setOpenSettingMovie] = useState(false);
-  const [currSelectedCast, setCurrSelectedCast] = useState([]);
   const [changeFilters, setChangeFilters] = useState(false);
 
   const {
@@ -46,12 +44,15 @@ export default function MovieFinder() {
   if (status === "loading") return <LoadingPage />;
   if (status === "error") return <h1>{JSON.stringify(error)}</h1>;
 
-  const handleAddMoviesByInsertPeople = (castMovie) => {
-    setCurrSelectedCast([...currSelectedCast, ...castMovie]);
+  const handleAddMoviesByInsertPeople = () => {
+    refetch({ pageParam: 1 });
+
+    setChangeFilters(!changeFilters);
   };
-  const handleRemoveMoviesByInsertPeople = (id) => {
-    const newCurrSelectedCast = currSelectedCast.filter((c) => c.castId !== id);
-    setCurrSelectedCast(newCurrSelectedCast);
+  const handleRemoveMoviesByInsertPeople = () => {
+    refetch({ pageParam: 1 });
+
+    setChangeFilters(!changeFilters);
   };
 
   const movies = data?.pages
@@ -65,12 +66,13 @@ export default function MovieFinder() {
       };
     }, {});
 
-  const visibleData = uniqueArray(
-    movies?.results?.filter((item) => Boolean(item?.overview)),
-    currSelectedCast
+  const visibleData = movies?.results?.filter((item) =>
+    Boolean(item?.overview)
   );
 
-  // console.log("visible", visibleData);
+  console.log("visible", visibleData);
+
+  //console.log("status", status);
 
   const currentMovie = visibleData[bgWrapperIndex];
 
@@ -178,10 +180,11 @@ export default function MovieFinder() {
                 marginBottom: { xs: 0, sm: 3 },
               }}
             >
-              {currentMovie?.id && (
+              {currentMovie && visibleData.length > 0 && (
                 <DetailMovie
                   id={currentMovie?.id}
                   changeFilters={changeFilters}
+                  reInitzialize={isRefetching}
                   handleAddMoviesByInsertPeople={handleAddMoviesByInsertPeople}
                   handleRemoveMoviesByInsertPeople={
                     handleRemoveMoviesByInsertPeople
@@ -198,7 +201,6 @@ export default function MovieFinder() {
         changeFilters={changeFilters}
         setChangeFilters={setChangeFilters}
         refetchPagination={refetch}
-        setCurrSelectedCast={setCurrSelectedCast}
       />
       <FloatingActionButton
         onClick={() => setOpenSettingMovie(true)}
