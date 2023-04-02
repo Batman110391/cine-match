@@ -71,7 +71,7 @@ export default function DialogSettingMovies({
   const [selectedItemsCasts, setSelectedItemsCasts] = useState(castsQuery);
 
   const disableSaveAction =
-    periods === periodsQuery &&
+    JSON.stringify(periods) === periodsQuery &&
     sort === sortQuery &&
     exactSearch === exactQuery &&
     selectedItemsGenres === genresQuery &&

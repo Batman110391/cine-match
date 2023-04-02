@@ -70,6 +70,8 @@ export default function MovieFinder() {
     currSelectedCast
   );
 
+  console.log("visible", visibleData);
+
   const currentMovie = visibleData[bgWrapperIndex];
 
   return (
@@ -171,7 +173,7 @@ export default function MovieFinder() {
                 width: "100%",
                 height: "100%",
                 minHeight: "50vh",
-                borderRadius: "2%",
+                borderRadius: { sx: "0%", sm: "2%" },
                 my: 3,
                 marginBottom: { xs: 0, sm: 3 },
               }}

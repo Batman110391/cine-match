@@ -23,12 +23,20 @@ export default function CastListDetail({
 }) {
   const visible = { opacity: 1, y: 0, transition: { duration: 0.5 } };
   const cast = useSelector((state) => state.movieQuery.cast);
+  const periods = useSelector((state) => state.movieQuery.rangeDate);
+  const genres = useSelector((state) => state.movieQuery.genres);
+  const exactQuery = useSelector((state) => state.movieQuery.exactQuery);
   const dispatch = useDispatch();
 
   const [selected, setSelected] = React.useState(null);
 
   useQuery(["addMoreOptions", selected], async () => {
-    const data = await fetchMoviesByCasts(selected);
+    const data = await fetchMoviesByCasts(
+      selected,
+      genres,
+      periods,
+      exactQuery
+    );
 
     if (data) {
       handleAddMoviesByInsertPeople(data.results);

@@ -79,7 +79,7 @@ export default function DetailMovie({
     (p) => p?.iso_639_1 === "en"
   )?.file_path;
 
-  console.log("data", data);
+  //console.log("data", data);
   // const currProgress = Math.round((progress / duration) * 100);
 
   const handleClickOpenDialogTrailer = () => {
@@ -203,40 +203,41 @@ export default function DetailMovie({
                   visible,
                 }}
               >
-                {detail?.ratings && (
-                  <>
-                    <Chip
-                      sx={{ borderColor: "transparent" }}
-                      variant="outlined"
-                      icon={<RottenTomatoes />}
-                      label={
-                        <Rating
-                          defaultValue={roundToHalf(
-                            detail?.ratings?.find(
-                              (r) => r.source === "rottenTomatoes"
-                            )?.value
-                          )}
-                          precision={0.5}
-                          readOnly
-                        />
-                      }
-                    />
-                    <Chip
-                      sx={{ borderColor: "transparent" }}
-                      variant="outlined"
-                      icon={<Imdb />}
-                      label={
-                        <Rating
-                          defaultValue={roundToHalf(
-                            detail?.ratings?.find((r) => r.source === "Imdb")
-                              ?.value
-                          )}
-                          precision={0.5}
-                          readOnly
-                        />
-                      }
-                    />
-                  </>
+                {detail?.ratings?.find((r) => r.source === "rottenTomatoes")
+                  ?.value && (
+                  <Chip
+                    sx={{ borderColor: "transparent" }}
+                    variant="outlined"
+                    icon={<RottenTomatoes />}
+                    label={
+                      <Rating
+                        defaultValue={roundToHalf(
+                          detail?.ratings?.find(
+                            (r) => r.source === "rottenTomatoes"
+                          )?.value
+                        )}
+                        precision={0.5}
+                        readOnly
+                      />
+                    }
+                  />
+                )}
+                {detail?.ratings?.find((r) => r.source === "Imdb")?.value && (
+                  <Chip
+                    sx={{ borderColor: "transparent" }}
+                    variant="outlined"
+                    icon={<Imdb />}
+                    label={
+                      <Rating
+                        defaultValue={roundToHalf(
+                          detail?.ratings?.find((r) => r.source === "Imdb")
+                            ?.value
+                        )}
+                        precision={0.5}
+                        readOnly
+                      />
+                    }
+                  />
                 )}
                 <Chip
                   sx={{ borderColor: "transparent" }}

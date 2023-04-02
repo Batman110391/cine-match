@@ -6,9 +6,19 @@ import AnimatedTitle from "../components/AnimatedTitle";
 import ButtonAnimated from "../components/ButtonAnimated";
 import TypographyAnimated from "../components/TypographyAnimated";
 import { removeLocalStorage } from "../utils/useLocalStorage";
+import { useDispatch } from "react-redux";
+import { initialState, setQuery } from "../store/movieQuery";
 
 export default function HomePage() {
   const visible = { opacity: 1, y: 0, transition: { duration: 0.5 } };
+
+  const dispatch = useDispatch();
+
+  const handleInitzialiteApp = () => {
+    removeLocalStorage("configCineMatch");
+
+    dispatch(setQuery(initialState));
+  };
 
   return (
     <Stack
@@ -49,7 +59,7 @@ export default function HomePage() {
         }}
         sx={{ background: (theme) => theme.palette.gradient.extraLight }}
         LinkComponent={Link}
-        onClick={() => removeLocalStorage("configCineMatch")}
+        onClick={handleInitzialiteApp}
         to={"/movie-finder-generes"}
         color={"action"}
         variant="contained"

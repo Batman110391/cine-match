@@ -8,7 +8,7 @@ export const initialState = {
   sort: "popularity.desc",
   prevExcludeItems: [],
   rangeDate: JSON.stringify({
-    from: dayjs(new Date()).subtract(25, "year"),
+    from: dayjs("1975/01/01"),
     to: new Date(),
     error: false,
   }),

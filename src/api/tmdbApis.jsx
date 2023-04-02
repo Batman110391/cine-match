@@ -1,6 +1,8 @@
 import dayjs from "dayjs";
 import { fetchPromise } from "../utils/fetchPromise";
 import { uniqueArray } from "../utils/uniqueArray";
+import isBetween from "dayjs/plugin/isBetween";
+dayjs.extend(isBetween);
 
 const API_KEY = import.meta.env.VITE_API_KEY;
 const CURRENT_LANGUAGE = "language=it-IT";
@@ -209,6 +211,9 @@ export async function fetchMovies(
       ?.map((c) => c.id)
       ?.join(exactQuery ? "," : "|") || null;
 
+  const currentSort =
+    sort === "vote_average.desc" ? "vote_average" : "popularity";
+
   //01/01/2000
   //14/03/2023 dayjs(data.to).format("DD/MM/YYYY")
 
@@ -225,16 +230,17 @@ filtri sort
 
   const { from, to } = JSON.parse(periods);
 
-  const periodsQueryString = `&primary_release_date.gte=${dayjs(
-    new Date(from)
-  ).format("YYYY-MM-DD")}&primary_release_date.lte=${dayjs(new Date(to)).format(
-    "YYYY-MM-DD"
-  )}`;
+  const formattingPeriod = {
+    from: dayjs(new Date(from)).format("YYYY-MM-DD"),
+    to: dayjs(new Date(to)).format("YYYY-MM-DD"),
+  };
+
+  const periodsQueryString = `&primary_release_date.gte=${formattingPeriod.from}&primary_release_date.lte=${formattingPeriod.to}`;
 
   const minVoteCount =
     sort === "vote_average.desc" ? "&vote_count.gte=100" : "";
 
-  if (exactQuery) {
+  /*   if (exactQuery) {
     const currMoviesByGenresAndCast =
       (await fetchPromise(
         `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&sort_by=${sort}&${CURRENT_LANGUAGE}${
@@ -256,12 +262,12 @@ filtri sort
       nextPage: hasNext ? page + 1 : undefined,
       previousPage: page > 1 ? page - 1 : undefined,
     };
-  }
+  } */
 
   const currMoviesByGeneres =
-    genresQuery || (!genresQuery && !castsQuery && !crewQuery)
+    (!castsQuery && !crewQuery) || (!exactQuery && genresQuery)
       ? await fetchPromise(
-          `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&sort_by=${sort}&${CURRENT_LANGUAGE}${
+          `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}${
             genresQuery && "&with_genres=" + genresQuery
           }${periodsQueryString}${minVoteCount}`
         ).then((data) => {
@@ -272,55 +278,38 @@ filtri sort
         })
       : [];
 
-  const currMoviesByCast =
-    castsQuery || (!castsQuery && !genresQuery && !crewQuery)
-      ? await fetchPromise(
-          `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&sort_by=${sort}&${CURRENT_LANGUAGE}${
-            castsQuery && "&with_cast=" + castsQuery
-          }${periodsQueryString}${minVoteCount}`
-        ).then((data) => {
-          if (data?.total_pages > totalPage) {
-            totalPage = data.total_pages;
-          }
-          return data?.results;
-        })
-      : [];
-
-  const currMoviesByCrew = crewQuery
-    ? await Promise.all(
-        casts
-          ?.filter((c) => c.known_for_department === "Directing")
-          ?.map((crewId) => {
-            return fetchPromise(
-              `https://api.themoviedb.org/3/person/${crewId.id}/movie_credits?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
-            );
-          })
-      ).then((data) => {
-        const filtertingForDirector = data?.reduce((prev, curr) => {
-          const onlyDirectoringDepartment = curr.crew.filter(
-            (m) => m?.department === "Directing"
-          );
-
-          return [...prev, ...onlyDirectoringDepartment];
-        }, []);
-
-        const currentSort =
-          sort === "vote_average.desc" ? "vote_average" : "popularity";
-
-        return filtertingForDirector.sort(
-          (a, b) => b?.[currentSort] - a?.[currentSort]
-        );
-      })
+  const currMoviesByCast = castsQuery
+    ? await fetchPromiseAllQueries(
+        casts,
+        genres,
+        null,
+        "cast",
+        formattingPeriod,
+        exactQuery
+      )
     : [];
 
-  const hasNext = page <= totalPage;
+  const currMoviesByCrew = crewQuery
+    ? await fetchPromiseAllQueries(
+        casts,
+        genres,
+        "Directing",
+        "crew",
+        formattingPeriod,
+        exactQuery
+      )
+    : [];
+
+  const hasNext = page <= totalPage || !genresQuery;
 
   const aggregationPeople = uniqueArray(currMoviesByCast, currMoviesByCrew);
 
   const filterUniqueResult = uniqueArray(
     currMoviesByGeneres,
     aggregationPeople
-  );
+  ).sort((a, b) => b?.[currentSort] - a?.[currentSort]);
+
+  console.log("filterUniqueResult", filterUniqueResult);
 
   return {
     results: filterUniqueResult,
@@ -377,27 +366,33 @@ export async function fetchDetailMovieById(id) {
   });
 }
 
-export async function fetchMoviesByCasts(cast) {
+export async function fetchMoviesByCasts(cast, genres, periods, exactQuery) {
   if (!cast) {
     return null;
   }
 
-  const castsQuery = cast?.id;
+  const { from, to } = JSON.parse(periods);
 
-  const currMoviesByPeople = castsQuery
-    ? await fetchPromise(
-        `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=1&${CURRENT_LANGUAGE}${
-          castsQuery && "&with_cast=" + castsQuery
-        }`
-      ).then((data) => {
-        return data?.results;
-      })
-    : [];
+  const formattingPeriod = {
+    from: dayjs(new Date(from)).format("YYYY-MM-DD"),
+    to: dayjs(new Date(to)).format("YYYY-MM-DD"),
+  };
 
-  const currMoviesByPeopleWithIdCast = currMoviesByPeople.map((c) => {
+  const currCast = [{ id: cast?.id }];
+
+  const currMoviesByCast = await fetchPromiseAllQueries(
+    currCast,
+    genres,
+    null,
+    "cast",
+    formattingPeriod,
+    exactQuery
+  );
+
+  const currMoviesByPeopleWithIdCast = currMoviesByCast.map((c) => {
     return {
       ...c,
-      castId: castsQuery,
+      castId: cast?.id,
     };
   });
 
@@ -434,4 +429,58 @@ async function getRatingMovieById(id) {
     console.error(err);
     return null;
   }
+}
+
+async function fetchPromiseAllQueries(
+  persons,
+  genres,
+  currDepartment,
+  type,
+  periods,
+  exactQuery
+) {
+  const currGenres = genres?.map((g) => g.id);
+
+  const { from, to } = periods;
+
+  const currPerson = currDepartment
+    ? persons?.filter((c) => c.known_for_department === currDepartment)
+    : persons;
+
+  return await Promise.all(
+    currPerson?.map(({ id }) => {
+      return fetchPromise(
+        `https://api.themoviedb.org/3/person/${id}/movie_credits?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+      );
+    })
+  )
+    .then((data) => {
+      const filtertingForDepartment = data?.reduce((prev, curr) => {
+        const onlyDepartment = currDepartment
+          ? curr?.[type].filter((m) => m?.department === currDepartment)
+          : curr?.[type];
+
+        const onlyGenere =
+          Boolean(currGenres.length) && !exactQuery
+            ? onlyDepartment?.filter((od) =>
+                od.genre_ids.some((g) => currGenres.includes(g))
+              )
+            : onlyDepartment;
+
+        const onlyPeriods = onlyGenere?.filter((og) => {
+          const dateToCheck = dayjs(og?.release_date);
+
+          return dateToCheck.isBetween(from, to);
+        });
+
+        return [...prev, ...onlyPeriods];
+      }, []);
+
+      return filtertingForDepartment;
+    })
+    .catch((err) => {
+      console.error(err);
+
+      return [];
+    });
 }
