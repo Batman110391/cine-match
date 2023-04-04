@@ -284,20 +284,14 @@ const ItemRow = memo(RenderRow, areEqual);
 
 function RenderRow({ itemData, handleSelectedItem }) {
   return (
-    <Grid
-      container
-      spacing={{ xs: 1 }}
-      columns={{ xs: 1, sm: 8, md: 12 }}
-      sx={{ overflow: "hidden" }}
-    >
+    <Grid container sx={{ overflow: "hidden" }}>
       <AnimatePresence mode={"popLayout"}>
         {itemData.map((cast, i) => (
           <Grid
             component={motion.div}
             key={cast.id}
-            xs={2}
+            xs={6}
             sm={4}
-            md={4}
             lg={3}
             layout
             animate={{ scale: 1, opacity: 1 }}

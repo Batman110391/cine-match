@@ -62,7 +62,7 @@ export default function DetailMovie({
     (p) => p?.iso_639_1 === "en"
   )?.file_path;
 
-  //console.log("data", data);
+  console.log("data", data);
   // const currProgress = Math.round((progress / duration) * 100);
 
   const handleClickOpenDialogTrailer = () => {
@@ -138,15 +138,7 @@ export default function DetailMovie({
           },
         }}
       >
-        <Grid
-          container
-          spacing={5}
-          component={motion.div}
-          variants={{
-            hidden: { opacity: 0, y: -20 },
-            visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-          }}
-        >
+        <Grid container spacing={5}>
           <Grid item xs={12} sm={8}>
             <Box ref={infoMovieRef}>
               <TypographyAnimated
@@ -194,7 +186,7 @@ export default function DetailMovie({
                     icon={<RottenTomatoes />}
                     label={
                       <Rating
-                        defaultValue={roundToHalf(
+                        value={roundToHalf(
                           detail?.ratings?.find(
                             (r) => r.source === "rottenTomatoes"
                           )?.value
@@ -212,7 +204,7 @@ export default function DetailMovie({
                     icon={<Imdb />}
                     label={
                       <Rating
-                        defaultValue={roundToHalf(
+                        value={roundToHalf(
                           detail?.ratings?.find((r) => r.source === "Imdb")
                             ?.value
                         )}
@@ -228,7 +220,7 @@ export default function DetailMovie({
                   icon={<Tmdb />}
                   label={
                     <Rating
-                      defaultValue={roundToHalf(detail?.vote_average)}
+                      value={roundToHalf(detail?.vote_average)}
                       precision={0.5}
                       readOnly
                     />

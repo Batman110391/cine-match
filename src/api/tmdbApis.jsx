@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import _ from "lodash";
 import { fetchPromise } from "../utils/fetchPromise";
 import { uniqueArray } from "../utils/uniqueArray";
 import isBetween from "dayjs/plugin/isBetween";
@@ -141,7 +142,7 @@ export async function fetchCasts(page, keyword) {
 }
 
 export function fetchGenres() {
-  return new Promise((resolve, _) => resolve(genresList));
+  return new Promise((resolve) => resolve(genresList));
 }
 
 export async function fetchSimilarMoviesByGenres(page, keyword, genres) {
@@ -203,13 +204,11 @@ export async function fetchMovies(
   const castsQuery =
     casts
       ?.filter((c) => c.known_for_department !== "Directing")
-      ?.map((c) => c.id)
-      ?.join(exactQuery ? "," : "|") || null;
+      ?.map((c) => c.id) || null;
   const crewQuery =
     casts
       ?.filter((c) => c.known_for_department === "Directing")
-      ?.map((c) => c.id)
-      ?.join(exactQuery ? "," : "|") || null;
+      ?.map((c) => c.id) || null;
 
   const currentSort =
     sort === "vote_average.desc" ? "vote_average" : "popularity";
@@ -304,7 +303,9 @@ filtri sort
 
   const hasNext = page <= totalPage || !genresQuery;
 
-  const aggregationPeople = uniqueArray(currMoviesByCast, currMoviesByCrew);
+  const aggregationPeople = exactQuery
+    ? _.intersectionWith(currMoviesByCast, currMoviesByCrew, _.isEqual)
+    : uniqueArray(currMoviesByCast, currMoviesByCrew);
 
   const filterUniqueResult = uniqueArray(
     currMoviesByGeneres,

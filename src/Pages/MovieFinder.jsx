@@ -11,6 +11,7 @@ import DialogSettingMovies from "../components/DialogSettingMovies";
 import FloatingActionButton from "../components/FloatingActionButton";
 import LoadingPage from "../components/LoadingPage";
 import TypographyAnimated from "../components/TypographyAnimated";
+import { uniqueArray } from "../utils/uniqueArray";
 
 export default function MovieFinder() {
   const genres = useSelector((state) => state.movieQuery.genres);
@@ -39,7 +40,7 @@ export default function MovieFinder() {
       fetchMovies(pageParam, genres, casts, sort, periods, exactQuery),
   });
 
-  if (status === "loading") return <LoadingPage />;
+  if (status === "loading" || isRefetching) return <LoadingPage />;
   if (status === "error") return <h1>{JSON.stringify(error)}</h1>;
 
   const handleAddMoviesByInsertPeople = () => {
@@ -64,11 +65,11 @@ export default function MovieFinder() {
       };
     }, {});
 
-  const visibleData = movies?.results?.filter((item) =>
-    Boolean(item?.overview)
+  const visibleData = uniqueArray(
+    movies?.results?.filter((item) => Boolean(item?.overview))
   );
 
-  console.log("visible", visibleData);
+  //console.log("visible", visibleData);
 
   //console.log("status", status);
 

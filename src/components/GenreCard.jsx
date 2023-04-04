@@ -29,10 +29,10 @@ export default function GenreCard({ name, bg }) {
           letterSpacing: ".1em",
           textShadow: `-1px -1px 1px #1111116b,
           2px 2px 1px #36363691`,
+          fontSize: { xs: "1rem", md: "1.5rem" },
         }}
         variant="button"
         fontWeight="bold"
-        fontSize="1.5rem"
       >
         {name}
       </Typography>

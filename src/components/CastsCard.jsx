@@ -15,7 +15,7 @@ export default function CastsCard({ known_for_department, name, bg }) {
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center center",
         objectFit: "cover",
-        height: "360px",
+        height: { xs: "240px", sm: "360px" },
         width: "280px",
         display: "flex",
         alignItems: "end",
@@ -48,10 +48,10 @@ export default function CastsCard({ known_for_department, name, bg }) {
           letterSpacing: ".1em",
           textShadow: `-1px -1px 1px #1111116b,
           2px 2px 1px #36363691`,
+          fontSize: { xs: "1rem", md: "1.5rem" },
         }}
         variant="button"
         fontWeight="bold"
-        fontSize="1.5rem"
       >
         {name}
       </Typography>

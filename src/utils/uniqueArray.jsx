@@ -1,4 +1,4 @@
-export function uniqueArray(arr1, arr2) {
+export function uniqueArray(arr1 = [], arr2 = []) {
   const uniqueIds = [];
 
   const filterUniqueResult = [...arr1, ...arr2].filter((element) => {

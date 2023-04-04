@@ -131,16 +131,15 @@ export default function SearchGeneres() {
         <AnimatedTitle text="Seleziona generi" />
       </Box>
       <Box sx={{ overflow: "hidden", pb: 5 }}>
-        <Grid container spacing={{ xs: 1 }} columns={{ xs: 1, sm: 8, md: 12 }}>
+        <Grid container spacing={{ xs: 1 }}>
           <AnimatePresence mode={"popLayout"}>
             {visibleData?.map((genre, i) => {
               return (
                 <Grid
                   component={motion.div}
                   key={genre.id}
-                  xs={2}
+                  xs={6}
                   sm={4}
-                  md={4}
                   lg={3}
                   layout
                   animate={{ scale: 1, opacity: 1 }}
