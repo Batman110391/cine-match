@@ -32,7 +32,7 @@ import Tmdb from "./icons/Tmdb";
 const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
 export default function DetailMovie({
-  id,
+  currentMovie,
   handleAddMoviesByInsertPeople,
   handleRemoveMoviesByInsertPeople,
 }) {
@@ -43,8 +43,9 @@ export default function DetailMovie({
 
   const [infoMovieRef, { height }] = useElementSize();
 
-  const { isLoading, error, data } = useQuery(["detailMovie", id], () =>
-    fetchDetailMovieById(id)
+  const { isLoading, error, data } = useQuery(
+    ["detailMovie", currentMovie],
+    () => fetchDetailMovieById(currentMovie?.id)
   );
 
   if (isLoading)
@@ -62,7 +63,7 @@ export default function DetailMovie({
     (p) => p?.iso_639_1 === "en"
   )?.file_path;
 
-  console.log("data", data);
+  //console.log("data", data);
   // const currProgress = Math.round((progress / duration) * 100);
 
   const handleClickOpenDialogTrailer = () => {
@@ -283,7 +284,7 @@ export default function DetailMovie({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <ChartCompatibility movie={detail} />
+                <ChartCompatibility movie={currentMovie} />
               </Box>
               {detail?.providers?.flatrate && (
                 <Box>
@@ -313,8 +314,8 @@ export default function DetailMovie({
           </Grid>
           <Grid item xs={12} sm={4}>
             <CastListDetail
-              movieId={id}
-              person={detail?.credits?.cast}
+              movieId={currentMovie?.id}
+              person={currentMovie?.credits?.cast}
               height={height}
               handleAddMoviesByInsertPeople={handleAddMoviesByInsertPeople}
               handleRemoveMoviesByInsertPeople={

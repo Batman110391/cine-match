@@ -97,31 +97,19 @@ function ChipGroup({ groups }) {
 }
 
 export default function ChartCompatibility({ movie }) {
-  let progress = 0;
   const prevIdGenred = [];
   const prevIdCast = [];
 
   const genres = useSelector((state) => state.movieQuery.genres);
   const cast = useSelector((state) => state.movieQuery.cast);
 
-  const onlyIdGenres = genres.map((g) => g.id);
   const onlyIdCast = cast.map((c) => c.id);
 
-  const currentGeneresMovie = movie.genres;
   const currentCast = movie?.credits?.cast;
   const currentCrew = movie?.credits?.crew;
 
-  const divideProgress = 100 / (genres.length + cast.length);
-
-  currentGeneresMovie.forEach((item) => {
-    if (onlyIdGenres.includes(item.id) && !prevIdGenred.includes(item.id)) {
-      progress += divideProgress;
-      prevIdGenred.push(item.id);
-    }
-  });
   currentCast.forEach((item) => {
     if (onlyIdCast.includes(item.id) && !prevIdCast.includes(item.id)) {
-      progress += divideProgress;
       prevIdCast.push(item.id);
     }
   });
@@ -131,7 +119,6 @@ export default function ChartCompatibility({ movie }) {
       !prevIdCast.includes(item.id) &&
       item.department === "Directing"
     ) {
-      progress += divideProgress;
       prevIdCast.push(item.id);
     }
   });
@@ -145,7 +132,7 @@ export default function ChartCompatibility({ movie }) {
           variant={"body2"}
           text={`Compatibilità`}
         />
-        <CircularProgressWithLabel from={0} to={Math.round(progress)} />
+        <CircularProgressWithLabel from={0} to={movie?.progress} />
       </Box>
       <Box>
         <Stack gap={1}>

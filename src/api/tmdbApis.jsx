@@ -211,7 +211,11 @@ export async function fetchMovies(
       ?.map((c) => c.id) || null;
 
   const currentSort =
-    sort === "vote_average.desc" ? "vote_average" : "popularity";
+    sort === "vote_average.desc"
+      ? "vote_average"
+      : sort === "compatibility"
+      ? "progress"
+      : "popularity";
 
   //01/01/2000
   //14/03/2023 dayjs(data.to).format("DD/MM/YYYY")
@@ -224,6 +228,9 @@ filtri sort
  release_date.desc, RECENTI
  vote_average.desc, MIGLIOR VOTI
   */
+
+  const isCrew = crewQuery.length > 0;
+  const isCast = castsQuery.length > 0;
 
   let totalPage = 0;
 
@@ -264,21 +271,31 @@ filtri sort
   } */
 
   const currMoviesByGeneres =
-    (!castsQuery && !crewQuery) || (!exactQuery && genresQuery)
+    (!isCast && !isCrew) || (!exactQuery && genresQuery)
       ? await fetchPromise(
           `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}${
             genresQuery && "&with_genres=" + genresQuery
-          }${periodsQueryString}${minVoteCount}&sort_by=${sort}`
-        ).then((data) => {
+          }${periodsQueryString}${minVoteCount}&sort_by=${
+            sort === "compatibility" ? "popularity.desc" : sort
+          }`
+        ).then(async (data) => {
+          const promises = await data?.results?.map(async (op) => {
+            const credits = await fetchPromise(
+              `https://api.themoviedb.org/3/movie/${op.id}/credits?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+            );
+            return { ...op, credits };
+          });
+
+          const filteredResults = await Promise.all(promises);
           if (data?.total_pages > totalPage) {
             totalPage = data.total_pages;
           }
-          return data?.results;
+          return filteredResults;
         })
       : [];
 
   const currMoviesByCast =
-    castsQuery && page == 1
+    isCast && page == 1
       ? await fetchPromiseAllQueries(
           casts,
           genres,
@@ -290,7 +307,7 @@ filtri sort
       : [];
 
   const currMoviesByCrew =
-    crewQuery && page == 1
+    isCrew && page == 1
       ? await fetchPromiseAllQueries(
           casts,
           genres,
@@ -303,19 +320,29 @@ filtri sort
 
   const hasNext = page <= totalPage || !genresQuery;
 
-  const aggregationPeople = exactQuery
-    ? _.intersectionWith(currMoviesByCast, currMoviesByCrew, _.isEqual)
-    : uniqueArray(currMoviesByCast, currMoviesByCrew);
+  const aggregationPeople =
+    exactQuery && isCrew && isCast
+      ? _.intersectionWith(currMoviesByCast, currMoviesByCrew, _.isEqual)
+      : exactQuery && isCast
+      ? currMoviesByCast
+      : exactQuery && isCrew
+      ? currMoviesByCrew
+      : uniqueArray(currMoviesByCast, currMoviesByCrew);
 
   const filterUniqueResult = uniqueArray(
     currMoviesByGeneres,
     aggregationPeople
-  ).sort((a, b) => b?.[currentSort] - a?.[currentSort]);
+  );
 
-  //console.log("filterUniqueResult", filterUniqueResult);
+  const aggregateComaptibility = filterUniqueResult
+    ?.reduce((prev, curr) => {
+      const progress = findCompatibility(curr, genres, casts);
+      return [...prev, { ...curr, progress }];
+    }, [])
+    .sort((a, b) => b?.[currentSort] - a?.[currentSort]);
 
   return {
-    results: filterUniqueResult,
+    results: aggregateComaptibility,
     nextPage: hasNext ? page + 1 : undefined,
     previousPage: page > 1 ? page - 1 : undefined,
   };
@@ -327,10 +354,6 @@ export async function fetchDetailMovieById(id) {
   return fetchPromise(
     `https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
   ).then(async (data) => {
-    const currCreditsMovie = await fetchPromise(
-      `https://api.themoviedb.org/3/movie/${id}/credits?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
-    );
-
     const currImagesMovie = await fetchPromise(
       `https://api.themoviedb.org/3/movie/${id}/images?api_key=${API_KEY}`
     );
@@ -347,7 +370,6 @@ export async function fetchDetailMovieById(id) {
       return {
         ...data,
         videos: currVideosIT,
-        credits: currCreditsMovie,
         images: currImagesMovie,
         providers: currWatchProviders?.results?.["IT"],
         ...(externalRating && { ratings: externalRating.ratings }),
@@ -360,7 +382,6 @@ export async function fetchDetailMovieById(id) {
       return {
         ...data,
         videos: currVideosEN,
-        credits: currCreditsMovie,
         images: currImagesMovie,
         providers: currWatchProviders?.results?.["IT"],
         ...(externalRating && { ratings: externalRating.ratings }),
@@ -457,27 +478,40 @@ async function fetchPromiseAllQueries(
       );
     })
   )
-    .then((data) => {
-      const filtertingForDepartment = data?.reduce((prev, curr) => {
-        const onlyDepartment = currDepartment
-          ? curr?.[type].filter((m) => m?.department === currDepartment)
-          : curr?.[type];
+    .then(async (data) => {
+      const filtertingForDepartment = data?.reduce(
+        async (prevPromise, curr) => {
+          const prev = await prevPromise;
+          const onlyDepartment = currDepartment
+            ? curr?.[type].filter((m) => m?.department === currDepartment)
+            : curr?.[type];
 
-        const onlyGenere =
-          Boolean(currGenres.length) && exactQuery
-            ? onlyDepartment?.filter((od) =>
-                od.genre_ids.some((g) => currGenres.includes(g))
-              )
-            : onlyDepartment;
+          const onlyGenere =
+            Boolean(currGenres.length) && exactQuery
+              ? onlyDepartment?.filter((od) =>
+                  od.genre_ids.some((g) => currGenres.includes(g))
+                )
+              : onlyDepartment;
 
-        const onlyPeriods = onlyGenere?.filter((og) => {
-          const dateToCheck = dayjs(og?.release_date);
+          const onlyPeriods = onlyGenere?.filter((og) => {
+            const dateToCheck = dayjs(og?.release_date);
 
-          return dateToCheck.isBetween(from, to);
-        });
+            return dateToCheck.isBetween(from, to);
+          });
 
-        return [...prev, ...onlyPeriods];
-      }, []);
+          const promises = onlyPeriods?.map(async (op) => {
+            const credits = await fetchPromise(
+              `https://api.themoviedb.org/3/movie/${op.id}/credits?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+            );
+            return { ...op, credits };
+          });
+
+          const filteredResults = await Promise.all(promises);
+
+          return [...prev, ...(filteredResults ?? [])];
+        },
+        Promise.resolve([])
+      );
 
       return filtertingForDepartment;
     })
@@ -486,4 +520,44 @@ async function fetchPromiseAllQueries(
 
       return [];
     });
+}
+
+function findCompatibility(movie, genres, cast) {
+  let progress = 0;
+  const prevIdGenred = [];
+  const prevIdCast = [];
+
+  const onlyIdGenres = genres.map((g) => g.id);
+  const onlyIdCast = cast.map((c) => c.id);
+
+  const currentGeneresMovie = movie.genre_ids;
+  const currentCast = movie?.credits?.cast;
+  const currentCrew = movie?.credits?.crew;
+
+  const divideProgress = 100 / (genres.length + cast.length);
+
+  currentGeneresMovie.forEach((item) => {
+    if (onlyIdGenres.includes(item) && !prevIdGenred.includes(item)) {
+      progress += divideProgress;
+      prevIdGenred.push(item);
+    }
+  });
+  currentCast.forEach((item) => {
+    if (onlyIdCast.includes(item.id) && !prevIdCast.includes(item.id)) {
+      progress += divideProgress;
+      prevIdCast.push(item.id);
+    }
+  });
+  currentCrew.forEach((item) => {
+    if (
+      onlyIdCast.includes(item.id) &&
+      !prevIdCast.includes(item.id) &&
+      item.department === "Directing"
+    ) {
+      progress += divideProgress;
+      prevIdCast.push(item.id);
+    }
+  });
+
+  return Math.round(progress);
 }

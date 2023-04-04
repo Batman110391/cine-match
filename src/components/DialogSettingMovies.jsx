@@ -38,6 +38,7 @@ import { useEffect } from "react";
 const ORDERS = [
   { name: "Popolarità", label: "popularity.desc" },
   { name: "Voto", label: "vote_average.desc" },
+  { name: "Compatibilità", label: "compatibility" },
 ];
 
 const Transition = React.forwardRef(function Transition(props, ref) {

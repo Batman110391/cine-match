@@ -39,8 +39,8 @@ export default function CastListDetail({
       exit={{ opacity: 0 }}
       sx={{
         width: "100%",
-        maxHeight: height ? `${height}px` : "50vh",
-        overflowY: "auto",
+        maxHeight: { xs: "inherit", sm: height ? `${height}px` : "50vh" },
+        overflowY: { xs: "inherit", sm: "auto" },
       }}
       subheader={<ListSubheader>Cast</ListSubheader>}
     >

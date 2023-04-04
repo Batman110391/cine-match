@@ -177,7 +177,7 @@ export default function MovieFinder() {
             >
               {currentMovie && visibleData.length > 0 && (
                 <DetailMovie
-                  id={currentMovie?.id}
+                  currentMovie={currentMovie}
                   changeFilters={changeFilters}
                   reInitzialize={isRefetching}
                   handleAddMoviesByInsertPeople={handleAddMoviesByInsertPeople}
