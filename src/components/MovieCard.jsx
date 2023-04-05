@@ -9,6 +9,7 @@ export default function MovieCard({ title, bg, selected }) {
         backgroundImage: `url(http://image.tmdb.org/t/p/w500${bg})`,
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
+        backgroundPosition: "center center",
         height: "200px",
         width: "133px",
         display: "flex",

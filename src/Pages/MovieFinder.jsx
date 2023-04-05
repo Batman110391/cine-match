@@ -40,7 +40,7 @@ export default function MovieFinder() {
       fetchMovies(pageParam, genres, casts, sort, periods, exactQuery),
   });
 
-  if (status === "loading" || isRefetching) return <LoadingPage />;
+  if (status === "loading") return <LoadingPage />;
   if (status === "error") return <h1>{JSON.stringify(error)}</h1>;
 
   const handleAddMoviesByInsertPeople = () => {
@@ -69,7 +69,7 @@ export default function MovieFinder() {
     movies?.results?.filter((item) => Boolean(item?.overview))
   );
 
-  //console.log("visible", visibleData);
+  console.log("visible", visibleData);
 
   //console.log("status", status);
 
