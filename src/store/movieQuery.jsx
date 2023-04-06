@@ -11,6 +11,7 @@ export const initialState = {
     to: new Date(),
     error: false,
   }),
+  notifications: { casts: [], genres: [], value: 0 },
 };
 
 export const movieQuerySlice = createSlice({

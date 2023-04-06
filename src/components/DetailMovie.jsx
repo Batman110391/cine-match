@@ -69,8 +69,6 @@ export default function DetailMovie({
     (c) => c.department === "Directing"
   );
 
-  console.log("direct", director);
-
   //console.log("data", data);
   // const currProgress = Math.round((progress / duration) * 100);
 

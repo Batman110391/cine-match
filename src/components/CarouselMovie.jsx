@@ -15,8 +15,7 @@ export default function CarouselMovie({
   setBgWrapperIndex,
   hasNextPage,
   fetchNextPage,
-  initzializeSwiper = 0,
-  isLoading,
+  changeFilters,
 }) {
   const swiperRef = useRef(null);
   const theme = useTheme();
@@ -33,7 +32,7 @@ export default function CarouselMovie({
     swiperRef?.current?.swiper?.slideTo(0);
     setBgWrapperIndex(0);
     setCurrentSlide(0);
-  }, [initzializeSwiper]);
+  }, [changeFilters]);
 
   return (
     <Swiper

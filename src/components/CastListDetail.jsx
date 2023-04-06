@@ -23,12 +23,12 @@ export default function CastListDetail({
 
   const handleAddPerson = (value) => {
     dispatch(setQuery({ cast: [...cast, value] }));
-    handleAddMoviesByInsertPeople(movieId);
+    handleAddMoviesByInsertPeople(value);
   };
   const handleRemovePerson = (value) => {
     const newCast = cast.filter((c) => c.id !== value.id);
     dispatch(setQuery({ cast: newCast }));
-    handleRemoveMoviesByInsertPeople(movieId);
+    handleRemoveMoviesByInsertPeople(value);
   };
 
   return (

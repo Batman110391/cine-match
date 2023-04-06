@@ -1,10 +1,11 @@
 import SettingsIcon from "@mui/icons-material/Settings";
+import _ from "lodash";
 import TuneIcon from "@mui/icons-material/Tune";
 import { alpha, Box, Card, Stack, Typography } from "@mui/material";
 import { motion } from "framer-motion";
 import React, { useState } from "react";
 import { useInfiniteQuery } from "react-query";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { fetchMovies } from "../api/tmdbApis";
 import CarouselMovie from "../components/CarouselMovie";
 import DetailMovie from "../components/DetailMovie";
@@ -14,18 +15,28 @@ import LoadingPage from "../components/LoadingPage";
 import TypographyAnimated from "../components/TypographyAnimated";
 import { uniqueArray } from "../utils/uniqueArray";
 import CarouselMovieMobile from "../components/CarouselMovieMobile";
+import { setQuery } from "../store/movieQuery";
 
 export default function MovieFinder() {
+  const dispatch = useDispatch();
+
   const genres = useSelector((state) => state.movieQuery.genres);
   const casts = useSelector((state) => state.movieQuery.cast);
   const sort = useSelector((state) => state.movieQuery.sort);
   const periods = useSelector((state) => state.movieQuery.rangeDate);
   const exactQuery = useSelector((state) => state.movieQuery.exactQuery);
+  const notification = useSelector((state) => state.movieQuery.notifications);
 
   const [bgWrapperIndex, setBgWrapperIndex] = useState(0);
   const [openSettingMovie, setOpenSettingMovie] = useState(false);
   const [changeFilters, setChangeFilters] = useState(false);
   const [initzializeSwiper, setInitzializeSwiper] = useState(0);
+
+  /* const [notification, setNotifications] = useState({
+    casts: [],
+    genres: [],
+    value: 0,
+  }); */
 
   const {
     status,
@@ -46,15 +57,44 @@ export default function MovieFinder() {
   if (status === "loading") return <LoadingPage />;
   if (status === "error") return <h1>{JSON.stringify(error)}</h1>;
 
-  const handleAddMoviesByInsertPeople = () => {
-    refetch({ pageParam: 1 });
+  const handleAddMoviesByInsertPeople = (obj) => {
+    if (!notification.casts.find((n) => n.id === obj.id)) {
+      const newNotifications = {
+        ...notification,
+        casts: [...notification.casts, obj],
+        value: notification.value + 1,
+      };
 
-    setChangeFilters(!changeFilters);
+      dispatch(setQuery({ notifications: newNotifications }));
+    } else {
+      const newNotifications = {
+        ...notification,
+        value: notification.value - 1,
+      };
+
+      dispatch(setQuery({ notifications: newNotifications }));
+    }
   };
-  const handleRemoveMoviesByInsertPeople = () => {
-    refetch({ pageParam: 1 });
+  const handleRemoveMoviesByInsertPeople = (obj) => {
+    if (notification.casts.find((n) => n.id === obj.id)) {
+      const newCasts = notification.casts.filter((n) => n.id !== obj.id);
 
-    setChangeFilters(!changeFilters);
+      const newNotifications = {
+        ...notification,
+        casts: newCasts,
+        value: newCasts.length,
+      };
+
+      dispatch(setQuery({ notifications: newNotifications }));
+    } else {
+      const newNotifications = {
+        ...notification,
+        casts: [...notification.casts, obj],
+        value: notification.value + 1,
+      };
+
+      dispatch(setQuery({ notifications: newNotifications }));
+    }
   };
 
   const movies = data?.pages
@@ -71,6 +111,8 @@ export default function MovieFinder() {
   const visibleData = uniqueArray(
     movies?.results?.filter((item) => Boolean(item?.overview))
   );
+
+  const countChangeParams = notification.value;
 
   console.log("visible", visibleData);
 
@@ -147,8 +189,7 @@ export default function MovieFinder() {
               setBgWrapperIndex={setBgWrapperIndex}
               hasNextPage={hasNextPage}
               fetchNextPage={fetchNextPage}
-              initzializeSwiper={initzializeSwiper}
-              isLoading={isRefetching}
+              changeFilters={changeFilters}
             />
           </Box>
           <Box
@@ -180,8 +221,6 @@ export default function MovieFinder() {
               {currentMovie && visibleData.length > 0 && (
                 <DetailMovie
                   currentMovie={currentMovie}
-                  changeFilters={changeFilters}
-                  reInitzialize={isRefetching}
                   handleAddMoviesByInsertPeople={handleAddMoviesByInsertPeople}
                   handleRemoveMoviesByInsertPeople={
                     handleRemoveMoviesByInsertPeople
@@ -195,6 +234,7 @@ export default function MovieFinder() {
       <DialogSettingMovies
         open={openSettingMovie}
         setOpen={setOpenSettingMovie}
+        isChangeQuery={countChangeParams > 0}
         changeFilters={changeFilters}
         setChangeFilters={setChangeFilters}
         refetchPagination={refetch}
@@ -204,6 +244,7 @@ export default function MovieFinder() {
         position={"right"}
         size={"large"}
         sx={{ padding: 0 }}
+        badgeContent={countChangeParams}
       >
         <TuneIcon fontSize="large" color="action" />
       </FloatingActionButton>
