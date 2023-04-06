@@ -1,5 +1,6 @@
 import SettingsIcon from "@mui/icons-material/Settings";
-import { alpha, Box, Card } from "@mui/material";
+import TuneIcon from "@mui/icons-material/Tune";
+import { alpha, Box, Card, Stack, Typography } from "@mui/material";
 import { motion } from "framer-motion";
 import React, { useState } from "react";
 import { useInfiniteQuery } from "react-query";
@@ -12,6 +13,7 @@ import FloatingActionButton from "../components/FloatingActionButton";
 import LoadingPage from "../components/LoadingPage";
 import TypographyAnimated from "../components/TypographyAnimated";
 import { uniqueArray } from "../utils/uniqueArray";
+import CarouselMovieMobile from "../components/CarouselMovieMobile";
 
 export default function MovieFinder() {
   const genres = useSelector((state) => state.movieQuery.genres);
@@ -23,6 +25,7 @@ export default function MovieFinder() {
   const [bgWrapperIndex, setBgWrapperIndex] = useState(0);
   const [openSettingMovie, setOpenSettingMovie] = useState(false);
   const [changeFilters, setChangeFilters] = useState(false);
+  const [initzializeSwiper, setInitzializeSwiper] = useState(0);
 
   const {
     status,
@@ -75,6 +78,8 @@ export default function MovieFinder() {
 
   const currentMovie = visibleData[bgWrapperIndex];
 
+  const testMobile = false;
+
   return (
     <Box
       component={motion.div}
@@ -89,20 +94,7 @@ export default function MovieFinder() {
         width: "100%",
         height: "100%",
         position: "relative",
-        "&:after": {
-          content: "''",
-          backgroundImage: (theme) => theme.palette.gradient.opacityBgBottom,
-          backgroundRepeat: "no-repeat",
-          display: "block",
-          height: "100%",
-          left: "50%",
-          pointerEvents: "none",
-          position: "absolute",
-          top: 0,
-          transform: "translateX(-50%)",
-          width: "100%",
-          zIndex: 0,
-        },
+
         "&:before": {
           content: "''",
           backgroundImage: `url(http://image.tmdb.org/t/p/original${currentMovie?.backdrop_path})`,
@@ -114,7 +106,7 @@ export default function MovieFinder() {
           right: "0px",
           bottom: "0px",
           left: "0px",
-          opacity: 0.35,
+          opacity: 0.25,
           transition: "background-image 0.8s cubic-bezier(0, 0.71, 0.2, 1.01)",
         },
       }}
@@ -136,6 +128,17 @@ export default function MovieFinder() {
             text={"Nessun contenuto presente"}
           />
         </Box>
+      ) : testMobile ? (
+        <Box sx={{ width: "100%", height: "100%" }}>
+          <CarouselMovieMobile
+            slides={visibleData}
+            setBgWrapperIndex={setBgWrapperIndex}
+            hasNextPage={hasNextPage}
+            fetchNextPage={fetchNextPage}
+            initzializeSwiper={initzializeSwiper}
+            isLoading={isRefetching}
+          />
+        </Box>
       ) : (
         <>
           <Box sx={{ width: "100%" }}>
@@ -144,7 +147,7 @@ export default function MovieFinder() {
               setBgWrapperIndex={setBgWrapperIndex}
               hasNextPage={hasNextPage}
               fetchNextPage={fetchNextPage}
-              initzializeSwiper={changeFilters}
+              initzializeSwiper={initzializeSwiper}
               isLoading={isRefetching}
             />
           </Box>
@@ -169,8 +172,7 @@ export default function MovieFinder() {
                   alpha(theme.palette.background.paper, 0.8),
                 width: "100%",
                 height: "100%",
-                minHeight: { xs: "100vh", sm: "50vh" },
-                borderRadius: { sx: "0%", sm: "2%" },
+                minHeight: { xs: "100vh", sm: "85vh" },
                 my: 3,
                 marginBottom: { xs: 0, sm: 3 },
               }}
@@ -203,7 +205,7 @@ export default function MovieFinder() {
         size={"large"}
         sx={{ padding: 0 }}
       >
-        <SettingsIcon fontSize="large" color="action" />
+        <TuneIcon fontSize="large" color="action" />
       </FloatingActionButton>
     </Box>
   );

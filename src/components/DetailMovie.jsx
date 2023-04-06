@@ -28,6 +28,8 @@ import CastListDetail from "./CastListDetail";
 import ChartCompatibility from "./ChartCompatibility";
 import TypographyAnimated from "./TypographyAnimated";
 import Tmdb from "./icons/Tmdb";
+import AddIcon from "@mui/icons-material/Add";
+import RemoveIcon from "@mui/icons-material/Remove";
 
 const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
@@ -62,6 +64,12 @@ export default function DetailMovie({
   const bgContainerPoster = detail?.images?.logos?.find(
     (p) => p?.iso_639_1 === "en"
   )?.file_path;
+
+  const director = currentMovie?.credits?.crew?.find(
+    (c) => c.department === "Directing"
+  );
+
+  console.log("direct", director);
 
   //console.log("data", data);
   // const currProgress = Math.round((progress / duration) * 100);
@@ -144,20 +152,42 @@ export default function DetailMovie({
             <Box ref={infoMovieRef}>
               <TypographyAnimated
                 component={"div"}
-                sx={{ mb: 1, fontSize: "1.2rem" }}
+                sx={{ fontSize: "1.2rem", mb: 2 }}
                 variant={"h6"}
-                animate={"visible"}
-                text={
-                  detail?.title +
-                  " (" +
-                  detail?.release_date?.substring(0, 4) +
-                  ")"
-                }
+                text={detail?.title}
               />
-
+              <Stack flexDirection={"row"} alignItems={"center"} gap={1}>
+                <TypographyAnimated
+                  component={"div"}
+                  sx={{ fontSize: "0.7rem" }}
+                  variant={"button"}
+                  text={`${detail?.release_date?.substring(
+                    0,
+                    4
+                  )} - diretto da `}
+                />
+                <Chip
+                  key={director.id}
+                  variant="outlined"
+                  avatar={
+                    director?.profile_path ? (
+                      <Avatar
+                        alt={director.name}
+                        src={`http://image.tmdb.org/t/p/w500${director.profile_path}`}
+                      />
+                    ) : (
+                      <Avatar>{director.name.charAt(0)}</Avatar>
+                    )
+                  }
+                  label={director.name}
+                  deleteIcon={<AddIcon />}
+                  onDelete={() => console.log("hi")}
+                />
+              </Stack>
               <TypographyAnimated
                 component={"div"}
                 variant={"body2"}
+                sx={{ mt: 2 }}
                 text={
                   <Highlighter
                     searchWords={genres?.map((g) => g.name)}

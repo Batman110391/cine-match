@@ -75,7 +75,7 @@ function CircularProgressWithLabel({ from, to }) {
   );
 }
 
-function ChipGroup({ groups }) {
+function ChipGroup({ groups, ...rest }) {
   return (
     <Stack direction="row" flexWrap={"wrap"} gap={1}>
       {groups &&
@@ -90,7 +90,14 @@ function ChipGroup({ groups }) {
             <Avatar>{item.name.charAt(0)}</Avatar>
           );
 
-          return <Chip key={item.id} avatar={existPath} label={item.name} />;
+          return (
+            <Chip
+              key={item.id}
+              avatar={existPath}
+              label={item.name}
+              {...rest}
+            />
+          );
         })}
     </Stack>
   );
@@ -103,10 +110,18 @@ export default function ChartCompatibility({ movie }) {
   const genres = useSelector((state) => state.movieQuery.genres);
   const cast = useSelector((state) => state.movieQuery.cast);
 
+  const onlyIdGenres = genres.map((g) => g.id);
   const onlyIdCast = cast.map((c) => c.id);
 
+  const currentGeneresMovie = movie.genre_ids;
   const currentCast = movie?.credits?.cast;
   const currentCrew = movie?.credits?.crew;
+
+  currentGeneresMovie.forEach((item) => {
+    if (onlyIdGenres.includes(item) && !prevIdGenred.includes(item)) {
+      prevIdGenred.push(item);
+    }
+  });
 
   currentCast.forEach((item) => {
     if (onlyIdCast.includes(item.id) && !prevIdCast.includes(item.id)) {
