@@ -51,7 +51,7 @@ export default function CarouselMovie({
         paddingTop: "55px",
       }}
       onReachEnd={handleReachEnd}
-      onSlideChange={(e) => setCurrentSlide(e.realIndex)}
+      onSlideChange={(e) => setCurrentSlide(e.activeIndex)}
       onTransitionEnd={(e) => setBgWrapperIndex(e.realIndex)}
       watchSlidesProgress={true}
       breakpoints={{

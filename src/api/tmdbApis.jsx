@@ -392,8 +392,6 @@ export async function fetchDetailMovieById(id) {
       ])
     );
 
-    console.log("resources", resources);
-
     if (resources.videos?.results?.length > 0) {
       return {
         ...data,

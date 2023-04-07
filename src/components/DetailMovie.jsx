@@ -17,7 +17,7 @@ import React, { useState } from "react";
 import Highlighter from "react-highlight-words";
 import YouTubePlayer from "react-player/youtube";
 import { useQuery } from "react-query";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { fetchDetailMovieById } from "../api/tmdbApis";
 import Imdb from "../components/icons/Imdb";
 import RottenTomatoes from "../components/icons/RottenTomatoes";
@@ -30,6 +30,8 @@ import TypographyAnimated from "./TypographyAnimated";
 import Tmdb from "./icons/Tmdb";
 import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
+import dayjs from "dayjs";
+import { setQuery } from "../store/movieQuery";
 
 const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
@@ -38,10 +40,13 @@ export default function DetailMovie({
   handleAddMoviesByInsertPeople,
   handleRemoveMoviesByInsertPeople,
 }) {
+  const dispatch = useDispatch();
+
   const [mute, setMute] = useState(true);
   const [openTrailerDialog, setOpenTrailerDialog] = React.useState(false);
 
   const genres = useSelector((state) => state.movieQuery.genres);
+  const cast = useSelector((state) => state.movieQuery.cast);
 
   const [infoMovieRef, { height }] = useElementSize();
 
@@ -69,8 +74,20 @@ export default function DetailMovie({
     (c) => c.department === "Directing"
   );
 
-  console.log("data", data);
+  const existDirector = cast.find((c) => c.id === director.id);
+
+  //console.log("data", data);
   // const currProgress = Math.round((progress / duration) * 100);
+
+  const handleAddPerson = (value) => {
+    dispatch(setQuery({ cast: [...cast, value] }));
+    handleAddMoviesByInsertPeople(value);
+  };
+  const handleRemovePerson = (value) => {
+    const newCast = cast.filter((c) => c.id !== value.id);
+    dispatch(setQuery({ cast: newCast }));
+    handleRemoveMoviesByInsertPeople(value);
+  };
 
   const handleClickOpenDialogTrailer = () => {
     setOpenTrailerDialog(true);
@@ -166,6 +183,10 @@ export default function DetailMovie({
                 />
                 <Chip
                   key={director.id}
+                  component={motion.div}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   variant="outlined"
                   avatar={
                     director?.profile_path ? (
@@ -178,14 +199,31 @@ export default function DetailMovie({
                     )
                   }
                   label={director.name}
-                  deleteIcon={<AddIcon />}
-                  onDelete={() => console.log("hi")}
+                  deleteIcon={existDirector ? <RemoveIcon /> : <AddIcon />}
+                  onDelete={
+                    existDirector
+                      ? () => handleRemovePerson(director)
+                      : () => handleAddPerson(director)
+                  }
                 />
               </Stack>
               <TypographyAnimated
                 component={"div"}
+                sx={{ fontSize: "0.6rem" }}
+                variant={"button"}
+                color={"text.secondary"}
+                text={`distibuito in italia - ${
+                  detail?.releaseIT?.release_date
+                    ? dayjs(detail?.releaseIT?.release_date).format(
+                        "DD-MM-YYYY"
+                      )
+                    : "non definito"
+                }`}
+              />
+              <TypographyAnimated
+                component={"div"}
                 variant={"body2"}
-                sx={{ mt: 2 }}
+                sx={{ mt: 1 }}
                 text={
                   <Highlighter
                     searchWords={genres?.map((g) => g.name)}
