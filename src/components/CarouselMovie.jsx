@@ -22,11 +22,19 @@ export default function CarouselMovie({
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
-  useEffect(() => {
+  const handleReachEnd = () => {
+    console.log("Siamo arrivati all'ultima slide!");
+    // eseguire altre operazioni quando si raggiunge l'ultima slide
+    if (hasNextPage) {
+      fetchNextPage();
+    }
+  };
+
+  /*   useEffect(() => {
     if (slides && currentSlide >= slides?.length - 5 && hasNextPage) {
       fetchNextPage();
     }
-  }, [currentSlide]);
+  }, [currentSlide]); */
 
   useEffect(() => {
     swiperRef?.current?.swiper?.slideTo(0);
@@ -42,6 +50,7 @@ export default function CarouselMovie({
         height: "290px",
         paddingTop: "55px",
       }}
+      onReachEnd={handleReachEnd}
       onSlideChange={(e) => setCurrentSlide(e.realIndex)}
       onTransitionEnd={(e) => setBgWrapperIndex(e.realIndex)}
       watchSlidesProgress={true}

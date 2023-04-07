@@ -354,24 +354,55 @@ export async function fetchDetailMovieById(id) {
   return fetchPromise(
     `https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
   ).then(async (data) => {
-    const currImagesMovie = await fetchPromise(
-      `https://api.themoviedb.org/3/movie/${id}/images?api_key=${API_KEY}`
+    const resourcesAll = [
+      {
+        name: "images",
+        api: fetchPromise(
+          `https://api.themoviedb.org/3/movie/${id}/images?api_key=${API_KEY}`
+        ),
+      },
+      {
+        name: "providers",
+        api: fetchPromise(
+          `https://api.themoviedb.org/3/movie/${id}/watch/providers?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+        ),
+      },
+      {
+        name: "videos",
+        api: fetchPromise(
+          `https://api.themoviedb.org/3/movie/${id}/videos?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+        ),
+      },
+      {
+        name: "releaseIT",
+        api: fetchPromise(
+          `https://api.themoviedb.org/3/movie/${id}/release_dates?api_key=${API_KEY}`
+        ),
+      },
+    ];
+
+    const aggregationResources = await Promise.all(
+      resourcesAll.map((r) => r.api)
     );
 
-    const currWatchProviders = await fetchPromise(
-      `https://api.themoviedb.org/3/movie/${id}/watch/providers?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+    const resources = Object.fromEntries(
+      aggregationResources.map((resource, index) => [
+        resourcesAll[index].name,
+        resource,
+      ])
     );
 
-    const currVideosIT = await fetchPromise(
-      `https://api.themoviedb.org/3/movie/${id}/videos?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
-    );
+    console.log("resources", resources);
 
-    if (currVideosIT?.results?.length > 0) {
+    if (resources.videos?.results?.length > 0) {
       return {
         ...data,
-        videos: currVideosIT,
-        images: currImagesMovie,
-        providers: currWatchProviders?.results?.["IT"],
+        videos: resources.videos,
+        images: resources.images,
+        providers: resources.providers?.results?.["IT"],
+        releaseIT: resources.releaseIT?.results?.find(
+          (release) => release.iso_3166_1 === "IT"
+        )?.release_dates?.[0],
         ...(externalRating && { ratings: externalRating.ratings }),
       };
     } else {
@@ -382,8 +413,11 @@ export async function fetchDetailMovieById(id) {
       return {
         ...data,
         videos: currVideosEN,
-        images: currImagesMovie,
-        providers: currWatchProviders?.results?.["IT"],
+        images: resources.images,
+        providers: resources.providers?.results?.["IT"],
+        releaseIT: resources.releaseIT?.results?.find(
+          (release) => release.iso_3166_1 === "IT"
+        )?.release_dates?.[0],
         ...(externalRating && { ratings: externalRating.ratings }),
       };
     }

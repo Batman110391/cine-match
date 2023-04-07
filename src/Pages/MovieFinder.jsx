@@ -108,9 +108,7 @@ export default function MovieFinder() {
       };
     }, {});
 
-  const visibleData = uniqueArray(
-    movies?.results?.filter((item) => Boolean(item?.overview))
-  );
+  const visibleData = uniqueArray(movies?.results);
 
   const countChangeParams = notification.value;
 
