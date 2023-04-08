@@ -30,11 +30,11 @@ export default function CarouselMovie({
     }
   };
 
-  /*   useEffect(() => {
+  useEffect(() => {
     if (slides && currentSlide >= slides?.length - 5 && hasNextPage) {
       fetchNextPage();
     }
-  }, [currentSlide]); */
+  }, [currentSlide]);
 
   useEffect(() => {
     swiperRef?.current?.swiper?.slideTo(0);
@@ -50,11 +50,11 @@ export default function CarouselMovie({
         height: "290px",
         paddingTop: "55px",
       }}
-      onReachEnd={handleReachEnd}
-      onSlideChange={(e) => setCurrentSlide(e.activeIndex)}
+      //onReachEnd={handleReachEnd}
+      onSlideChange={(e) => setCurrentSlide(e.realIndex)}
       onTransitionEnd={(e) => setBgWrapperIndex(e.realIndex)}
       watchSlidesProgress={true}
-      breakpoints={{
+      /* breakpoints={{
         // quando la larghezza della finestra è >= 320px
         320: {
           slidesPerView: 3,
@@ -83,9 +83,10 @@ export default function CarouselMovie({
         1300: {
           slidesPerView: 9,
         },
-      }}
+      }} */
       //effect={"coverflow"}
       grabCursor={true}
+      slidesPerView={"auto"}
       centeredSlides={true}
       navigation={useMediaQuery(theme.breakpoints.up("sm")) ? true : false}
       keyboard={{
@@ -103,8 +104,8 @@ export default function CarouselMovie({
       }}
       //loop={true}
       spaceBetween={10}
-      virtual
-      modules={[Pagination, Navigation, Keyboard, Virtual]}
+      //virtual
+      modules={[Pagination, Navigation, Keyboard]}
       /* virtual={{
         cache: true,
         addSlidesBefore: 4,

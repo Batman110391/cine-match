@@ -12,11 +12,12 @@ import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import PropTypes from "prop-types";
 import * as React from "react";
-import { useInfiniteQuery } from "react-query";
+import { useInfiniteQuery, useQuery } from "react-query";
 import { useSelector } from "react-redux";
 import { VariableSizeList } from "react-window";
-import { fetchCasts } from "../api/tmdbApis";
+import { fetchCasts, fetchCastsByKey } from "../api/tmdbApis";
 import LoadingPage from "./LoadingPage";
+import { useState } from "react";
 
 const LISTBOX_PADDING = 8; // px
 
@@ -82,7 +83,7 @@ const ListboxComponent = React.forwardRef(function ListboxComponent(
   const [lastvisibleIndex, setLastVisibleIndex] = React.useState(0);
   const { children, ...other } = props;
 
-  const { fetchNextPage, isFetchingNextPage, hasNextPage } = other;
+  //const { fetchNextPage, hasNextPage } = other;
 
   const itemData = [];
   children.forEach((item) => {
@@ -102,8 +103,8 @@ const ListboxComponent = React.forwardRef(function ListboxComponent(
   };
 
   const getHeight = () => {
-    if (itemCount > 8) {
-      return 8 * itemSize;
+    if (itemCount > 4) {
+      return 4 * itemSize;
     }
     return itemData.map(getChildSize).reduce((a, b) => a + b, 0);
   };
@@ -114,7 +115,7 @@ const ListboxComponent = React.forwardRef(function ListboxComponent(
     setLastVisibleIndex(visibleStopIndex);
   }
 
-  function onScroll({
+  /*   function onScroll({
     scrollDirection,
     scrollOffset,
     scrollUpdateWasRequested,
@@ -131,7 +132,7 @@ const ListboxComponent = React.forwardRef(function ListboxComponent(
     ) {
       fetchNextPage();
     }
-  }
+  } */
 
   return (
     <div ref={ref}>
@@ -140,7 +141,7 @@ const ListboxComponent = React.forwardRef(function ListboxComponent(
           itemData={itemData}
           height={getHeight() + 2 * LISTBOX_PADDING}
           width="100%"
-          onScroll={onScroll}
+          //onScroll={onScroll}
           onItemsRendered={onItemsRendered}
           ref={gridRef}
           outerElementType={OuterElementType}
@@ -160,56 +161,65 @@ ListboxComponent.propTypes = {
   children: PropTypes.node,
 };
 
-const StyledPopper = styled(Popper)({
-  [`& .${autocompleteClasses.listbox}`]: {
-    boxSizing: "border-box",
-    "& ul": {
-      padding: 0,
-      margin: 0,
-    },
-  },
-});
+const PopperMy = function (props) {
+  return (
+    <Popper
+      {...props}
+      sx={{
+        [`& .${autocompleteClasses.listbox}`]: {
+          boxSizing: "border-box",
+          "& ul": {
+            padding: 0,
+            margin: 0,
+          },
+        },
+      }}
+      placement="top"
+    />
+  );
+};
 
 export default function AutocompleteCastSetting({
   selectedItemsCasts,
   setSelectedItemsCasts,
 }) {
-  const {
+  const [keywordSearchInput, setKeywordSearchInput] = useState("");
+
+  /*   const {
     status,
     error,
     data,
-    isFetchingNextPage,
+    isLoading,
     hasNextPage,
     fetchNextPage,
   } = useInfiniteQuery({
     queryKey: ["cast"],
     getNextPageParam: (prevData) => prevData.nextPage,
     queryFn: ({ pageParam = 1 }) => fetchCasts(pageParam),
-  });
+  }); */
 
-  if (status === "loading") return <LoadingPage />;
-  if (status === "error") return <h1>{JSON.stringify(error)}</h1>;
-
-  const cast = data?.pages
-    ?.flatMap((data) => data)
-    .reduce((prev, curr) => {
-      return {
-        ...curr,
-        results: prev?.results
-          ? prev.results.concat(curr.results)
-          : curr.results,
-      };
-    }, {});
-
-  const visibleData = cast?.results?.filter(
-    (item) => !selectedItemsCasts?.find((sItem) => sItem.id === item.id)
+  const { isLoading, error, data } = useQuery(
+    ["castByKey", keywordSearchInput],
+    () => fetchCastsByKey(keywordSearchInput)
   );
 
-  const itemData = {
+  if (error) return <h1>{JSON.stringify(error)}</h1>;
+  /*
+  if (status === "loading") return <LoadingPage />;
+  if (status === "error") return <h1>{JSON.stringify(error)}</h1>; */
+
+  const cast = data;
+
+  const visibleData =
+    cast?.filter(
+      (item) => !selectedItemsCasts?.find((sItem) => sItem.id === item.id)
+    ) || [];
+
+  /*   const itemData = {
     fetchNextPage,
-    isFetchingNextPage,
+    isLoading,
     hasNextPage,
-  };
+  }; */
 
   const handleChange = (value) => {
     setSelectedItemsCasts(value);
@@ -221,21 +231,29 @@ export default function AutocompleteCastSetting({
     setSelectedItemsCasts(newSelectedItems);
   };
 
+  const handleChangeInput = (e) => {
+    const keyword = e.target.value;
+
+    setKeywordSearchInput(keyword);
+  };
+
+  console.log("keywordSearchInput", keywordSearchInput);
   return (
     <Autocomplete
       multiple
       id="tags-outlined"
       disableListWrap
-      PopperComponent={StyledPopper}
+      PopperComponent={PopperMy}
       ListboxComponent={ListboxComponent}
-      ListboxProps={itemData}
+      //ListboxProps={itemData}
       options={visibleData}
-      loading={isFetchingNextPage}
+      loading={isLoading}
       getOptionLabel={(option) => option.name}
       value={selectedItemsCasts}
       onChange={(event, newValue) => {
         handleChange(newValue);
       }}
+      onInputChange={handleChangeInput}
       filterSelectedOptions
       renderTags={(value, getTagProps) => {
         return value.map((option, index) => {

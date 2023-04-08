@@ -13,7 +13,7 @@ export default function MovieCard({ title, bg, selected }) {
         height: "200px",
         width: "133px",
         display: "flex",
-        alignItems: "end",
+        alignItems: "center",
         justifyContent: "center",
         border: "1px solid #ffffff70",
         transform: selected ? "scale(1.3)" : "scale(1)",
@@ -26,13 +26,12 @@ export default function MovieCard({ title, bg, selected }) {
             mb: 1,
             textAlign: "center",
             userSelect: "none",
-            letterSpacing: ".1em",
             textShadow: `-1px -1px 1px #1111116b,
           2px 2px 1px #36363691`,
           }}
           variant="button"
           fontWeight="bold"
-          fontSize="1.5rem"
+          fontSize="0.7rem"
         >
           {title}
         </Typography>

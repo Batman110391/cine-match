@@ -6,6 +6,7 @@ export default function TypographyAnimated({
   component,
   variants,
   text,
+  gutterBottom,
   ...rest
 }) {
   return (
@@ -14,6 +15,7 @@ export default function TypographyAnimated({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+      sx={gutterBottom && { mb: 1 }}
     >
       <Typography variant={component} {...rest}>
         {text}

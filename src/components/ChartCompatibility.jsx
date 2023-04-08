@@ -103,12 +103,10 @@ function ChipGroup({ groups, ...rest }) {
   );
 }
 
-export default function ChartCompatibility({ movie }) {
+export default function ChartCompatibility({ movie, cast, genres }) {
+  let progress = 0;
   const prevIdGenred = [];
   const prevIdCast = [];
-
-  const genres = useSelector((state) => state.movieQuery.genres);
-  const cast = useSelector((state) => state.movieQuery.cast);
 
   const onlyIdGenres = genres.map((g) => g.id);
   const onlyIdCast = cast.map((c) => c.id);
@@ -117,14 +115,18 @@ export default function ChartCompatibility({ movie }) {
   const currentCast = movie?.credits?.cast;
   const currentCrew = movie?.credits?.crew;
 
+  const divideProgress = 100 / (genres.length + cast.length);
+
   currentGeneresMovie.forEach((item) => {
     if (onlyIdGenres.includes(item) && !prevIdGenred.includes(item)) {
+      progress += divideProgress;
       prevIdGenred.push(item);
     }
   });
 
   currentCast.forEach((item) => {
     if (onlyIdCast.includes(item.id) && !prevIdCast.includes(item.id)) {
+      progress += divideProgress;
       prevIdCast.push(item.id);
     }
   });
@@ -134,6 +136,7 @@ export default function ChartCompatibility({ movie }) {
       !prevIdCast.includes(item.id) &&
       item.department === "Directing"
     ) {
+      progress += divideProgress;
       prevIdCast.push(item.id);
     }
   });
@@ -143,11 +146,12 @@ export default function ChartCompatibility({ movie }) {
       <Box>
         <TypographyAnimated
           component={"div"}
-          sx={{ mb: 2 }}
-          variant={"body2"}
+          sx={{ fontSize: "0.6rem" }}
+          variant={"button"}
           text={`Compatibilità`}
+          gutterBottom
         />
-        <CircularProgressWithLabel from={0} to={movie?.progress} />
+        <CircularProgressWithLabel from={0} to={progress} />
       </Box>
       <Box>
         <Stack gap={1}>
@@ -155,7 +159,8 @@ export default function ChartCompatibility({ movie }) {
             <>
               <TypographyAnimated
                 component={"div"}
-                variant={"body2"}
+                sx={{ fontSize: "0.6rem" }}
+                variant={"button"}
                 text={`Generi presenti nella ricerca`}
               />
               <ChipGroup
@@ -167,7 +172,8 @@ export default function ChartCompatibility({ movie }) {
             <>
               <TypographyAnimated
                 component={"div"}
-                variant={"body2"}
+                sx={{ fontSize: "0.6rem" }}
+                variant={"button"}
                 text={`Cast presente nella ricerca`}
               />
               <ChipGroup

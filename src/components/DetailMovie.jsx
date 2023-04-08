@@ -71,12 +71,13 @@ export default function DetailMovie({
   )?.file_path;
 
   const director = currentMovie?.credits?.crew?.find(
-    (c) => c.department === "Directing"
+    (c) => c?.department === "Directing"
   );
 
-  const existDirector = cast.find((c) => c.id === director.id);
+  const existDirector = cast.find((c) => c?.id === director?.id);
 
-  //console.log("data", data);
+  console.log("data", data);
+
   // const currProgress = Math.round((progress / duration) * 100);
 
   const handleAddPerson = (value) => {
@@ -167,10 +168,19 @@ export default function DetailMovie({
             <Box ref={infoMovieRef}>
               <TypographyAnimated
                 component={"div"}
-                sx={{ fontSize: "1.2rem", mb: 2 }}
+                sx={{ fontSize: "1.2rem" }}
                 variant={"h6"}
                 text={detail?.title}
               />
+              {detail?.title !== detail?.original_title && (
+                <TypographyAnimated
+                  component={"div"}
+                  sx={{ fontSize: "0.6rem" }}
+                  variant={"button"}
+                  color={"text.secondary"}
+                  text={`( ${detail?.original_title} )`}
+                />
+              )}
               <Stack flexDirection={"row"} alignItems={"center"} gap={1}>
                 <TypographyAnimated
                   component={"div"}
@@ -181,43 +191,58 @@ export default function DetailMovie({
                     4
                   )} - diretto da `}
                 />
-                <Chip
-                  key={director.id}
-                  component={motion.div}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  variant="outlined"
-                  avatar={
-                    director?.profile_path ? (
-                      <Avatar
-                        alt={director.name}
-                        src={`http://image.tmdb.org/t/p/w500${director.profile_path}`}
-                      />
-                    ) : (
-                      <Avatar>{director.name.charAt(0)}</Avatar>
-                    )
-                  }
-                  label={director.name}
-                  deleteIcon={existDirector ? <RemoveIcon /> : <AddIcon />}
-                  onDelete={
-                    existDirector
-                      ? () => handleRemovePerson(director)
-                      : () => handleAddPerson(director)
-                  }
-                />
+                {director ? (
+                  <Chip
+                    key={director?.id}
+                    component={motion.div}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    variant="outlined"
+                    avatar={
+                      director?.profile_path ? (
+                        <Avatar
+                          alt={director?.name}
+                          src={`http://image.tmdb.org/t/p/w500${director?.profile_path}`}
+                        />
+                      ) : (
+                        <Avatar>{director?.name?.charAt(0)}</Avatar>
+                      )
+                    }
+                    label={director?.name}
+                    deleteIcon={existDirector ? <RemoveIcon /> : <AddIcon />}
+                    onDelete={
+                      existDirector
+                        ? () => handleRemovePerson(director)
+                        : () => handleAddPerson(director)
+                    }
+                  />
+                ) : (
+                  <TypographyAnimated
+                    component={"div"}
+                    sx={{ fontSize: "0.7rem" }}
+                    variant={"button"}
+                    text={"- non definito"}
+                  />
+                )}
               </Stack>
+
               <TypographyAnimated
                 component={"div"}
                 sx={{ fontSize: "0.6rem" }}
                 variant={"button"}
                 color={"text.secondary"}
-                text={`distibuito in italia - ${
-                  detail?.releaseIT?.release_date
-                    ? dayjs(detail?.releaseIT?.release_date).format(
+                text={`${
+                  detail?.releaseIT?.release_date &&
+                  !dayjs().isAfter(detail?.releaseIT?.release_date)
+                    ? "distribuito in italia -" +
+                      dayjs(detail?.releaseIT?.release_date).format(
                         "DD-MM-YYYY"
                       )
-                    : "non definito"
+                    : detail?.release_date &&
+                      !dayjs().isAfter(detail?.release_date)
+                    ? "distribuito in italia - non definito"
+                    : ""
                 }`}
               />
               <TypographyAnimated
@@ -350,7 +375,11 @@ export default function DetailMovie({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                <ChartCompatibility movie={currentMovie} />
+                <ChartCompatibility
+                  movie={currentMovie}
+                  genres={genres}
+                  cast={cast}
+                />
               </Box>
               {detail?.providers?.flatrate && (
                 <Box>

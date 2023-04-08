@@ -107,6 +107,19 @@ const genresList = [
   },
 ];
 
+export async function fetchCastsByKey(keyword) {
+  let page = 1;
+  if (keyword) {
+    return fetchPromise(
+      `https://api.themoviedb.org/3/search/person?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}&query=${encodeURI(
+        keyword
+      )}&include_adult=true`
+    ).then((data) => {
+      return data?.results;
+    });
+  }
+}
+
 export async function fetchCasts(page, keyword) {
   if (keyword) {
     return fetchPromise(
