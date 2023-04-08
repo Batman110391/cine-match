@@ -16,8 +16,6 @@ export default function CarouselMovieMobile({
   setBgWrapperIndex,
   hasNextPage,
   fetchNextPage,
-  initzializeSwiper = 0,
-  isLoading,
 }) {
   const swiperRef = useRef(null);
   const theme = useTheme();
@@ -29,12 +27,6 @@ export default function CarouselMovieMobile({
       fetchNextPage();
     }
   }, [currentSlide]);
-
-  useEffect(() => {
-    swiperRef?.current?.swiper?.slideTo(0);
-    setBgWrapperIndex(0);
-    setCurrentSlide(0);
-  }, [initzializeSwiper]);
 
   return (
     <Swiper

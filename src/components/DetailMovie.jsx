@@ -18,7 +18,7 @@ import Highlighter from "react-highlight-words";
 import YouTubePlayer from "react-player/youtube";
 import { useQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchDetailMovieById } from "../api/tmdbApis";
+import { fetchDetailMovieById, fetchSimilarMoviesById } from "../api/tmdbApis";
 import Imdb from "../components/icons/Imdb";
 import RottenTomatoes from "../components/icons/RottenTomatoes";
 import { roundToHalf } from "../utils/numberFormatting";
@@ -32,13 +32,19 @@ import AddIcon from "@mui/icons-material/Add";
 import RemoveIcon from "@mui/icons-material/Remove";
 import dayjs from "dayjs";
 import { setQuery } from "../store/movieQuery";
+import { uniqueArray } from "../utils/uniqueArray";
 
 const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
 export default function DetailMovie({
   currentMovie,
+  position,
   handleAddMoviesByInsertPeople,
   handleRemoveMoviesByInsertPeople,
+  similarMovies,
+  setSimilarMovies,
+  visibleData,
+  setVisibleData,
 }) {
   const dispatch = useDispatch();
 
@@ -74,7 +80,11 @@ export default function DetailMovie({
     (c) => c?.department === "Directing"
   );
 
-  const existDirector = cast.find((c) => c?.id === director?.id);
+  const existDirector = cast?.find((c) => c?.id === director?.id);
+
+  const existSimilarMovie = similarMovies?.find(
+    (s) => s.movieId === currentMovie.id
+  );
 
   console.log("data", data);
 
@@ -96,6 +106,37 @@ export default function DetailMovie({
 
   const handleCloseDialogTrailer = () => {
     setOpenTrailerDialog(false);
+  };
+
+  const handleAddSimilarMovies = async () => {
+    const raccomandedMovies = await fetchSimilarMoviesById(currentMovie.id);
+
+    const copy = [...visibleData];
+    copy.splice(position + 1, 0, ...raccomandedMovies);
+
+    const uniqData = uniqueArray(copy);
+
+    setSimilarMovies([
+      ...similarMovies,
+      { movieId: currentMovie.id, elemLength: raccomandedMovies?.length || 0 },
+    ]);
+
+    setVisibleData(uniqData);
+  };
+
+  const handleRemoveSimilarMovies = () => {
+    const copy = [...visibleData];
+    copy.splice(position + 1, existSimilarMovie.elemLength);
+
+    const uniqData = uniqueArray(copy);
+
+    const newSimilarMovies = similarMovies.filter(
+      (s) => s.movieId !== currentMovie.id
+    );
+
+    setSimilarMovies(newSimilarMovies);
+
+    setVisibleData(uniqData);
   };
 
   return (
@@ -166,12 +207,27 @@ export default function DetailMovie({
         <Grid container spacing={5}>
           <Grid item xs={12} sm={8}>
             <Box ref={infoMovieRef}>
-              <TypographyAnimated
-                component={"div"}
-                sx={{ fontSize: "1.2rem" }}
-                variant={"h6"}
-                text={detail?.title}
-              />
+              <Stack flexDirection={"row"} alignItems={"center"} gap={1}>
+                <TypographyAnimated
+                  component={"div"}
+                  sx={{ fontSize: "1.2rem" }}
+                  variant={"h6"}
+                  text={detail?.title}
+                />
+                <Button
+                  sx={{ margin: "5px 10px", px: 0.5 }}
+                  variant="outlined"
+                  size="small"
+                  onClick={
+                    existSimilarMovie
+                      ? () => handleRemoveSimilarMovies()
+                      : () => handleAddSimilarMovies()
+                  }
+                  endIcon={existSimilarMovie ? <RemoveIcon /> : <AddIcon />}
+                >
+                  film simili
+                </Button>
+              </Stack>
               {detail?.title !== detail?.original_title && (
                 <TypographyAnimated
                   component={"div"}

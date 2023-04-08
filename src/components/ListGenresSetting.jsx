@@ -42,69 +42,60 @@ export default function ListGenresSetting({
   const visibleData = data;
 
   return (
-    <ScrollContainer
-      horizontal={false}
-      vertical={true}
-      style={{
-        height: "100%",
-        width: "100%",
-      }}
+    <Grid
+      container
+      spacing={0.5}
+      sx={{ height: { xs: "265px", lg: "100%" }, overflow: "auto" }}
     >
-      <Grid
-        container
-        spacing={0.5}
-        sx={{ height: { xs: "265px", lg: "100%" } }}
-      >
-        {visibleData.map((genre) => {
-          const selected = selectedItemsGenres.find((s) => s.id === genre.id);
+      {visibleData.map((genre) => {
+        const selected = selectedItemsGenres.find((s) => s.id === genre.id);
 
-          return (
-            <Grid
-              xs={4}
-              sm={3}
-              md={2}
-              lg={2}
-              key={genre.id}
-              //onClick={() => handleSelectedItem(genre.id)}
+        return (
+          <Grid
+            xs={4}
+            sm={3}
+            md={2}
+            lg={2}
+            key={genre.id}
+            //onClick={() => handleSelectedItem(genre.id)}
+          >
+            <Button
+              onClick={() => handleToggleSelectedGeneres(genre.id)}
+              color="inherit"
+              sx={{
+                position: "relative",
+                backgroundImage: selected
+                  ? `linear-gradient(-180deg, rgba(206, 147, 216, 0.8), rgba(206, 147, 216, 0.8)), url(${genre.bg})`
+                  : `linear-gradient(-180deg, rgba(34,34,34,0.8), rgba(32,32,32,0.8)), url(${genre.bg})`,
+                backgroundSize: "cover",
+                backgroundRepeat: "no-repeat",
+                backgroundPosition: "center center",
+                objectFit: "cover",
+                width: "100%",
+                height: "120px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
             >
-              <Button
-                onClick={() => handleToggleSelectedGeneres(genre.id)}
-                color="inherit"
+              <Typography
                 sx={{
-                  position: "relative",
-                  backgroundImage: selected
-                    ? `linear-gradient(-180deg, rgba(206, 147, 216, 0.8), rgba(206, 147, 216, 0.8)), url(${genre.bg})`
-                    : `linear-gradient(-180deg, rgba(34,34,34,0.8), rgba(32,32,32,0.8)), url(${genre.bg})`,
-                  backgroundSize: "cover",
-                  backgroundRepeat: "no-repeat",
-                  backgroundPosition: "center center",
-                  objectFit: "cover",
-                  width: "100%",
-                  height: "120px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                }}
-              >
-                <Typography
-                  sx={{
-                    userSelect: "none",
-                    letterSpacing: ".1em",
-                    textShadow: `-1px -1px 1px #1111116b,
+                  userSelect: "none",
+                  letterSpacing: ".1em",
+                  textShadow: `-1px -1px 1px #1111116b,
           2px 2px 1px #36363691`,
-                  }}
-                  variant="button"
-                  fontWeight="bold"
-                  fontSize="0.7rem"
-                >
-                  {genre.name}
-                </Typography>
-              </Button>
-            </Grid>
-          );
-        })}
-      </Grid>
-    </ScrollContainer>
+                }}
+                variant="button"
+                fontWeight="bold"
+                fontSize="0.7rem"
+              >
+                {genre.name}
+              </Typography>
+            </Button>
+          </Grid>
+        );
+      })}
+    </Grid>
   );
 }

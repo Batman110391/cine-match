@@ -144,14 +144,23 @@ export default function ChartCompatibility({ movie, cast, genres }) {
   return (
     <Stack flexDirection={{ xs: "column", sm: "row" }} gap={4}>
       <Box>
-        <TypographyAnimated
-          component={"div"}
-          sx={{ fontSize: "0.6rem" }}
-          variant={"button"}
-          text={`Compatibilità`}
-          gutterBottom
-        />
-        <CircularProgressWithLabel from={0} to={progress} />
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            flexDirection: "column",
+            width: "fit-content",
+          }}
+        >
+          <TypographyAnimated
+            component={"div"}
+            sx={{ fontSize: "0.6rem" }}
+            variant={"button"}
+            text={`Compatibilità`}
+            gutterBottom
+          />
+          <CircularProgressWithLabel from={0} to={progress} />
+        </Box>
       </Box>
       <Box>
         <Stack gap={1}>

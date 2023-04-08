@@ -237,7 +237,6 @@ export default function AutocompleteCastSetting({
     setKeywordSearchInput(keyword);
   };
 
-  console.log("keywordSearchInput", keywordSearchInput);
   return (
     <Autocomplete
       multiple

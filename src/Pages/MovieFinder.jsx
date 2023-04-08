@@ -3,7 +3,7 @@ import _ from "lodash";
 import TuneIcon from "@mui/icons-material/Tune";
 import { alpha, Box, Card, Stack, Typography } from "@mui/material";
 import { motion } from "framer-motion";
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useInfiniteQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMovies } from "../api/tmdbApis";
@@ -30,7 +30,9 @@ export default function MovieFinder() {
   const [bgWrapperIndex, setBgWrapperIndex] = useState(0);
   const [openSettingMovie, setOpenSettingMovie] = useState(false);
   const [changeFilters, setChangeFilters] = useState(false);
-  const [initzializeSwiper, setInitzializeSwiper] = useState(0);
+  const [similarMovies, setSimilarMovies] = useState([]);
+
+  const [visibleData, setVisibleData] = useState([]);
 
   /* const [notification, setNotifications] = useState({
     casts: [],
@@ -53,6 +55,23 @@ export default function MovieFinder() {
     queryFn: ({ pageParam = 1 }) =>
       fetchMovies(pageParam, genres, casts, sort, periods, exactQuery),
   });
+
+  useMemo(() => {
+    const movies = data?.pages
+      ?.flatMap((data) => data)
+      .reduce((prev, curr) => {
+        return {
+          ...curr,
+          results: prev?.results
+            ? prev.results.concat(curr.results)
+            : curr.results,
+        };
+      }, {});
+
+    const uniqData = uniqueArray(movies?.results);
+
+    setVisibleData(uniqData);
+  }, [data]);
 
   if (status === "loading") return <LoadingPage />;
   if (status === "error") return <h1>{JSON.stringify(error)}</h1>;
@@ -96,19 +115,6 @@ export default function MovieFinder() {
       dispatch(setQuery({ notifications: newNotifications }));
     }
   };
-
-  const movies = data?.pages
-    ?.flatMap((data) => data)
-    .reduce((prev, curr) => {
-      return {
-        ...curr,
-        results: prev?.results
-          ? prev.results.concat(curr.results)
-          : curr.results,
-      };
-    }, {});
-
-  const visibleData = uniqueArray(movies?.results);
 
   const countChangeParams = notification.value;
 
@@ -175,8 +181,6 @@ export default function MovieFinder() {
             setBgWrapperIndex={setBgWrapperIndex}
             hasNextPage={hasNextPage}
             fetchNextPage={fetchNextPage}
-            initzializeSwiper={initzializeSwiper}
-            isLoading={isRefetching}
           />
         </Box>
       ) : (
@@ -219,10 +223,15 @@ export default function MovieFinder() {
               {currentMovie && visibleData.length > 0 && (
                 <DetailMovie
                   currentMovie={currentMovie}
+                  position={bgWrapperIndex}
                   handleAddMoviesByInsertPeople={handleAddMoviesByInsertPeople}
                   handleRemoveMoviesByInsertPeople={
                     handleRemoveMoviesByInsertPeople
                   }
+                  similarMovies={similarMovies}
+                  setSimilarMovies={setSimilarMovies}
+                  visibleData={visibleData}
+                  setVisibleData={setVisibleData}
                 />
               )}
             </Card>

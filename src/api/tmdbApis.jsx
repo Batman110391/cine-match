@@ -196,11 +196,20 @@ export async function fetchSimilarMoviesByGenres(page, keyword, genres) {
   });
 }
 
-export async function fetchSimilarMoviesById(page, id) {
+export async function fetchSimilarMoviesById(id) {
   return fetchPromise(
-    `https://api.themoviedb.org/3/movie/${id}/similar?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}`
-  ).then((data) => {
-    return data?.results;
+    `https://api.themoviedb.org/3/movie/${id}/recommendations?api_key=${API_KEY}&page=${1}&${CURRENT_LANGUAGE}`
+  ).then(async (data) => {
+    const promises = await data?.results?.map(async (op) => {
+      const credits = await fetchPromise(
+        `https://api.themoviedb.org/3/movie/${op.id}/credits?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+      );
+      return { ...op, credits };
+    });
+
+    const filteredResults = await Promise.all(promises);
+
+    return filteredResults;
   });
 }
 
