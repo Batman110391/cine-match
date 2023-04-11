@@ -48,7 +48,7 @@ const genresList = [
   {
     pos: 6,
     id: 18,
-    name: "Drammatico",
+    name: "Dramma",
     bg: "/images/genres/dramatic.jpg",
   },
   {
@@ -370,8 +370,8 @@ filtri sort
   };
 }
 
-export async function fetchDetailMovieById(id) {
-  const externalRating = await getRatingMovieById(id);
+export async function fetchDetailMovieById(id, originalTitle) {
+  const externalRating = await getRatingMovieById(id, originalTitle);
 
   return fetchPromise(
     `https://api.themoviedb.org/3/movie/${id}?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
@@ -479,28 +479,45 @@ export async function fetchMoviesByCasts(cast, genres, periods, exactQuery) {
   };
 }
 
-async function getRatingMovieById(id) {
+async function getRatingMovieById(id, originalTitle) {
   try {
+    const url = `https://flickmetrix.com/api2/values/getFilms?amazonRegion=us&cast=&comboScoreMax=100&comboScoreMin=0&countryCode=us&criticRatingMax=100&criticRatingMin=0&criticReviewsMax=1000&criticReviewsMin=0&currentPage=0&deviceID=1&director=&format=movies&genreAND=false&imdbRatingMax=10&imdbRatingMin=0&imdbVotesMax=2800000&imdbVotesMin=0&inCinemas=true&includeDismissed=true&includeSeen=true&includeWantToWatch=true&isCastSearch=false&isDirectorSearch=false&isPersonSearch=false&language=all&letterboxdScoreMax=100&letterboxdScoreMin=0&letterboxdVotesMax=1200000&letterboxdVotesMin=0&metacriticRatingMax=100&metacriticRatingMin=0&metacriticReviewsMax=100&metacriticReviewsMin=0&onAmazonPrime=false&onAmazonVideo=false&onDVD=false&onNetflix=false&pageSize=20&path=/&person=&plot=&queryType=GetFilmsToSieve&searchTerm=${encodeURI(
+      originalTitle
+    )}&sharedUser=&sortOrder=comboScoreDesc&title=&token=&watchedRating=0&writer=&yearMax=2023&yearMin=1900`;
+
+    const encodeURL = `https://api.allorigins.win/get?url=${encodeURIComponent(
+      url
+    )}`;
+    const responseRating = await fetchPromise(encodeURL);
+
+    if (!responseRating) return null;
+
+    const responseJson = JSON.parse(JSON.parse(responseRating.contents));
+
     const { imdb_id } = await fetchPromise(
       `https://api.themoviedb.org/3/movie/${id}/external_ids?api_key=${API_KEY}`
     );
 
-    const response = await fetchPromise(
-      `http://www.omdbapi.com/?i=${imdb_id}&apikey=15eb44fd`
+    const currentMovieRating = responseJson?.find(
+      (obj) => obj.imdbID === imdb_id
     );
 
-    const rottenTomatoesValue = response?.Ratings?.find(
-      (ele) => ele.Source === "Rotten Tomatoes"
-    )?.Value;
+    const convertPercent = (number) => (parseFloat(number) * 10) / 100;
 
-    const splitPercent = rottenTomatoesValue?.split("%")[0];
-
-    const convertPercent = (parseFloat(splitPercent) * 10) / 100;
+    console.log("currentMovieRating", currentMovieRating);
 
     return {
       ratings: [
-        { source: "Imdb", value: parseFloat(response?.imdbRating) || null },
-        { source: "rottenTomatoes", value: convertPercent || null },
+        {
+          source: "Imdb",
+          value: currentMovieRating?.imdbRating || null,
+          count: currentMovieRating?.imdbVotes || 0,
+        },
+        {
+          source: "Letterboxd",
+          value: convertPercent(currentMovieRating?.LetterboxdScore) || null,
+          count: currentMovieRating?.letterboxdVotes || 0,
+        },
       ],
     };
   } catch (err) {

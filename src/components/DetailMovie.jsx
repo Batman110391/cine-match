@@ -20,7 +20,7 @@ import { useQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchDetailMovieById, fetchSimilarMoviesById } from "../api/tmdbApis";
 import Imdb from "../components/icons/Imdb";
-import RottenTomatoes from "../components/icons/RottenTomatoes";
+import Letterboxd from "./icons/Letterboxd";
 import { roundToHalf } from "../utils/numberFormatting";
 import { formatMinutes } from "../utils/timeFormat";
 import useElementSize from "../utils/useElementSize";
@@ -58,7 +58,7 @@ export default function DetailMovie({
 
   const { isLoading, error, data } = useQuery(
     ["detailMovie", currentMovie],
-    () => fetchDetailMovieById(currentMovie?.id)
+    () => fetchDetailMovieById(currentMovie?.id, currentMovie?.original_title)
   );
 
   if (isLoading)
@@ -326,17 +326,17 @@ export default function DetailMovie({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
               >
-                {detail?.ratings?.find((r) => r.source === "rottenTomatoes")
+                {detail?.ratings?.find((r) => r.source === "Letterboxd")
                   ?.value && (
                   <Chip
                     sx={{ borderColor: "transparent" }}
                     variant="outlined"
-                    icon={<RottenTomatoes />}
+                    icon={<Letterboxd />}
                     label={
                       <Rating
                         value={roundToHalf(
                           detail?.ratings?.find(
-                            (r) => r.source === "rottenTomatoes"
+                            (r) => r.source === "Letterboxd"
                           )?.value
                         )}
                         precision={0.5}
@@ -442,7 +442,8 @@ export default function DetailMovie({
                   <Divider sx={{ my: 2 }} />
                   <TypographyAnimated
                     component={"div"}
-                    variant={"body2"}
+                    sx={{ fontSize: "0.6rem" }}
+                    variant={"button"}
                     text={"Disponibile sulle piattaforme"}
                   />
 
