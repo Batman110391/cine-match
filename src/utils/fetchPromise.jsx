@@ -1,20 +1,43 @@
-export function fetchPromise(url, options = {}) {
+export function fetchPromise(
+  url,
+  options = {},
+  numRetries = 3,
+  retryDelay = 300
+) {
   const controller = new AbortController();
+  let retries = 0;
 
-  return fetch(url, { signal: controller.signal, ...options })
-    .then((res) => {
+  const fetchRequest = () => {
+    return fetch(url, { signal: controller.signal, ...options }).then((res) => {
       if (res.status === 200) {
         return res.json();
       }
       return Promise.reject(res);
-    })
-    .catch((e) => {
-      if (e.name === "AbortError") return;
+    });
+  };
 
-      console.error("Error: ", e);
+  const handleError = (e) => {
+    if (e.name === "AbortError") {
+      return Promise.reject(new Error("Request aborted"));
+    }
 
-      controller.abort();
-    })
+    if (retries < numRetries) {
+      retries++;
+      console.warn(
+        `Fetch failed. Retrying in ${retryDelay}ms... (${retries}/${numRetries})`
+      );
+      return new Promise((resolve) => setTimeout(resolve, retryDelay)).then(
+        fetchRequest
+      );
+    }
+
+    console.error("Error: ", e);
+    controller.abort();
+    return Promise.reject(e);
+  };
+
+  return fetchRequest()
+    .catch(handleError)
     .finally(() => {
       if (controller.signal.aborted) return;
     });
