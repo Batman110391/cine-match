@@ -8,6 +8,30 @@ dayjs.extend(isBetween);
 const API_KEY = import.meta.env.VITE_API_KEY;
 const CURRENT_LANGUAGE = "language=it-IT";
 
+const PROVIDERS = "8|119|337|29|39|359|110|222";
+
+const CURRENT_DATE_FORMATTING = dayjs(new Date()).format("YYYY-MM-DD");
+const DATA_TOMORROW = dayjs(CURRENT_DATE_FORMATTING)
+  .add(1, "day")
+  .format("YYYY-MM-DD");
+const DATE_SIX_MONTHS_LATER = dayjs(CURRENT_DATE_FORMATTING)
+  .add(6, "month")
+  .format("YYYY-MM-DD");
+
+const URL_POPULAR_TV = `https://api.themoviedb.org/3/discover/tv?api_key=${API_KEY}&${CURRENT_LANGUAGE}
+&air_date.lte=${DATE_SIX_MONTHS_LATER}&certification_country=IT&ott_region=IT&release_date.lte=${DATE_SIX_MONTHS_LATER}&show_me=0&sort_by=popularity.desc&vote_average.gte=0&vote_average.lte=10
+&vote_count.gte=0&with_ott_providers=${encodeURI(
+  PROVIDERS
+)}&with_runtime.gte=0&with_runtime.lte=400`;
+
+const URL_POPULAR_MOVIE = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&${CURRENT_LANGUAGE}
+&air_date.lte=${DATE_SIX_MONTHS_LATER}&certification_country=IT&ott_region=IT&release_date.lte=${DATE_SIX_MONTHS_LATER}&show_me=0&sort_by=popularity.desc&vote_average.gte=0&vote_average.lte=10
+&vote_count.gte=0&with_runtime.gte=0&with_runtime.lte=400region=IT`;
+
+const URL_INCOMING_MOVIE = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&${CURRENT_LANGUAGE}
+&air_date.lte=${DATE_SIX_MONTHS_LATER}&certification_country=IT&ott_region=IT&release_date.gte=${DATA_TOMORROW}&release_date.lte=${DATE_SIX_MONTHS_LATER}&show_me=0&sort_by=popularity.desc&vote_average.gte=0&vote_average.lte=10
+&vote_count.gte=0&with_runtime.gte=0&with_runtime.lte=400&with_release_type=3|4&region=IT`;
+
 const genresList = [
   {
     pos: 0,
@@ -211,6 +235,104 @@ export async function fetchSimilarMoviesById(id) {
 
     return filteredResults;
   });
+}
+
+export async function fetchMoviesDiscover(page = 1) {
+  const resourcesAll = [
+    {
+      name: "trending_movie",
+      api: fetchPromise(`${URL_POPULAR_MOVIE}&page=${page}`),
+    },
+    {
+      name: "trending_tv",
+      api: fetchPromise(`${URL_POPULAR_TV}&page=${page}`),
+    },
+    {
+      name: "incoming_movie",
+      api: fetchPromise(`${URL_INCOMING_MOVIE}&page=${page}`),
+    },
+  ];
+
+  const aggregationResources = await Promise.all(
+    resourcesAll.map((r) => r.api)
+  );
+
+  const resources = Object.fromEntries(
+    aggregationResources.map((resource, index) => [
+      resourcesAll[index].name,
+      resource,
+    ])
+  );
+
+  return resources;
+}
+
+export async function fetchMoviesByKeywords(keyword, typeQuery, page = 1) {
+  const keyWordNotNull = keyword && keyword !== "";
+
+  if (keyWordNotNull && typeQuery === "movie") {
+    return await fetchPromise(
+      `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}&query=${encodeURI(
+        keyword
+      )}&region=IT`
+    ).then((data) => {
+      if (data && data?.results?.length > 0) {
+        return data?.results;
+      } else {
+        return [];
+      }
+    });
+  }
+
+  if (keyWordNotNull && typeQuery === "tv") {
+    return await fetchPromise(
+      `https://api.themoviedb.org/3/search/tv?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}&query=${encodeURI(
+        keyword
+      )}`
+    ).then((data) => {
+      if (data && data?.results?.length > 0) {
+        return data?.results;
+      } else {
+        return [];
+      }
+    });
+  }
+
+  if (keyWordNotNull && typeQuery === "person") {
+    return await fetchPromise(
+      `https://api.themoviedb.org/3/search/person?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}&query=${encodeURI(
+        keyword
+      )}&include_adult=true&region=IT`
+    ).then((data) => data?.results);
+  }
+
+  if (typeQuery === "movie") {
+    return await fetchPromise(`${URL_POPULAR_MOVIE}&page=${page}`).then(
+      (data) => {
+        if (data && data?.results?.length > 0) {
+          return data?.results;
+        } else {
+          return [];
+        }
+      }
+    );
+  }
+
+  if (typeQuery === "tv") {
+    return await fetchPromise(`${URL_POPULAR_TV}&page=${page}`).then((data) => {
+      if (data && data?.results?.length > 0) {
+        return data?.results;
+      } else {
+        return [];
+      }
+    });
+  }
+
+  if (typeQuery === "person") {
+    return await fetchPromise(
+      `https://api.themoviedb.org/3/person/popular?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}&region=IT`
+    ).then((data) => data?.results);
+  }
 }
 
 export async function fetchMovies(
@@ -479,51 +601,68 @@ export async function fetchMoviesByCasts(cast, genres, periods, exactQuery) {
   };
 }
 
-async function getRatingMovieById(id, originalTitle) {
-  try {
-    const url = `https://flickmetrix.com/api2/values/getFilms?amazonRegion=us&cast=&comboScoreMax=100&comboScoreMin=0&countryCode=us&criticRatingMax=100&criticRatingMin=0&criticReviewsMax=1000&criticReviewsMin=0&currentPage=0&deviceID=1&director=&format=movies&genreAND=false&imdbRatingMax=10&imdbRatingMin=0&imdbVotesMax=2800000&imdbVotesMin=0&inCinemas=true&includeDismissed=true&includeSeen=true&includeWantToWatch=true&isCastSearch=false&isDirectorSearch=false&isPersonSearch=false&language=all&letterboxdScoreMax=100&letterboxdScoreMin=0&letterboxdVotesMax=1200000&letterboxdVotesMin=0&metacriticRatingMax=100&metacriticRatingMin=0&metacriticReviewsMax=100&metacriticReviewsMin=0&onAmazonPrime=false&onAmazonVideo=false&onDVD=false&onNetflix=false&pageSize=20&path=/&person=&plot=&queryType=GetFilmsToSieve&searchTerm=${encodeURI(
-      originalTitle
-    )}&sharedUser=&sortOrder=comboScoreDesc&title=&token=&watchedRating=0&writer=&yearMax=2023&yearMin=1900`;
+async function getRatingMovieById(id, originalTitle, type) {
+  const url = `https://flickmetrix.com/api2/values/getFilms?amazonRegion=us&cast=&comboScoreMax=100&comboScoreMin=0&countryCode=it&criticRatingMax=100&criticRatingMin=0&criticReviewsMax=1000&criticReviewsMin=0&currentPage=0&deviceID=1&director=&format=movies&genreAND=false&imdbRatingMax=10&imdbRatingMin=0&imdbVotesMax=2800000&imdbVotesMin=0&inCinemas=true&includeDismissed=true&includeSeen=true&includeWantToWatch=true&isCastSearch=false&isDirectorSearch=false&isPersonSearch=false&language=all&letterboxdScoreMax=100&letterboxdScoreMin=0&letterboxdVotesMax=1200000&letterboxdVotesMin=0&metacriticRatingMax=100&metacriticRatingMin=0&metacriticReviewsMax=100&metacriticReviewsMin=0&onAmazonPrime=false&onAmazonVideo=false&onDVD=false&onNetflix=false&pageSize=20&path=/&person=&plot=&queryType=GetFilmsToSieve&searchTerm=${encodeURI(
+    originalTitle
+  )}&sharedUser=&sortOrder=comboScoreDesc&title=&token=&watchedRating=0&writer=&yearMax=2023&yearMin=1900`;
 
-    const encodeURL = `https://api.allorigins.win/get?url=${encodeURIComponent(
-      url
-    )}`;
-    const responseRating = await fetchPromise(encodeURL);
+  const encodeURL1 = `https://api.allorigins.win/get?url=${encodeURIComponent(
+    url
+  )}`;
+  const encodeURL2 = `https://thingproxy.freeboard.io/fetch/${encodeURIComponent(
+    url
+  )}`;
+  let responseJson = await fetchPromise(encodeURL2)
+    .then((data) => JSON.parse(data))
+    .catch((e) => {
+      console.log("Error second response Rating");
+      return null;
+    });
 
-    if (!responseRating) return null;
+  if (!responseJson) {
+    responseJson = await fetchPromise(encodeURL1)
+      .then((data) => JSON.parse(JSON.parse(data.contents)))
+      .catch((e) => {
+        console.log("Errore first response Rating, retry on new proxy");
 
-    const responseJson = JSON.parse(JSON.parse(responseRating.contents));
+        return null;
+      });
+  }
 
-    const { imdb_id } = await fetchPromise(
-      `https://api.themoviedb.org/3/movie/${id}/external_ids?api_key=${API_KEY}`
-    );
-
-    const currentMovieRating = responseJson?.find(
-      (obj) => obj.imdbID === imdb_id
-    );
-
-    const convertPercent = (number) => (parseFloat(number) * 10) / 100;
-
-    console.log("currentMovieRating", currentMovieRating);
-
-    return {
-      ratings: [
-        {
-          source: "Imdb",
-          value: currentMovieRating?.imdbRating || null,
-          count: currentMovieRating?.imdbVotes || 0,
-        },
-        {
-          source: "Letterboxd",
-          value: convertPercent(currentMovieRating?.LetterboxdScore) || null,
-          count: currentMovieRating?.letterboxdVotes || 0,
-        },
-      ],
-    };
-  } catch (err) {
-    console.error(err);
+  if (!responseJson) {
     return null;
   }
+
+  const { imdb_id } = await fetchPromise(
+    `https://api.themoviedb.org/3/${type}/${id}/external_ids?api_key=${API_KEY}`
+  );
+
+  const currentMovieRating = responseJson?.find(
+    (obj) => obj.imdbID === imdb_id
+  );
+
+  return {
+    providers: currentMovieRating?.Providers,
+    awards: currentMovieRating?.Awards,
+    cast: currentMovieRating?.Cast,
+    director: currentMovieRating?.Director,
+    ratings: [
+      {
+        source: "Imdb",
+        value: currentMovieRating?.imdbRating,
+        count: currentMovieRating?.imdbVotes || 0,
+      },
+      {
+        source: "Letterboxd",
+        value: currentMovieRating?.LetterboxdScore,
+        count: currentMovieRating?.letterboxdVotes || 0,
+      },
+      {
+        source: "ComboScore",
+        value: currentMovieRating?.ComboScore,
+      },
+    ],
+  };
 }
 
 async function fetchPromiseAllQueries(
@@ -631,4 +770,50 @@ function findCompatibility(movie, genres, cast) {
   });
 
   return Math.round(progress);
+}
+
+const memoizedGetRatingMovieById = (() => {
+  const cache = new Map();
+
+  return async (id, originalTitle, type) => {
+    const cacheKey = `${id}-${originalTitle}`;
+    if (cache.has(cacheKey)) {
+      return cache.get(cacheKey);
+    }
+
+    const details = await getRatingMovieById(id, originalTitle, type);
+    cache.set(cacheKey, details);
+    return details;
+  };
+})();
+
+async function concatDetailMovies(array, type) {
+  return await processArrayInBatches(array, 5, type);
+}
+
+async function processArrayInBatches(arr, batchSize, type) {
+  let dividedResults = [];
+
+  for (let i = 0; batchSize * i < arr.length; i++) {
+    const batch = arr.slice(batchSize * i, batchSize * (i + 1));
+
+    const promises = batch.map(async (arr) => {
+      const searchTerm = arr?.original_name || arr?.original_title;
+
+      await new Promise((resolve) => setTimeout(resolve, i === 0 ? 0 : 500)); // Wait 1 second for second batch
+
+      const details = await memoizedGetRatingMovieById(
+        arr.id,
+        searchTerm,
+        type
+      );
+      return { ...arr, details };
+    });
+
+    const filteredResults = await Promise.all(promises);
+
+    dividedResults = dividedResults.concat(filteredResults);
+  }
+
+  return dividedResults;
 }

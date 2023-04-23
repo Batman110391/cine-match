@@ -1,14 +1,20 @@
 export function fetchPromise(
   url,
   options = {},
-  numRetries = 3,
+  numRetries = 0,
   retryDelay = 300
 ) {
   const controller = new AbortController();
   let retries = 0;
 
   const fetchRequest = () => {
-    return fetch(url, { signal: controller.signal, ...options }).then((res) => {
+    const credentials = "same-origin";
+
+    return fetch(url, {
+      signal: controller.signal,
+      ...options,
+      credentials,
+    }).then((res) => {
       if (res.status === 200) {
         return res.json();
       }

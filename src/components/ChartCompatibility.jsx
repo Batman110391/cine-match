@@ -1,4 +1,4 @@
-import { Avatar, Chip } from "@mui/material";
+import { Avatar, Chip, alpha } from "@mui/material";
 import Box from "@mui/material/Box";
 import CircularProgress from "@mui/material/CircularProgress";
 import Typography from "@mui/material/Typography";
@@ -7,18 +7,63 @@ import { animate } from "framer-motion";
 import * as React from "react";
 import { useSelector } from "react-redux";
 import TypographyAnimated from "./TypographyAnimated";
+import { useTheme } from "@emotion/react";
 
-function CircularProgressWithLabel({ from, to }) {
+function getStyleChart(variant, numb) {
+  const theme = useTheme();
+
+  const currentReactionColor =
+    numb > 70
+      ? theme.palette.chartPrimary.positive
+      : numb < 50
+      ? theme.palette.chartPrimary.negative
+      : theme.palette.chartPrimary.middle;
+
+  switch (variant) {
+    case "dark":
+      return {
+        bgChart: alpha(theme.palette.background.dark, 0.3),
+        colorOutline: "transparent",
+        colorInline: currentReactionColor,
+      };
+
+    case "light":
+      return {
+        bgChart: alpha(theme.palette.background.dark, 0.3),
+        colorOutline: "transparent",
+        colorInline: currentReactionColor,
+      };
+
+    default:
+      return {
+        bgChart: alpha(theme.palette.background.dark, 0.3),
+        colorOutline: "transparent",
+        colorInline: currentReactionColor,
+      };
+  }
+}
+
+export function CircularProgressWithLabel({
+  from = 0,
+  to,
+  size = 100,
+  thickness = 3,
+  labelSize = 15,
+  durationAnimate = 2,
+  variant = "default",
+}) {
   const [progress, setProgress] = React.useState(0);
   const nodeRef = React.useRef();
+
+  const { colorOutline, colorInline, bgChart } = getStyleChart(variant, to);
 
   React.useEffect(() => {
     const node = nodeRef.current;
 
     const controls = animate(from, to, {
-      duration: 2,
+      duration: durationAnimate,
       onUpdate(value) {
-        node.textContent = `${Math.round(value)}%`;
+        node.textContent = `${Math.round(value)}`;
         setProgress(Math.round(value));
       },
     });
@@ -27,28 +72,34 @@ function CircularProgressWithLabel({ from, to }) {
   }, [from, to]);
 
   return (
-    <Box sx={{ position: "relative", display: "inline-flex" }}>
+    <Box
+      sx={{
+        position: "relative",
+        display: "inline-flex",
+        background: bgChart,
+        borderRadius: "50%",
+      }}
+    >
       <CircularProgress
         value={100}
         variant="determinate"
         sx={{
-          color: (theme) =>
-            theme.palette.grey[theme.palette.mode === "light" ? 200 : 800],
+          color: colorOutline,
         }}
-        size={100}
-        thickness={3}
+        size={size}
+        thickness={thickness}
       />
       <CircularProgress
         value={progress || 0}
         variant="determinate"
         sx={{
-          color: (theme) => theme.palette.chartPrimary.default,
-          animationDuration: "550ms",
+          color: colorInline,
+          //animationDuration: "550ms",
           position: "absolute",
           left: 0,
         }}
-        size={100}
-        thickness={3}
+        size={size}
+        thickness={thickness}
       />
       <Box
         sx={{
@@ -66,10 +117,17 @@ function CircularProgressWithLabel({ from, to }) {
           ref={nodeRef}
           variant="caption"
           component="div"
-          color="text.secondary"
+          color="text.primary"
           fontWeight={"bold"}
-          fontSize={"15px"}
+          fontSize={`${labelSize}px`}
         />
+        <Typography
+          variant="caption"
+          fontSize={7}
+          sx={{ alignSelf: "self-start", mt: 1.3 }}
+        >
+          {"%"}
+        </Typography>
       </Box>
     </Box>
   );

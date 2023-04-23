@@ -12,6 +12,7 @@ export const initialState = {
     error: false,
   }),
   notifications: { casts: [], genres: [], value: 0 },
+  currentRoute: 0,
 };
 
 export const movieQuerySlice = createSlice({
