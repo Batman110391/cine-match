@@ -32,7 +32,7 @@ const URL_INCOMING_MOVIE = `https://api.themoviedb.org/3/discover/movie?api_key=
 &air_date.lte=${DATE_SIX_MONTHS_LATER}&certification_country=IT&ott_region=IT&release_date.gte=${DATA_TOMORROW}&release_date.lte=${DATE_SIX_MONTHS_LATER}&show_me=0&sort_by=popularity.desc&vote_average.gte=0&vote_average.lte=10
 &vote_count.gte=0&with_runtime.gte=0&with_runtime.lte=400&with_release_type=3|4&region=IT`;
 
-const genresList = [
+export const genresList = [
   {
     pos: 0,
     id: 28,
@@ -333,6 +333,27 @@ export async function fetchMoviesByKeywords(keyword, typeQuery, page = 1) {
       `https://api.themoviedb.org/3/person/popular?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}&region=IT`
     ).then((data) => data?.results);
   }
+}
+
+export async function fetchMoviesPage(
+  page,
+  genres,
+  casts,
+  sort,
+  periods,
+  exactQuery
+) {
+  return fetchPromise(`${URL_POPULAR_MOVIE}&page=${page}`).then((data) => {
+    const hasNext = page <= data.total_pages;
+
+    const currMovies = {
+      results: data?.results,
+      nextPage: hasNext ? page + 1 : undefined,
+      previousPage: page > 1 ? page - 1 : undefined,
+    };
+
+    return currMovies;
+  });
 }
 
 export async function fetchMovies(

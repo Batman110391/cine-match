@@ -48,7 +48,6 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 export default function DialogSettingMovies({
   open,
   setOpen,
-  isChangeQuery,
   changeFilters,
   setChangeFilters,
   refetchPagination,
@@ -74,8 +73,7 @@ export default function DialogSettingMovies({
     sort === sortQuery &&
     exactSearch === exactQuery &&
     selectedItemsGenres === genresQuery &&
-    selectedItemsCasts === castsQuery &&
-    !isChangeQuery;
+    selectedItemsCasts === castsQuery;
 
   useEffect(() => {
     setPeriods(JSON.parse(periodsQuery));
@@ -113,7 +111,9 @@ export default function DialogSettingMovies({
       })
     );
 
-    refetchPagination({ pageParam: 1 });
+    if (refetchPagination) {
+      refetchPagination({ pageParam: 1 });
+    }
 
     setChangeFilters(!changeFilters);
 

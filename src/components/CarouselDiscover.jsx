@@ -82,7 +82,7 @@ export default function CarouselDiscover({ slides, titleDiscover, queries }) {
               >
                 <MovieCard
                   bg={slideContent?.poster_path}
-                  title={slideContent?.title}
+                  title={slideContent?.title || slideContent?.name}
                   w={150}
                   h={230}
                   badgeRating={slideContent?.vote_average}
