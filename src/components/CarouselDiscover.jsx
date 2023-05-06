@@ -1,5 +1,5 @@
 import React from "react";
-import { Navigation, FreeMode } from "swiper";
+import { FreeMode, Navigation } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import MovieCard from "./MovieCard";
 // Import Swiper styles
@@ -11,14 +11,23 @@ import {
   Box,
   Button,
   Divider,
+  Skeleton,
   Stack,
   Typography,
-  useMediaQuery,
-  useTheme,
 } from "@mui/material";
+import { Link } from "react-router-dom";
 
-export default function CarouselDiscover({ slides, titleDiscover, queries }) {
-  const theme = useTheme();
+export default function CarouselDiscover({
+  slides,
+  titleDiscover,
+  isLoading,
+  path,
+  onAction,
+  isDesktop,
+}) {
+  if (isLoading) {
+    return <LoadingCarousel titleDiscover={titleDiscover} />;
+  }
 
   return (
     <Box
@@ -50,7 +59,7 @@ export default function CarouselDiscover({ slides, titleDiscover, queries }) {
         alignItems={"center"}
       >
         <Typography variant="body1">{titleDiscover}</Typography>
-        <Button>
+        <Button LinkComponent={Link} to={path} onClick={onAction}>
           <Typography variant="button">{"Vedi tutti"}</Typography>
         </Button>
       </Stack>
@@ -60,7 +69,7 @@ export default function CarouselDiscover({ slides, titleDiscover, queries }) {
         }}
         grabCursor={true}
         slidesPerView={"auto"}
-        navigation={useMediaQuery(theme.breakpoints.up("sm")) ? true : false}
+        navigation={isDesktop}
         spaceBetween={10}
         freeMode={{
           enabled: true,
@@ -91,6 +100,43 @@ export default function CarouselDiscover({ slides, titleDiscover, queries }) {
             );
           })}
       </Swiper>
+      <Divider sx={{ my: 2 }} />
+    </Box>
+  );
+}
+
+function LoadingCarousel({ titleDiscover }) {
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        my: 2,
+      }}
+    >
+      <Stack
+        mb={1}
+        flexDirection={"row"}
+        justifyContent={"space-between"}
+        alignItems={"center"}
+      >
+        <Typography variant="body1">{titleDiscover}</Typography>
+      </Stack>
+      <Stack
+        flexDirection={"row"}
+        alignItems={"center"}
+        overflow={"hidden"}
+        gap={1}
+      >
+        {Array.from(new Array(20)).map((ele, i) => (
+          <Skeleton
+            key={"loading" + i}
+            sx={{ minWidth: 150 }}
+            variant="rectangular"
+            height={230}
+          />
+        ))}
+      </Stack>
+
       <Divider sx={{ my: 2 }} />
     </Box>
   );

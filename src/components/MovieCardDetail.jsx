@@ -11,7 +11,8 @@ import { useTheme } from "@emotion/react";
 export default function MovieCardDetail({ movie, w = 175, h = 275 }) {
   const theme = useTheme();
 
-  const genres = useSelector((state) => state.movieQuery.genres);
+  const genres =
+    useSelector((state) => state.movieQuery.querySearch?.with_genres) || [];
 
   const percentRating =
     movie?.vote_average && (movie?.vote_average.toFixed(1) * 100) / 10;
@@ -36,18 +37,59 @@ export default function MovieCardDetail({ movie, w = 175, h = 275 }) {
       <Grid item xs={10}>
         <Grid container rowSpacing={1} columnSpacing={{ xs: 1, sm: 2, md: 3 }}>
           <Grid item xs={12} sm={4} md={4}>
-            <Stack flexDirection={"row"}>
-              <Box sx={{ flex: 2 }}>
+            <Box sx={{ flex: 2 }}>
+              <Stack flexDirection={"row"} gap={2}>
                 <MovieCard
                   bg={movie?.poster_path}
                   title={movie?.title || movie?.name}
                   w={w}
                   h={h}
                 />
-              </Box>
-              {!useMediaQuery(theme.breakpoints.up("sm")) && (
-                <Box sx={{ flex: 1 }}>
-                  <Typography variant={"body2"}>
+                {!useMediaQuery(theme.breakpoints.up("sm")) && (
+                  <Stack sx={{ flex: 1 }} gap={1}>
+                    <Typography sx={{ fontSize: "1rem" }} variant={"h6"}>
+                      {movie?.title || movie?.name}
+                    </Typography>
+                    <Typography
+                      component="span"
+                      sx={{ fontSize: "0.7rem" }}
+                      variant={"button"}
+                    >
+                      {movie?.release_date || movie?.first_air_date}
+                    </Typography>
+
+                    <Typography variant={"body2"} sx={{ mt: 1 }}>
+                      <Highlighter
+                        searchWords={genres?.map((g) => g.name)}
+                        autoEscape={true}
+                        highlightStyle={{
+                          backgroundColor: "#ffee58b3",
+                          padding: "0 4px",
+                        }}
+                        textToHighlight={`${currGenres?.join(", ")}`}
+                      />
+                    </Typography>
+                  </Stack>
+                )}
+              </Stack>
+            </Box>
+          </Grid>
+          <Grid item xs={12} sm={8} md={8}>
+            <Stack>
+              {useMediaQuery(theme.breakpoints.up("sm")) && (
+                <>
+                  <Typography sx={{ fontSize: "1rem" }} variant={"h6"}>
+                    {movie?.title || movie?.name}
+                  </Typography>
+                  <Typography
+                    component="span"
+                    sx={{ fontSize: "0.7rem" }}
+                    variant={"button"}
+                  >
+                    {movie?.release_date || movie?.first_air_date}
+                  </Typography>
+
+                  <Typography variant={"body2"} sx={{ mt: 1 }}>
                     <Highlighter
                       searchWords={genres?.map((g) => g.name)}
                       autoEscape={true}
@@ -55,37 +97,10 @@ export default function MovieCardDetail({ movie, w = 175, h = 275 }) {
                         backgroundColor: "#ffee58b3",
                         padding: "0 4px",
                       }}
-                      textToHighlight={`${currGenres.join(" ")}`}
+                      textToHighlight={`${currGenres.join(", ")}`}
                     />
                   </Typography>
-                </Box>
-              )}
-            </Stack>
-          </Grid>
-          <Grid item xs={12} sm={8} md={8}>
-            <Stack>
-              <Typography sx={{ fontSize: "1rem" }} variant={"h6"}>
-                {movie?.title || movie?.name}
-              </Typography>
-              <Typography
-                component="span"
-                sx={{ fontSize: "0.7rem" }}
-                variant={"button"}
-              >
-                {movie?.release_date || movie?.first_air_date}
-              </Typography>
-              {useMediaQuery(theme.breakpoints.up("sm")) && (
-                <Typography variant={"body2"} sx={{ mt: 1 }}>
-                  <Highlighter
-                    searchWords={genres?.map((g) => g.name)}
-                    autoEscape={true}
-                    highlightStyle={{
-                      backgroundColor: "#ffee58b3",
-                      padding: "0 4px",
-                    }}
-                    textToHighlight={`${currGenres.join(", ")}`}
-                  />
-                </Typography>
+                </>
               )}
               <Typography
                 component="span"
@@ -106,7 +121,7 @@ export default function MovieCardDetail({ movie, w = 175, h = 275 }) {
         <Stack flexDirection={"column"} gap={3} alignItems={"center"}>
           <CircularProgressWithLabel
             to={percentRating}
-            size={55}
+            size={useMediaQuery(theme.breakpoints.up("sm")) ? 55 : 35}
             labelSize={11}
             durationAnimate={0}
           />

@@ -7,7 +7,7 @@ import { Box, Button, Card, Stack, Typography } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 
 export default function ListGenresSetting({
-  selectedItemsGenres,
+  selectedItemsGenres = [],
   setSelectedItemsGenres,
 }) {
   const { isLoading, error, data } = useQuery(["genres"], () => fetchGenres());
@@ -48,7 +48,7 @@ export default function ListGenresSetting({
       sx={{ height: { xs: "265px", lg: "100%" }, overflow: "auto" }}
     >
       {visibleData.map((genre) => {
-        const selected = selectedItemsGenres.find((s) => s.id === genre.id);
+        const selected = selectedItemsGenres?.find((s) => s.id === genre.id);
 
         return (
           <Grid

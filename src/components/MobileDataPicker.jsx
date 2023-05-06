@@ -5,6 +5,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { MobileDatePicker } from "@mui/x-date-pickers/MobileDatePicker";
 import * as React from "react";
+import { DATA_TOMORROW, DATE_SIX_MONTHS_LATER } from "../api/tmdbApis";
 
 export default function MobileDataPicker({ props }) {
   const {
@@ -37,7 +38,6 @@ export default function MobileDataPicker({ props }) {
       >
         <MobileDatePicker
           label="Data Iniziale"
-          disableFuture
           openTo="year"
           views={["year"]}
           value={initialDate}
@@ -55,7 +55,7 @@ export default function MobileDataPicker({ props }) {
           components={{
             ActionBar: CustomActionBar,
           }}
-          maxDate={new Date()}
+          maxDate={DATA_TOMORROW}
           inputFormat="YYYY"
           renderInput={(params) => (
             <TextField
@@ -67,7 +67,6 @@ export default function MobileDataPicker({ props }) {
         -
         <MobileDatePicker
           label="Data finale"
-          disableFuture
           openTo="year"
           views={["year"]}
           value={lastDate}
@@ -85,7 +84,7 @@ export default function MobileDataPicker({ props }) {
           components={{
             ActionBar: CustomActionBar,
           }}
-          maxDate={new Date()}
+          maxDate={DATE_SIX_MONTHS_LATER}
           inputFormat="YYYY"
           renderInput={(params) => (
             <TextField

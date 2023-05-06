@@ -1,23 +1,85 @@
-import { Box, Button, Paper, Stack, Typography } from "@mui/material";
-import SearchPageDialog from "../components/SearchPageDialog";
-import { useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
+import {
+  Box,
+  Button,
+  Stack,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
+import dayjs from "dayjs";
+import { useState } from "react";
 import { useQuery } from "react-query";
-import { fetchMoviesDiscover } from "../api/tmdbApis";
+import { useDispatch } from "react-redux";
+import { DATA_TOMORROW, fetchMoviesDiscover } from "../api/tmdbApis";
 import CarouselDiscover from "../components/CarouselDiscover";
+import SearchPageDialog from "../components/SearchPageDialog";
+import { setQuery } from "../store/movieQuery";
 
 export default function SearchPage() {
-  const [openSearchMovie, setOpenSearchMovie] = useState(false);
+  const dispatch = useDispatch();
+  const theme = useTheme();
 
+  const [openSearchMovie, setOpenSearchMovie] = useState(false);
   const { isLoading, error, data } = useQuery(["discoverPage"], () =>
     fetchMoviesDiscover()
   );
+
+  const handleSeeAllMovie = () => {
+    dispatch(
+      setQuery({
+        currentRoute: 1,
+        querySearch: {
+          from: "1970-01-01",
+          to: dayjs(new Date()).format("YYYY-MM-DD"),
+          order_by: "popularity.desc",
+          with_genres: [],
+          with_ott_providers: [],
+          exact_search: false,
+        },
+      })
+    );
+  };
+  const handleSeeAllPopularTv = () => {
+    dispatch(
+      setQuery({
+        currentRoute: 2,
+        querySearchTv: {
+          from: "1970-01-01",
+          to: dayjs(new Date()).format("YYYY-MM-DD"),
+          order_by: "popularity.desc",
+          with_genres: [],
+          with_ott_providers: [],
+          exact_search: false,
+        },
+      })
+    );
+  };
+
+  const handleSeeAllIncomingMovie = () => {
+    dispatch(
+      setQuery({
+        currentRoute: 1,
+        querySearch: {
+          from: DATA_TOMORROW,
+          to: dayjs(new Date()).add(6, "month").format("YYYY-MM-DD"),
+          order_by: "popularity.desc",
+          with_genres: [],
+          with_ott_providers: [],
+          exact_search: false,
+          with_release_type: "3|4",
+        },
+      })
+    );
+  };
 
   const popularMovies = data?.trending_movie?.results || [];
 
   const popularTv = data?.trending_tv?.results || [];
 
   const incomingMovie = data?.incoming_movie?.results || [];
+
+  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
 
   return (
     <Box sx={{ p: 2 }}>
@@ -49,14 +111,26 @@ export default function SearchPage() {
         <CarouselDiscover
           slides={popularMovies}
           titleDiscover={"Film di tendenza"}
+          isLoading={isLoading}
+          path={"/movies"}
+          onAction={handleSeeAllMovie}
+          isDesktop={isDesktop}
         />
         <CarouselDiscover
           slides={popularTv}
           titleDiscover={"Serie TV di tendenza"}
+          isLoading={isLoading}
+          path={"/showtv"}
+          onAction={handleSeeAllPopularTv}
+          isDesktop={isDesktop}
         />
         <CarouselDiscover
           slides={incomingMovie}
           titleDiscover={"Film in arrivo"}
+          isLoading={isLoading}
+          path={"/movies"}
+          onAction={handleSeeAllIncomingMovie}
+          isDesktop={isDesktop}
         />
       </Box>
     </Box>

@@ -1,10 +1,12 @@
+import { useTheme } from "@emotion/react";
+import TableRowsIcon from "@mui/icons-material/TableRows";
+import TuneIcon from "@mui/icons-material/Tune";
+import ViewCompactIcon from "@mui/icons-material/ViewCompact";
 import {
   Box,
   CircularProgress,
-  Stack,
   ToggleButton,
   ToggleButtonGroup,
-  Typography,
   useMediaQuery,
 } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
@@ -12,35 +14,25 @@ import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
 import { memo, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useInfiniteQuery } from "react-query";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { fetchMoviesPage } from "../api/tmdbApis";
-import AnimatedTitle from "../components/AnimatedTitle";
 import DialogSettingMovies from "../components/DialogSettingMovies";
 import FloatingActionButton from "../components/FloatingActionButton";
 import LoadingPage from "../components/LoadingPage";
 import MovieCard from "../components/MovieCard";
-import { areEqual } from "../utils/areEqual";
-import TuneIcon from "@mui/icons-material/Tune";
-import ViewCompactIcon from "@mui/icons-material/ViewCompact";
-import TableRowsIcon from "@mui/icons-material/TableRows";
-import { useTheme } from "@emotion/react";
 import MovieCardDetail from "../components/MovieCardDetail";
+import { areEqual } from "../utils/areEqual";
 
 export default function MoviesPage() {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-
-  const genres = useSelector((state) => state.movieQuery.genres);
-  const casts = useSelector((state) => state.movieQuery.cast);
-  const sort = useSelector((state) => state.movieQuery.sort);
-  const periods = useSelector((state) => state.movieQuery.rangeDate);
-  const exactQuery = useSelector((state) => state.movieQuery.exactQuery);
+  const theme = useTheme();
 
   const [changeFilters, setChangeFilters] = useState(false);
   const [openSettingMovie, setOpenSettingMovie] = useState(false);
+  const querySearch = useSelector((state) => state.movieQuery.querySearch);
 
-  const [viewGrid, setViewGrid] = useState("detail");
+  const [viewGrid, setViewGrid] = useState("compact");
+
+  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
@@ -60,8 +52,7 @@ export default function MoviesPage() {
   } = useInfiniteQuery({
     queryKey: ["moviesPage", changeFilters],
     getNextPageParam: (prevData) => prevData.nextPage,
-    queryFn: ({ pageParam = 1 }) =>
-      fetchMoviesPage(pageParam, genres, casts, sort, periods, exactQuery),
+    queryFn: ({ pageParam = 1 }) => fetchMoviesPage(pageParam, querySearch),
   });
 
   if (status === "loading") return <LoadingPage />;
@@ -151,6 +142,7 @@ export default function MoviesPage() {
         onClick={() => setOpenSettingMovie(true)}
         position={"right"}
         size={"large"}
+        bottom={isDesktop ? 16 : 95}
         sx={{ padding: 0 }}
       >
         <TuneIcon fontSize="large" color="action" />
@@ -162,13 +154,9 @@ export default function MoviesPage() {
 const ItemRow = memo(RenderRow, areEqual);
 
 function RenderRow({ itemData, typeView, handleClickItem }) {
-  const theme = useTheme();
-
-  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
-
   if (typeView === "detail") {
     return (
-      <Grid container sx={{ overflow: "hidden" }}>
+      <Grid container sx={{ overflow: "hidden" }} gap={2}>
         <AnimatePresence
           mode={"popLayout"}
           prop={{
@@ -193,7 +181,7 @@ function RenderRow({ itemData, typeView, handleClickItem }) {
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring" }}
               sx={{
-                padding: 1.5,
+                padding: 2,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

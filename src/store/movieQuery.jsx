@@ -2,16 +2,22 @@ import { createSlice } from "@reduxjs/toolkit";
 import dayjs from "dayjs";
 
 export const initialState = {
-  exactQuery: false,
-  genres: [],
-  cast: [],
-  sort: "popularity.desc",
-  rangeDate: JSON.stringify({
-    from: dayjs("1975/01/01"),
-    to: new Date(),
-    error: false,
-  }),
-  notifications: { casts: [], genres: [], value: 0 },
+  querySearch: {
+    from: "1975-01-01",
+    to: dayjs(new Date()).format("YYYY-MM-DD"),
+    order_by: "popularity.desc",
+    with_genres: [],
+    with_ott_providers: [],
+    exact_search: false,
+  },
+  querySearchTv: {
+    from: "1975-01-01",
+    to: dayjs(new Date()).format("YYYY-MM-DD"),
+    order_by: "popularity.desc",
+    with_genres: [],
+    with_ott_providers: [],
+    exact_search: false,
+  },
   currentRoute: 0,
 };
 

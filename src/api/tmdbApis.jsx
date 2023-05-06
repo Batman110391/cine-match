@@ -3,34 +3,76 @@ import _ from "lodash";
 import { fetchPromise } from "../utils/fetchPromise";
 import { uniqueArray } from "../utils/uniqueArray";
 import isBetween from "dayjs/plugin/isBetween";
+import axios from "axios";
 dayjs.extend(isBetween);
 
 const API_KEY = import.meta.env.VITE_API_KEY;
 const CURRENT_LANGUAGE = "language=it-IT";
 
-const PROVIDERS = "8|119|337|29|39|359|110|222";
+export const PROVIDERS = "8|119|337|29|39|359|110|222";
 
-const CURRENT_DATE_FORMATTING = dayjs(new Date()).format("YYYY-MM-DD");
-const DATA_TOMORROW = dayjs(CURRENT_DATE_FORMATTING)
+export const CURRENT_DATE_FORMATTING = dayjs(new Date()).format("YYYY-MM-DD");
+export const DATA_TOMORROW = dayjs(CURRENT_DATE_FORMATTING)
   .add(1, "day")
   .format("YYYY-MM-DD");
-const DATE_SIX_MONTHS_LATER = dayjs(CURRENT_DATE_FORMATTING)
+export const DATE_SIX_MONTHS_LATER = dayjs(CURRENT_DATE_FORMATTING)
   .add(6, "month")
   .format("YYYY-MM-DD");
 
-const URL_POPULAR_TV = `https://api.themoviedb.org/3/discover/tv?api_key=${API_KEY}&${CURRENT_LANGUAGE}
-&air_date.lte=${DATE_SIX_MONTHS_LATER}&certification_country=IT&ott_region=IT&release_date.lte=${DATE_SIX_MONTHS_LATER}&show_me=0&sort_by=popularity.desc&vote_average.gte=0&vote_average.lte=10
-&vote_count.gte=0&with_ott_providers=${encodeURI(
-  PROVIDERS
-)}&with_runtime.gte=0&with_runtime.lte=400`;
+const getUrlMoviesWithCustomParams = ({
+  order_by = "popularity.desc",
+  from = "1970-01-01",
+  to = DATE_SIX_MONTHS_LATER,
+  with_genres = [],
+  with_ott_providers = [],
+  exact_search = false,
+  with_release_type = null,
+}) => {
+  const genres =
+    with_genres.length > 0 && exact_search
+      ? with_genres.map((g) => g.id).join(",")
+      : with_genres.length > 0 && !exact_search
+      ? with_genres.map((g) => g.id).join("|")
+      : null;
+  const providers =
+    with_ott_providers.length > 0
+      ? with_ott_providers.map((g) => g.provider_id).join("|")
+      : null;
 
-const URL_POPULAR_MOVIE = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&${CURRENT_LANGUAGE}
-&air_date.lte=${DATE_SIX_MONTHS_LATER}&certification_country=IT&ott_region=IT&release_date.lte=${DATE_SIX_MONTHS_LATER}&show_me=0&sort_by=popularity.desc&vote_average.gte=0&vote_average.lte=10
-&vote_count.gte=0&with_runtime.gte=0&with_runtime.lte=400region=IT`;
+  return `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&${CURRENT_LANGUAGE}
+  &air_date.lte=${DATE_SIX_MONTHS_LATER}&certification_country=IT&ott_region=IT&release_date.gte=${from}&release_date.lte=${to}&show_me=0&sort_by=${order_by}&vote_average.gte=0&vote_average.lte=10
+  &vote_count.gte=0&with_runtime.gte=0&with_runtime.lte=400&region=IT${
+    genres ? "&with_genres=" + genres : ""
+  }${providers ? "&with_ott_providers=" + providers : ""}${
+    with_release_type ? "&with_release_type=" + with_release_type : ""
+  }`;
+};
 
-const URL_INCOMING_MOVIE = `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&${CURRENT_LANGUAGE}
-&air_date.lte=${DATE_SIX_MONTHS_LATER}&certification_country=IT&ott_region=IT&release_date.gte=${DATA_TOMORROW}&release_date.lte=${DATE_SIX_MONTHS_LATER}&show_me=0&sort_by=popularity.desc&vote_average.gte=0&vote_average.lte=10
-&vote_count.gte=0&with_runtime.gte=0&with_runtime.lte=400&with_release_type=3|4&region=IT`;
+const getUrlSerieTvWithCustomParams = ({
+  order_by = "popularity.desc",
+  from = "1970-01-01",
+  to = DATE_SIX_MONTHS_LATER,
+  with_genres = [],
+  with_ott_providers = [],
+  exact_search = false,
+}) => {
+  const genres =
+    with_genres.length > 0 && exact_search
+      ? with_genres.map((g) => g.id).join(",")
+      : with_genres.length > 0 && !exact_search
+      ? with_genres.map((g) => g.id).join("|")
+      : null;
+  const providers =
+    with_ott_providers.length > 0
+      ? with_ott_providers.map((g) => g.provider_id).join("|")
+      : PROVIDERS;
+
+  return `https://api.themoviedb.org/3/discover/tv?api_key=${API_KEY}&${CURRENT_LANGUAGE}
+  &air_date.lte=${DATE_SIX_MONTHS_LATER}&certification_country=IT&ott_region=IT&release_date.gte=${from}&release_date.lte=${to}&show_me=0&sort_by=${order_by}&vote_average.gte=0&vote_average.lte=10
+  &vote_count.gte=0&with_runtime.gte=0&with_runtime.lte=400&region=IT${
+    genres ? "&with_genres=" + genres : ""
+  }${providers ? "&with_ott_providers=" + providers : ""}`;
+};
 
 export const genresList = [
   {
@@ -182,6 +224,14 @@ export function fetchGenres() {
   return new Promise((resolve) => resolve(genresList));
 }
 
+export async function fetchProviders() {
+  return fetchPromise(
+    `https://api.themoviedb.org/3/watch/providers/movie?api_key=${API_KEY}&${CURRENT_LANGUAGE}&watch_region=IT`
+  ).then((data) => {
+    return data.results;
+  });
+}
+
 export async function fetchSimilarMoviesByGenres(page, keyword, genres) {
   const genresQuery = genres?.map((g) => g.id).join(",") || null;
 
@@ -241,15 +291,20 @@ export async function fetchMoviesDiscover(page = 1) {
   const resourcesAll = [
     {
       name: "trending_movie",
-      api: fetchPromise(`${URL_POPULAR_MOVIE}&page=${page}`),
+      api: fetchPromise(`${getUrlMoviesWithCustomParams({})}&page=${page}`),
     },
     {
       name: "trending_tv",
-      api: fetchPromise(`${URL_POPULAR_TV}&page=${page}`),
+      api: fetchPromise(`${getUrlSerieTvWithCustomParams({})}&page=${page}`),
     },
     {
       name: "incoming_movie",
-      api: fetchPromise(`${URL_INCOMING_MOVIE}&page=${page}`),
+      api: fetchPromise(
+        `${getUrlMoviesWithCustomParams({
+          from: DATA_TOMORROW,
+          with_release_type: "3|4",
+        })}&page=${page}`
+      ),
     },
   ];
 
@@ -307,19 +362,21 @@ export async function fetchMoviesByKeywords(keyword, typeQuery, page = 1) {
   }
 
   if (typeQuery === "movie") {
-    return await fetchPromise(`${URL_POPULAR_MOVIE}&page=${page}`).then(
-      (data) => {
-        if (data && data?.results?.length > 0) {
-          return data?.results;
-        } else {
-          return [];
-        }
+    return await fetchPromise(
+      `${getUrlMoviesWithCustomParams({})}&page=${page}`
+    ).then((data) => {
+      if (data && data?.results?.length > 0) {
+        return data?.results;
+      } else {
+        return [];
       }
-    );
+    });
   }
 
   if (typeQuery === "tv") {
-    return await fetchPromise(`${URL_POPULAR_TV}&page=${page}`).then((data) => {
+    return await fetchPromise(
+      `${getUrlSerieTvWithCustomParams({})}&page=${page}`
+    ).then((data) => {
       if (data && data?.results?.length > 0) {
         return data?.results;
       } else {
@@ -335,15 +392,25 @@ export async function fetchMoviesByKeywords(keyword, typeQuery, page = 1) {
   }
 }
 
-export async function fetchMoviesPage(
-  page,
-  genres,
-  casts,
-  sort,
-  periods,
-  exactQuery
-) {
-  return fetchPromise(`${URL_POPULAR_MOVIE}&page=${page}`).then((data) => {
+export async function fetchMoviesPage(page, querySearch) {
+  return fetchPromise(
+    `${getUrlMoviesWithCustomParams(querySearch)}&page=${page}`
+  ).then((data) => {
+    const hasNext = page <= data.total_pages;
+
+    const currMovies = {
+      results: data?.results,
+      nextPage: hasNext ? page + 1 : undefined,
+      previousPage: page > 1 ? page - 1 : undefined,
+    };
+
+    return currMovies;
+  });
+}
+export async function fetchShowTvPage(page, querySearch) {
+  return fetchPromise(
+    `${getUrlSerieTvWithCustomParams(querySearch)}&page=${page}`
+  ).then((data) => {
     const hasNext = page <= data.total_pages;
 
     const currMovies = {

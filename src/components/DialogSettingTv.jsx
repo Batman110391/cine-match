@@ -42,7 +42,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Grow in={true} ref={ref} {...props} />;
 });
 
-export default function DialogSettingMovies({
+export default function DialogSettingTv({
   open,
   setOpen,
   changeFilters,
@@ -53,19 +53,19 @@ export default function DialogSettingMovies({
 
   const dispatch = useDispatch();
 
-  const fromPrev = useSelector((state) => state.movieQuery.querySearch?.from);
-  const toPrev = useSelector((state) => state.movieQuery.querySearch?.to);
+  const fromPrev = useSelector((state) => state.movieQuery.querySearchTv?.from);
+  const toPrev = useSelector((state) => state.movieQuery.querySearchTv?.to);
   const orderPrev = useSelector(
-    (state) => state.movieQuery.querySearch?.order_by
+    (state) => state.movieQuery.querySearchTv?.order_by
   );
   const exactPrev = useSelector(
-    (state) => state.movieQuery.querySearch?.exact_search
+    (state) => state.movieQuery.querySearchTv?.exact_search
   );
   const genresPrev = useSelector(
-    (state) => state.movieQuery.querySearch?.with_genres
+    (state) => state.movieQuery.querySearchTv?.with_genres
   );
   const providerPrev = useSelector(
-    (state) => state.movieQuery.querySearch?.with_ott_providers
+    (state) => state.movieQuery.querySearchTv?.with_ott_providers
   );
 
   const [periods, setPeriods] = useState({
@@ -113,7 +113,7 @@ export default function DialogSettingMovies({
   const handleSaveSetting = () => {
     dispatch(
       setQuery({
-        querySearch: {
+        querySearchTv: {
           from: periods.from,
           to: periods.to,
           order_by: sort,
