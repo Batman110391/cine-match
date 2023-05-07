@@ -43,11 +43,7 @@ export default function ListProviderSettng({
   const visibleData = data;
 
   return (
-    <Grid
-      container
-      spacing={0.5}
-      sx={{ height: { xs: "265px", lg: "100%" }, overflow: "auto" }}
-    >
+    <Grid container spacing={0.5} sx={{ height: "100%", overflow: "auto" }}>
       {visibleData?.map((provider) => {
         const selected = selectedItemsProviders?.find(
           (s) => s.provider_id === provider.provider_id

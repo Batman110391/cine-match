@@ -8,6 +8,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 import { darkTheme } from "./context/theme";
 import { store } from "./store/store";
+import DialogMovieDetailProvider from "./components/DialogMovieDetailProvider";
 
 const queryClient = new QueryClient();
 
@@ -17,7 +18,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <BrowserRouter>
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>
-          <App />
+          <DialogMovieDetailProvider>
+            <App />
+          </DialogMovieDetailProvider>
         </QueryClientProvider>
       </Provider>
     </BrowserRouter>

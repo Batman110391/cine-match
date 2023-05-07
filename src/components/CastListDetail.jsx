@@ -1,6 +1,10 @@
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
-import { Divider, IconButton, ListSubheader, Typography } from "@mui/material";
+import { useTheme } from "@emotion/react";
+import {
+  Divider,
+  ListSubheader,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
 import Avatar from "@mui/material/Avatar";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -8,28 +12,9 @@ import ListItemAvatar from "@mui/material/ListItemAvatar";
 import ListItemText from "@mui/material/ListItemText";
 import { motion } from "framer-motion";
 import * as React from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { setQuery } from "../store/movieQuery";
 
-export default function CastListDetail({
-  movieId,
-  person,
-  height,
-  handleAddMoviesByInsertPeople,
-  handleRemoveMoviesByInsertPeople,
-}) {
-  const cast = useSelector((state) => state.movieQuery.cast);
-  const dispatch = useDispatch();
-
-  const handleAddPerson = (value) => {
-    dispatch(setQuery({ cast: [...cast, value] }));
-    handleAddMoviesByInsertPeople(value);
-  };
-  const handleRemovePerson = (value) => {
-    const newCast = cast.filter((c) => c.id !== value.id);
-    dispatch(setQuery({ cast: newCast }));
-    handleRemoveMoviesByInsertPeople(value);
-  };
+export default function CastListDetail({ person, height }) {
+  const theme = useTheme();
 
   return (
     <List
@@ -42,27 +27,21 @@ export default function CastListDetail({
         maxHeight: { xs: "inherit", sm: height ? `${height}px` : "50vh" },
         overflowY: { xs: "inherit", sm: "auto" },
       }}
-      subheader={<ListSubheader>Cast</ListSubheader>}
+      subheader={
+        useMediaQuery(theme.breakpoints.up("sm")) ? (
+          <ListSubheader>Cast</ListSubheader>
+        ) : (
+          <Typography>Cast</Typography>
+        )
+      }
     >
       {person.map(
         ({ profile_path, name, id, known_for_department, character }, i) => {
           const labelId = `checkbox-list-secondary-label-${id}`;
 
-          const existCast = cast.find((c) => c.id === id);
-
-          const actionButton = existCast ? (
-            <IconButton onClick={() => handleRemovePerson(person[i])}>
-              <RemoveIcon />
-            </IconButton>
-          ) : (
-            <IconButton onClick={() => handleAddPerson(person[i])}>
-              <AddIcon />
-            </IconButton>
-          );
-
           return (
             <React.Fragment key={id + name + i}>
-              <ListItem secondaryAction={actionButton} disableGutters>
+              <ListItem disableGutters>
                 <ListItemAvatar>
                   <Avatar
                     alt={`Avatar ${name}`}

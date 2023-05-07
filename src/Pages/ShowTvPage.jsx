@@ -9,22 +9,23 @@ import {
   ToggleButtonGroup,
   useMediaQuery,
 } from "@mui/material";
-import Grid from "@mui/material/Unstable_Grid2";
-import { AnimatePresence, motion, useScroll, useSpring } from "framer-motion";
-import { memo, useState } from "react";
+import { motion, useScroll, useSpring } from "framer-motion";
+import { memo, useContext, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useInfiniteQuery } from "react-query";
 import { useSelector } from "react-redux";
 import { fetchShowTvPage } from "../api/tmdbApis";
+import { DialogMovieDetailContext } from "../components/DialogMovieDetailProvider";
 import DialogSettingTv from "../components/DialogSettingTv";
 import FloatingActionButton from "../components/FloatingActionButton";
 import LoadingPage from "../components/LoadingPage";
-import MovieCard from "../components/MovieCard";
-import MovieCardDetail from "../components/MovieCardDetail";
+import RenderRow from "../components/RenderRow";
 import { areEqual } from "../utils/areEqual";
 
 export default function ShowTvPage() {
   const theme = useTheme();
+
+  const { openDialogMovieDetail } = useContext(DialogMovieDetailContext);
 
   const [changeFilters, setChangeFilters] = useState(false);
   const [openSettingTv, setOpenSettingTv] = useState(false);
@@ -69,8 +70,8 @@ export default function ShowTvPage() {
       };
     }, {});
 
-  const handleClickItem = () => {
-    console.log("to do");
+  const handleClickItem = (movieID) => {
+    openDialogMovieDetail(movieID, "tv");
   };
 
   const handleViewGrid = (event, newValue) => {
@@ -152,88 +153,3 @@ export default function ShowTvPage() {
 }
 
 const ItemRow = memo(RenderRow, areEqual);
-
-function RenderRow({ itemData, typeView, handleClickItem }) {
-  if (typeView === "detail") {
-    return (
-      <Grid container sx={{ overflow: "hidden" }} gap={2}>
-        <AnimatePresence
-          mode={"popLayout"}
-          prop={{
-            popDuration: 0.2,
-            popSpringMass: 1.8,
-            popSpringStiffness: 100,
-            popSpringDamping: 100,
-          }}
-        >
-          {itemData.map((movie, i) => (
-            <Grid
-              component={motion.div}
-              key={movie.id}
-              xs={12}
-              layout
-              animate={{ scale: 1, opacity: 1 }}
-              initial={{
-                scale: 0.9,
-                opacity: 0,
-                duration: 0.1,
-              }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: "spring" }}
-              sx={{
-                padding: 2,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-              onClick={() => handleClickItem(movie.id)}
-            >
-              <MovieCardDetail movie={movie} />
-            </Grid>
-          ))}
-        </AnimatePresence>
-      </Grid>
-    );
-  } else {
-    return (
-      <Grid container sx={{ overflow: "hidden" }}>
-        <AnimatePresence mode={"popLayout"}>
-          {itemData.map((movie, i) => (
-            <Grid
-              component={motion.div}
-              key={movie.id}
-              xs={6}
-              sm={4}
-              md={3}
-              lg={2}
-              layout
-              animate={{ scale: 1, opacity: 1 }}
-              initial={{
-                scale: 0.8,
-                opacity: 0,
-                duration: 0.1,
-              }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ type: "spring" }}
-              sx={{
-                padding: 1.5,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-              onClick={() => handleClickItem(movie.id)}
-            >
-              <MovieCard
-                bg={movie?.poster_path}
-                title={movie?.title}
-                w={175}
-                h={265}
-                badgeRating={movie?.vote_average}
-              />
-            </Grid>
-          ))}
-        </AnimatePresence>
-      </Grid>
-    );
-  }
-}

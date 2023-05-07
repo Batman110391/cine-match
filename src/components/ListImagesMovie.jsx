@@ -1,3 +1,5 @@
+import { useTheme } from "@emotion/react";
+import { useMediaQuery } from "@mui/material";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
 import * as React from "react";
@@ -10,18 +12,21 @@ function srcset(image) {
 }
 
 export default function ListImagesMovie({ images }) {
+  const theme = useTheme();
+
   const itemData = images?.filter((ele) => !ele?.iso_639_1);
 
   return (
     <ImageList
+      variant="quilted"
       sx={{
         width: "100%",
         height: 450,
-        // Promote the list into its own layer in Chrome. This costs memory, but helps keeping high FPS.
         transform: "translateZ(0)",
       }}
       rowHeight={200}
-      gap={1}
+      cols={useMediaQuery(theme.breakpoints.up("sm")) ? 4 : 1}
+      gap={4}
     >
       {itemData.map((item, i) => {
         const featured = i === 0 || i % 3 === 0;
@@ -30,7 +35,11 @@ export default function ListImagesMovie({ images }) {
 
         return (
           <ImageListItem key={item.file_path} cols={cols} rows={rows}>
-            <img {...srcset(item.file_path)} alt={item.file_path} />
+            <img
+              style={{ borderRadius: "10px" }}
+              {...srcset(item.file_path)}
+              alt={item.file_path}
+            />
           </ImageListItem>
         );
       })}

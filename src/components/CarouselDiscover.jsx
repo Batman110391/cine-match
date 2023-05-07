@@ -23,7 +23,9 @@ export default function CarouselDiscover({
   isLoading,
   path,
   onAction,
+  handleClickItem,
   isDesktop,
+  type,
 }) {
   if (isLoading) {
     return <LoadingCarousel titleDiscover={titleDiscover} />;
@@ -87,7 +89,7 @@ export default function CarouselDiscover({
                 style={{
                   width: "150px",
                 }}
-                onClick={() => console.log("hi")}
+                onClick={() => handleClickItem(slideContent.id, type)}
               >
                 <MovieCard
                   bg={slideContent?.poster_path}

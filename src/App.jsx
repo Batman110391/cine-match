@@ -1,4 +1,4 @@
-import { Suspense, useEffect } from "react";
+import { Suspense, createElement, useContext, useEffect } from "react";
 import { AnimatePresence } from "framer-motion";
 import BoxLayout from "./components/BoxLayout";
 import ErrorBoundary from "./utils/ErrorBoundary";
@@ -8,6 +8,7 @@ import LoadingPage from "./components/LoadingPage";
 import { useLocalStorage } from "./utils/useLocalStorage";
 import { useDispatch, useSelector } from "react-redux";
 import { setQuery } from "./store/movieQuery";
+import { DialogMovieDetailContext } from "./components/DialogMovieDetailProvider";
 
 export default function App() {
   const { pathname } = useLocation();

@@ -8,15 +8,18 @@ import {
   useTheme,
 } from "@mui/material";
 import dayjs from "dayjs";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useQuery } from "react-query";
 import { useDispatch } from "react-redux";
 import { DATA_TOMORROW, fetchMoviesDiscover } from "../api/tmdbApis";
 import CarouselDiscover from "../components/CarouselDiscover";
+import { DialogMovieDetailContext } from "../components/DialogMovieDetailProvider";
 import SearchPageDialog from "../components/SearchPageDialog";
 import { setQuery } from "../store/movieQuery";
 
 export default function SearchPage() {
+  const { openDialogMovieDetail } = useContext(DialogMovieDetailContext);
+
   const dispatch = useDispatch();
   const theme = useTheme();
 
@@ -24,6 +27,10 @@ export default function SearchPage() {
   const { isLoading, error, data } = useQuery(["discoverPage"], () =>
     fetchMoviesDiscover()
   );
+
+  const handleClickItem = (movieID, type) => {
+    openDialogMovieDetail(movieID, type);
+  };
 
   const handleSeeAllMovie = () => {
     dispatch(
@@ -114,7 +121,9 @@ export default function SearchPage() {
           isLoading={isLoading}
           path={"/movies"}
           onAction={handleSeeAllMovie}
+          handleClickItem={handleClickItem}
           isDesktop={isDesktop}
+          type={"movie"}
         />
         <CarouselDiscover
           slides={popularTv}
@@ -122,7 +131,9 @@ export default function SearchPage() {
           isLoading={isLoading}
           path={"/showtv"}
           onAction={handleSeeAllPopularTv}
+          handleClickItem={handleClickItem}
           isDesktop={isDesktop}
+          type={"tv"}
         />
         <CarouselDiscover
           slides={incomingMovie}
@@ -130,7 +141,9 @@ export default function SearchPage() {
           isLoading={isLoading}
           path={"/movies"}
           onAction={handleSeeAllIncomingMovie}
+          handleClickItem={handleClickItem}
           isDesktop={isDesktop}
+          type={"movie"}
         />
       </Box>
     </Box>
