@@ -35,6 +35,7 @@ import CastsCard from "../components/CastsCard";
 import MovieCard from "../components/MovieCard";
 import { useDebounce } from "../utils/useDebounce";
 import { CircularProgressWithLabel } from "./ChartCompatibility";
+import { DialogMovieDetailContext } from "./DialogMovieDetailProvider";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -98,6 +99,8 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 });
 
 export default function SearchPageDialog({ open, setOpen }) {
+  const { openDialogMovieDetail } = React.useContext(DialogMovieDetailContext);
+
   const [typeQuery, setTypeQuery] = React.useState("movie");
   const [searchInput, setSearchInput] = React.useState("");
 
@@ -120,7 +123,7 @@ export default function SearchPageDialog({ open, setOpen }) {
 
   const redirectMovie = (movieId, type) => {
     if (movieId) {
-      // TO DO
+      openDialogMovieDetail(movieId, type);
     }
   };
 

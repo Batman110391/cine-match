@@ -73,12 +73,23 @@ export default function CarouselDiscover({
         slidesPerView={"auto"}
         navigation={isDesktop}
         spaceBetween={10}
+        edgeSwipeDetection={true}
+        edgeSwipeThreshold={20}
         freeMode={{
           enabled: true,
-          momentumVelocityRatio: 0.5,
-          sticky: true,
+          momentumVelocityRatio: 1,
         }}
         modules={[Navigation, FreeMode]}
+        touch={{
+          enabled: true,
+          releaseOnEdges: false,
+          releaseOnEdgesRatio: 0.5,
+          momentum: true,
+          momentumRatio: 1,
+          momentumBounce: true,
+          momentumBounceRatio: 1,
+          threshold: 10,
+        }}
       >
         {slides &&
           slides.length > 0 &&

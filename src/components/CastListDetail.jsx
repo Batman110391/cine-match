@@ -3,6 +3,7 @@ import {
   Divider,
   ListSubheader,
   Typography,
+  alpha,
   useMediaQuery,
 } from "@mui/material";
 import Avatar from "@mui/material/Avatar";
@@ -29,9 +30,20 @@ export default function CastListDetail({ person, height }) {
       }}
       subheader={
         useMediaQuery(theme.breakpoints.up("sm")) ? (
-          <ListSubheader>Cast</ListSubheader>
+          <ListSubheader
+            sx={{
+              bgcolor: (theme) => theme.palette.background.paper,
+              borderRadius: (theme) => theme.spacing(0.5),
+            }}
+          >
+            <Typography sx={{ fontSize: "0.6rem" }} variant={"button"}>
+              {"Cast"}
+            </Typography>
+          </ListSubheader>
         ) : (
-          <Typography>Cast</Typography>
+          <Typography sx={{ fontSize: "0.6rem" }} variant={"button"}>
+            {"Cast"}
+          </Typography>
         )
       }
     >
