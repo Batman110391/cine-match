@@ -7,7 +7,6 @@ import * as React from "react";
 function srcset(image) {
   return {
     src: `http://image.tmdb.org/t/p/original${image}`,
-    srcSet: `http://image.tmdb.org/t/p/original${image}`,
   };
 }
 
@@ -38,7 +37,7 @@ export default function ListImagesMovie({ images }) {
             <img
               style={{ borderRadius: "10px" }}
               {...srcset(item.file_path)}
-              alt={item.file_path}
+              alt={`image-${item.file_path}`}
             />
           </ImageListItem>
         );
