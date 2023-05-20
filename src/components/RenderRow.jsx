@@ -62,7 +62,7 @@ export default function RenderRow({ itemData, typeView, handleClickItem }) {
               initial={{
                 scale: 0.9,
                 opacity: 0,
-                duration: 0.1,
+                duration: 0,
               }}
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring" }}
@@ -72,7 +72,6 @@ export default function RenderRow({ itemData, typeView, handleClickItem }) {
                 alignItems: "center",
                 justifyContent: "center",
               }}
-              onClick={() => handleClickItem(movie.id)}
             >
               <MovieCard
                 bg={movie?.poster_path}
@@ -80,6 +79,7 @@ export default function RenderRow({ itemData, typeView, handleClickItem }) {
                 w={175}
                 h={265}
                 badgeRating={movie?.vote_average}
+                onClick={() => handleClickItem(movie.id)}
               />
             </Grid>
           ))}

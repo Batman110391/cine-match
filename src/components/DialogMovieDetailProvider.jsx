@@ -25,8 +25,6 @@ export default function DialogMovieDetailProvider({ children }) {
     setType(null);
   }
 
-  console.log(movieID, type);
-
   return (
     <React.Fragment>
       <DialogMovieDetailContext.Provider value={contextValue}>

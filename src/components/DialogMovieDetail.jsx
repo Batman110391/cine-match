@@ -58,8 +58,6 @@ export default function DialogMovieDetail({
     () => fetchDetailMovieById(movieID, type)
   );
 
-  console.log("detailMovie", data);
-
   const detail = data;
 
   const bgContainerPoster = detail?.images?.logos?.find(
@@ -84,7 +82,7 @@ export default function DialogMovieDetail({
       <Dialog
         fullScreen={useMediaQuery(theme.breakpoints.up("sm")) ? false : true}
         fullWidth={true}
-        maxWidth={"lg"}
+        maxWidth={"xl"}
         open={open}
         onClose={handleClose}
         TransitionComponent={Transition}

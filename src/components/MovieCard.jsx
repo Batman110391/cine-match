@@ -2,11 +2,20 @@ import { Box, Card, Typography } from "@mui/material";
 import React from "react";
 import { CircularProgressWithLabel } from "./ChartCompatibility";
 
-export default function MovieCard({ title, bg, selected, w, h, badgeRating }) {
+export default function MovieCard({
+  title,
+  bg,
+  selected,
+  w,
+  h,
+  badgeRating,
+  onClick,
+}) {
   const percentRating = badgeRating && (badgeRating.toFixed(1) * 100) / 10;
 
   return (
     <Card
+      onClick={onClick}
       elevation={3}
       sx={{
         position: "relative",
@@ -22,6 +31,7 @@ export default function MovieCard({ title, bg, selected, w, h, badgeRating }) {
         border: "1px solid #ffffff70",
         transform: selected ? "scale(1.3)" : "scale(1)",
         transition: "all 0.3s ease-out",
+        cursor: "pointer",
       }}
     >
       {!bg && (
@@ -40,7 +50,7 @@ export default function MovieCard({ title, bg, selected, w, h, badgeRating }) {
           {title}
         </Typography>
       )}
-      {percentRating && (
+      {percentRating > 0 && (
         <Box sx={{ position: "absolute", top: 2, left: 0 }}>
           <CircularProgressWithLabel
             to={percentRating}

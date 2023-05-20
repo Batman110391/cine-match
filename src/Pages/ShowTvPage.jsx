@@ -10,7 +10,14 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { motion, useScroll, useSpring } from "framer-motion";
-import { memo, useContext, useState } from "react";
+import {
+  memo,
+  useCallback,
+  useContext,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useInfiniteQuery } from "react-query";
 import { useSelector } from "react-redux";
@@ -21,11 +28,13 @@ import FloatingActionButton from "../components/FloatingActionButton";
 import LoadingPage from "../components/LoadingPage";
 import RenderRow from "../components/RenderRow";
 import { areEqual } from "../utils/areEqual";
+import _ from "lodash";
 
 export default function ShowTvPage() {
   const theme = useTheme();
 
   const { openDialogMovieDetail } = useContext(DialogMovieDetailContext);
+  const scrollContainerRef = useRef(null);
 
   const [changeFilters, setChangeFilters] = useState(false);
   const [openSettingTv, setOpenSettingTv] = useState(false);
@@ -55,6 +64,25 @@ export default function ShowTvPage() {
     getNextPageParam: (prevData) => prevData.nextPage,
     queryFn: ({ pageParam = 1 }) => fetchShowTvPage(pageParam, querySearchTv),
   });
+
+  const debounceFetchNextPage = _.debounce(() => {
+    fetchNextPage();
+  }, 200);
+
+  const fetchNextPageCallback = useCallback(debounceFetchNextPage, [
+    fetchNextPage,
+  ]);
+
+  useLayoutEffect(() => {
+    if (scrollContainerRef.current) {
+      const { clientHeight, scrollHeight } = scrollContainerRef.current;
+      const isScrollable = scrollHeight > clientHeight;
+
+      if (!isScrollable && hasNextPage && !status === "loading") {
+        fetchNextPageCallback();
+      }
+    }
+  }, [scrollContainerRef.current, hasNextPage, fetchNextPageCallback]);
 
   if (status === "loading") return <LoadingPage />;
   if (status === "error") return <h1>{JSON.stringify(error)}</h1>;
@@ -115,9 +143,10 @@ export default function ShowTvPage() {
       </Box>
       <Box sx={{ overflow: "hidden", pb: 5 }}>
         <InfiniteScroll
+          ref={scrollContainerRef}
           style={{ overflow: "hidden" }}
           dataLength={tvShows?.results?.length || 0}
-          next={() => fetchNextPage()}
+          next={() => debounceFetchNextPage()}
           hasMore={hasNextPage}
           loader={
             <Box sx={{ display: "flex", justifyContent: "center" }}>

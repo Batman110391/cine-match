@@ -1,11 +1,17 @@
-import { Suspense, createElement, useContext, useEffect } from "react";
+import {
+  Suspense,
+  createElement,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { AnimatePresence } from "framer-motion";
 import BoxLayout from "./components/BoxLayout";
 import ErrorBoundary from "./utils/ErrorBoundary";
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { routes } from "./routes";
 import LoadingPage from "./components/LoadingPage";
-import { useLocalStorage } from "./utils/useLocalStorage";
+import { useSessionStorage } from "./utils/useSessionStorage";
 import { useDispatch, useSelector } from "react-redux";
 import { setQuery } from "./store/movieQuery";
 import { DialogMovieDetailContext } from "./components/DialogMovieDetailProvider";
@@ -17,7 +23,9 @@ export default function App() {
 
   const initialStateStore = useSelector((state) => state.movieQuery);
 
-  const [configCineMatch, setConfigCineMatch] = useLocalStorage(
+  const [initialLoading, setInitialLoading] = useState(true);
+
+  const [configCineMatch, setConfigCineMatch] = useSessionStorage(
     "configCineMatch",
     initialStateStore
   );
@@ -26,6 +34,7 @@ export default function App() {
     if (configCineMatch) {
       dispatch(setQuery(configCineMatch));
     }
+    setInitialLoading(false);
   }, []);
 
   useEffect(() => {
@@ -56,10 +65,14 @@ export default function App() {
   return (
     <AnimatePresence mode="wait">
       <BoxLayout>
-        <Routes>
-          {getRoutes(routes)}
-          <Route path="*" element={<Navigate to="/home" />} />
-        </Routes>
+        {initialLoading ? (
+          <LoadingPage />
+        ) : (
+          <Routes>
+            {getRoutes(routes)}
+            <Route path="*" element={<Navigate to="/home" />} />
+          </Routes>
+        )}
       </BoxLayout>
     </AnimatePresence>
   );

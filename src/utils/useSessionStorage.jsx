@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 // Hook
-export function useLocalStorage(key, initialValue) {
+export function useSessionStorage(key, initialValue) {
   // State to store our value
   // Pass initial state function to useState so logic is only executed once
   const [storedValue, setStoredValue] = useState(() => {
@@ -9,18 +9,18 @@ export function useLocalStorage(key, initialValue) {
       return initialValue;
     }
     try {
-      // Get from local storage by key
-      const item = window.localStorage.getItem(key);
+      // Get from Session storage by key
+      const item = window.sessionStorage.getItem(key);
       // Parse stored json or if none return initialValue
       return item ? JSON.parse(item) : initialValue;
     } catch (error) {
       // If error also return initialValue
-      console.log(error);
+      console.warn(error);
       return initialValue;
     }
   });
   // Return a wrapped version of useState's setter function that ...
-  // ... persists the new value to localStorage.
+  // ... persists the new value to sessionStorage.
   const setValue = (value) => {
     try {
       // Allow value to be a function so we have same API as useState
@@ -28,18 +28,18 @@ export function useLocalStorage(key, initialValue) {
         value instanceof Function ? value(storedValue) : value;
       // Save state
       setStoredValue(valueToStore);
-      // Save to local storage
+      // Save to Session storage
       if (typeof window !== "undefined") {
-        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        window.sessionStorage.setItem(key, JSON.stringify(valueToStore));
       }
     } catch (error) {
       // A more advanced implementation would handle the error case
-      console.log(error);
+      console.warn(error);
     }
   };
   return [storedValue, setValue];
 }
 
 export function removeLocalStorage(key) {
-  window.localStorage.removeItem(key);
+  window.sessionStorage.removeItem(key);
 }

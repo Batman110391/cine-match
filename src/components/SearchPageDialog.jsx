@@ -358,6 +358,12 @@ export default function SearchPageDialog({ open, setOpen }) {
                                             bg={movie?.poster_path}
                                             w={55}
                                             h={80}
+                                            onClick={() =>
+                                              redirectMovie(
+                                                movie?.id,
+                                                movie?.media_type
+                                              )
+                                            }
                                           />
                                         </Button>
                                       </Tooltip>
