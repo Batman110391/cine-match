@@ -21,7 +21,6 @@ import AppBar from "@mui/material/AppBar";
 import Grow from "@mui/material/Grow ";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
-import dayjs from "dayjs";
 import { motion } from "framer-motion";
 import React from "react";
 import YouTubePlayer from "react-player/youtube";
@@ -31,9 +30,10 @@ import { roundToHalf } from "../utils/numberFormatting";
 import { formatMinutes } from "../utils/timeFormat";
 import useElementSize from "../utils/useElementSize";
 import CastListDetail from "./CastListDetail";
-import TypographyAnimated from "./TypographyAnimated";
-import Tmdb from "./icons/Tmdb";
 import ListImagesMovie from "./ListImagesMovie";
+import Tmdb from "./icons/Tmdb";
+import ShareIcon from "@mui/icons-material/Share";
+import SpeedDialShare from "./SpeedDialShare";
 
 const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
@@ -93,7 +93,7 @@ export default function DialogMovieDetail({
         }}
       >
         <AppBar sx={{ position: "relative" }}>
-          <Toolbar>
+          <Toolbar sx={{ position: "relative" }}>
             <IconButton
               edge="start"
               color="inherit"
@@ -102,6 +102,12 @@ export default function DialogMovieDetail({
             >
               <CloseIcon />
             </IconButton>
+
+            <SpeedDialShare
+              movieID={detail?.id}
+              type={type}
+              title={detail?.title || detail?.name}
+            />
           </Toolbar>
         </AppBar>
 

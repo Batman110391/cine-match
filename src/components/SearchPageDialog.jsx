@@ -36,6 +36,12 @@ import MovieCard from "../components/MovieCard";
 import { useDebounce } from "../utils/useDebounce";
 import { CircularProgressWithLabel } from "./ChartCompatibility";
 import { DialogMovieDetailContext } from "./DialogMovieDetailProvider";
+import {
+  MINI_MOVIE_CARD_HEIGTH,
+  MINI_MOVIE_CARD_WIDTH,
+  MOVIE_CARD_HEIGTH_MOBILE,
+  MOVIE_CARD_WIDTH_MOBILE,
+} from "../utils/constant";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -245,8 +251,9 @@ export default function SearchPageDialog({ open, setOpen }) {
                               <MovieCard
                                 title={curMovie?.title || curMovie?.name}
                                 bg={curMovie?.poster_path}
-                                w={100}
-                                h={130}
+                                w={MOVIE_CARD_WIDTH_MOBILE}
+                                h={MOVIE_CARD_HEIGTH_MOBILE}
+                                isDesktop={false}
                               />
                             </ListItemAvatar>
                             <ListItemText
@@ -311,8 +318,9 @@ export default function SearchPageDialog({ open, setOpen }) {
                                 noMotion
                                 text={false}
                                 badge={false}
-                                w={100}
-                                h={130}
+                                w={MOVIE_CARD_WIDTH_MOBILE}
+                                h={MOVIE_CARD_HEIGTH_MOBILE}
+                                isDesktop={false}
                               />
                             </ListItemAvatar>
                           </ListItemButton>
@@ -344,7 +352,7 @@ export default function SearchPageDialog({ open, setOpen }) {
                                 <Stack
                                   component={"span"}
                                   flexDirection={"row"}
-                                  gap={2}
+                                  gap={1}
                                   sx={{ mt: 1 }}
                                 >
                                   {curMovie?.known_for &&
@@ -356,8 +364,9 @@ export default function SearchPageDialog({ open, setOpen }) {
                                           <MovieCard
                                             title={movie?.title || movie?.name}
                                             bg={movie?.poster_path}
-                                            w={55}
-                                            h={80}
+                                            w={MINI_MOVIE_CARD_WIDTH}
+                                            h={MINI_MOVIE_CARD_HEIGTH}
+                                            isDesktop={false}
                                             onClick={() =>
                                               redirectMovie(
                                                 movie?.id,

@@ -14,6 +14,7 @@ import {
   memo,
   useCallback,
   useContext,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -29,9 +30,12 @@ import LoadingPage from "../components/LoadingPage";
 import RenderRow from "../components/RenderRow";
 import { areEqual } from "../utils/areEqual";
 import _ from "lodash";
+import { useParams, useNavigate } from "react-router-dom";
 
 export default function ShowTvPage() {
   const theme = useTheme();
+  const navigate = useNavigate();
+  const { movieID, type } = useParams();
 
   const { openDialogMovieDetail } = useContext(DialogMovieDetailContext);
   const scrollContainerRef = useRef(null);
@@ -72,6 +76,13 @@ export default function ShowTvPage() {
   const fetchNextPageCallback = useCallback(debounceFetchNextPage, [
     fetchNextPage,
   ]);
+
+  useEffect(() => {
+    if (movieID && type) {
+      openDialogMovieDetail(movieID, type);
+      navigate("/showtv", { replace: true });
+    }
+  }, []);
 
   useLayoutEffect(() => {
     if (scrollContainerRef.current) {
@@ -158,6 +169,7 @@ export default function ShowTvPage() {
             itemData={tvShows?.results}
             typeView={viewGrid}
             handleClickItem={handleClickItem}
+            isDesktop={isDesktop}
           />
         </InfiniteScroll>
       </Box>

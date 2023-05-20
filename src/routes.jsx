@@ -14,13 +14,15 @@ export const routes = [
   {
     name: "movies",
     key: "movies",
-    route: "/movies",
+    route: "/movies/:movieID?/:type?",
+    exact: false,
     component: <MoviesPage />,
   },
   {
     name: "showTv",
     key: "showtv",
-    route: "/showtv",
+    route: "/showtv/:movieID?/:type?",
+    exact: false,
     component: <ShowTvPages />,
   },
 ];

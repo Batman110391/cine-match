@@ -1,20 +1,13 @@
-import {
-  Suspense,
-  createElement,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
 import { AnimatePresence } from "framer-motion";
-import BoxLayout from "./components/BoxLayout";
-import ErrorBoundary from "./utils/ErrorBoundary";
-import { Routes, Route, Navigate, useLocation } from "react-router-dom";
-import { routes } from "./routes";
-import LoadingPage from "./components/LoadingPage";
-import { useSessionStorage } from "./utils/useSessionStorage";
+import { Suspense, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import BoxLayout from "./components/BoxLayout";
+import LoadingPage from "./components/LoadingPage";
+import { routes } from "./routes";
 import { setQuery } from "./store/movieQuery";
-import { DialogMovieDetailContext } from "./components/DialogMovieDetailProvider";
+import ErrorBoundary from "./utils/ErrorBoundary";
+import { useSessionStorage } from "./utils/useSessionStorage";
 
 export default function App() {
   const { pathname } = useLocation();
@@ -34,6 +27,7 @@ export default function App() {
     if (configCineMatch) {
       dispatch(setQuery(configCineMatch));
     }
+
     setInitialLoading(false);
   }, []);
 
@@ -51,7 +45,7 @@ export default function App() {
       return (
         <Route
           key={route.key}
-          exact
+          exact={route?.exact || true}
           path={route.route}
           element={
             <ErrorBoundary fallback={<div>Error...</div>}>

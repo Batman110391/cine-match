@@ -16,6 +16,12 @@ import {
   Typography,
 } from "@mui/material";
 import { Link } from "react-router-dom";
+import {
+  MOVIE_CARD_HEIGHT,
+  MOVIE_CARD_HEIGTH_MOBILE,
+  MOVIE_CARD_WIDTH,
+  MOVIE_CARD_WIDTH_MOBILE,
+} from "../utils/constant";
 
 export default function CarouselDiscover({
   slides,
@@ -28,7 +34,9 @@ export default function CarouselDiscover({
   type,
 }) {
   if (isLoading) {
-    return <LoadingCarousel titleDiscover={titleDiscover} />;
+    return (
+      <LoadingCarousel titleDiscover={titleDiscover} isDesktop={isDesktop} />
+    );
   }
 
   return (
@@ -98,16 +106,19 @@ export default function CarouselDiscover({
               <SwiperSlide
                 key={slideContent.id}
                 style={{
-                  width: "150px",
+                  width: isDesktop
+                    ? `${MOVIE_CARD_WIDTH}px`
+                    : `${MOVIE_CARD_WIDTH_MOBILE}px`,
                 }}
                 onClick={() => handleClickItem(slideContent.id, type)}
               >
                 <MovieCard
                   bg={slideContent?.poster_path}
                   title={slideContent?.title || slideContent?.name}
-                  w={150}
-                  h={230}
+                  w={isDesktop ? MOVIE_CARD_WIDTH : MOVIE_CARD_WIDTH_MOBILE}
+                  h={isDesktop ? MOVIE_CARD_HEIGHT : MOVIE_CARD_HEIGTH_MOBILE}
                   badgeRating={slideContent?.vote_average}
+                  isDesktop={isDesktop}
                 />
               </SwiperSlide>
             );
@@ -118,7 +129,7 @@ export default function CarouselDiscover({
   );
 }
 
-function LoadingCarousel({ titleDiscover }) {
+function LoadingCarousel({ titleDiscover, isDesktop }) {
   return (
     <Box
       sx={{
@@ -143,9 +154,11 @@ function LoadingCarousel({ titleDiscover }) {
         {Array.from(new Array(20)).map((ele, i) => (
           <Skeleton
             key={"loading" + i}
-            sx={{ minWidth: 150 }}
+            sx={{
+              minWidth: isDesktop ? MOVIE_CARD_WIDTH : MOVIE_CARD_WIDTH_MOBILE,
+            }}
             variant="rectangular"
-            height={230}
+            height={isDesktop ? MOVIE_CARD_HEIGHT : MOVIE_CARD_HEIGTH_MOBILE}
           />
         ))}
       </Stack>

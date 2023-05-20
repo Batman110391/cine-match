@@ -10,6 +10,7 @@ export default function MovieCard({
   h,
   badgeRating,
   onClick,
+  isDesktop = true,
 }) {
   const percentRating = badgeRating && (badgeRating.toFixed(1) * 100) / 10;
 
@@ -54,8 +55,8 @@ export default function MovieCard({
         <Box sx={{ position: "absolute", top: 2, left: 0 }}>
           <CircularProgressWithLabel
             to={percentRating}
-            size={35}
-            labelSize={11}
+            size={isDesktop ? 35 : 25}
+            labelSize={isDesktop ? 11 : 9}
             durationAnimate={0}
           />
         </Box>
