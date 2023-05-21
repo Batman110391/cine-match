@@ -11,6 +11,7 @@ export default function CastsCard({
   badge = true,
   noMotion = false,
   text = true,
+  noAction = false,
 }) {
   return (
     <Card
@@ -33,7 +34,7 @@ export default function CastsCard({
         display: "flex",
         alignItems: "end",
         justifyContent: "center",
-        cursor: "pointer",
+        cursor: noAction ? "inherit" : "pointer",
         border: "1px solid #ffffff70",
       }}
     >

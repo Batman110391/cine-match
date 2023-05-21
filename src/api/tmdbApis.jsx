@@ -190,20 +190,15 @@ export async function fetchProviders() {
   });
 }
 
-export async function fetchSimilarMoviesById(id) {
+export async function fetchSimilarMoviesOrTvById(id, type) {
   return fetchPromise(
-    `https://api.themoviedb.org/3/movie/${id}/recommendations?api_key=${API_KEY}&page=${1}&${CURRENT_LANGUAGE}`
-  ).then(async (data) => {
-    const promises = await data?.results?.map(async (op) => {
-      const credits = await fetchPromise(
-        `https://api.themoviedb.org/3/movie/${op.id}/credits?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
-      );
-      return { ...op, credits };
-    });
-
-    const filteredResults = await Promise.all(promises);
-
-    return filteredResults;
+    `https://api.themoviedb.org/3/${type}/${id}/recommendations?api_key=${API_KEY}&page=${1}&${CURRENT_LANGUAGE}`
+  ).then((data) => {
+    if (data && data?.results?.length > 0) {
+      return data?.results;
+    } else {
+      return [];
+    }
   });
 }
 
@@ -240,6 +235,25 @@ export async function fetchMoviesDiscover(page = 1) {
   );
 
   return resources;
+}
+
+export async function fetchDetailSeasonTvById(tvID, seasons) {
+  if (!tvID || (!Array.isArray(seasons) && seasons.length === 0)) {
+    return null;
+  }
+
+  const resourcesAll = seasons.map((season) => {
+    const url = `https://api.themoviedb.org/3/tv/${tvID}/season/${season.season_number}?api_key=${API_KEY}&${CURRENT_LANGUAGE}`;
+    return {
+      api: fetchPromise(url),
+    };
+  });
+
+  const aggregationResources = await Promise.all(
+    resourcesAll.map((r) => r.api)
+  );
+
+  return aggregationResources;
 }
 
 export async function fetchMoviesByKeywords(keyword, typeQuery, page = 1) {
@@ -405,6 +419,18 @@ export async function fetchDetailMovieById(id, type) {
         images: resources.images,
         providers: resources.providers?.results?.["IT"],
       };
+    }
+  });
+}
+
+export async function fetchPersonDetailById(personID) {
+  return fetchPromise(
+    `https://api.themoviedb.org/3/person/${personID}?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+  ).then((data) => {
+    if (data) {
+      return data;
+    } else {
+      return [];
     }
   });
 }

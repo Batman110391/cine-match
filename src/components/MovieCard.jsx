@@ -32,7 +32,7 @@ export default function MovieCard({
         border: "1px solid #ffffff70",
         transform: selected ? "scale(1.3)" : "scale(1)",
         transition: "all 0.3s ease-out",
-        cursor: "pointer",
+        cursor: onClick ? "pointer" : "inherit",
       }}
     >
       {!bg && (

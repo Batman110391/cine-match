@@ -31,9 +31,11 @@ import { formatMinutes } from "../utils/timeFormat";
 import useElementSize from "../utils/useElementSize";
 import CastListDetail from "./CastListDetail";
 import ListImagesMovie from "./ListImagesMovie";
-import Tmdb from "./icons/Tmdb";
-import ShareIcon from "@mui/icons-material/Share";
 import SpeedDialShare from "./SpeedDialShare";
+import Tmdb from "./icons/Tmdb";
+import SubHeader from "./SubHeader";
+import ListSeasonTv from "./ListSeasonTv";
+import ListSimilarMoviesAndTv from "./ListSimilarMoviesAndTv";
 
 const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
@@ -46,6 +48,7 @@ export default function DialogMovieDetail({
   handleClose,
   movieID,
   type,
+  subItemClick,
 }) {
   const theme = useTheme();
 
@@ -59,6 +62,8 @@ export default function DialogMovieDetail({
   );
 
   const detail = data;
+
+  console.log(detail);
 
   const bgContainerPoster = detail?.images?.logos?.find(
     (p) => p?.iso_639_1 === "en"
@@ -77,10 +82,12 @@ export default function DialogMovieDetail({
     setOpenTrailerDialog(false);
   };
 
+  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
+
   return (
     <div>
       <Dialog
-        fullScreen={useMediaQuery(theme.breakpoints.up("sm")) ? false : true}
+        fullScreen={isDesktop ? false : true}
         fullWidth={true}
         maxWidth={"xl"}
         open={open}
@@ -88,7 +95,7 @@ export default function DialogMovieDetail({
         TransitionComponent={Transition}
         PaperProps={{
           sx: {
-            minHeight: "80vh",
+            height: "100%",
           },
         }}
       >
@@ -123,6 +130,7 @@ export default function DialogMovieDetail({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            sx={{ paddingX: 1.5 }}
           >
             <Box
               sx={{
@@ -214,6 +222,7 @@ export default function DialogMovieDetail({
                       )}
                       <Stack
                         flexDirection={"row"}
+                        flexWrap={"wrap"}
                         alignItems={"center"}
                         gap={1}
                       >
@@ -222,7 +231,7 @@ export default function DialogMovieDetail({
                           variant={"button"}
                         >
                           {detail?.release_date?.substring(0, 4) ||
-                            detail?.first_air_date.substring(0, 4)}
+                            detail?.first_air_date?.substring(0, 4)}
                         </Typography>
                         {director && type === "movie" && (
                           <>
@@ -257,23 +266,25 @@ export default function DialogMovieDetail({
                             >
                               - IDEATO DA
                             </Typography>
-                            {director.map((dir) => (
-                              <Chip
-                                key={dir?.id}
-                                variant="outlined"
-                                avatar={
-                                  dir?.profile_path ? (
-                                    <Avatar
-                                      alt={dir?.name}
-                                      src={`http://image.tmdb.org/t/p/w500${dir?.profile_path}`}
-                                    />
-                                  ) : (
-                                    <Avatar>{dir?.name?.charAt(0)}</Avatar>
-                                  )
-                                }
-                                label={dir?.name}
-                              />
-                            ))}
+                            <Box>
+                              {director.map((dir) => (
+                                <Chip
+                                  key={dir?.id}
+                                  variant="outlined"
+                                  avatar={
+                                    dir?.profile_path ? (
+                                      <Avatar
+                                        alt={dir?.name}
+                                        src={`http://image.tmdb.org/t/p/w500${dir?.profile_path}`}
+                                      />
+                                    ) : (
+                                      <Avatar>{dir?.name?.charAt(0)}</Avatar>
+                                    )
+                                  }
+                                  label={dir?.name}
+                                />
+                              ))}
+                            </Box>
                           </>
                         )}
                       </Stack>
@@ -352,24 +363,18 @@ export default function DialogMovieDetail({
                       </Typography>
 
                       {detail?.providers?.flatrate && (
-                        <Box>
-                          <Divider sx={{ my: 2 }} />
-                          <Typography
-                            sx={{ fontSize: "0.6rem" }}
-                            variant={"button"}
-                          >
-                            {"Disponibile sulle piattaforme"}
-                          </Typography>
-
-                          <Stack flexDirection={"row"} gap={2} sx={{ mt: 2 }}>
-                            {detail?.providers?.flatrate?.map((provider) => (
-                              <Avatar
-                                key={provider?.provider_id}
-                                alt={provider?.provider_name}
-                                src={`http://image.tmdb.org/t/p/w500${provider?.logo_path}`}
-                              />
-                            ))}
-                          </Stack>
+                        <Box sx={{ mt: 2 }}>
+                          <SubHeader title={"Disponibile sulle piattaforme"}>
+                            <Stack flexDirection={"row"} gap={2} sx={{ mt: 2 }}>
+                              {detail?.providers?.flatrate?.map((provider) => (
+                                <Avatar
+                                  key={provider?.provider_id}
+                                  alt={provider?.provider_name}
+                                  src={`http://image.tmdb.org/t/p/w500${provider?.logo_path}`}
+                                />
+                              ))}
+                            </Stack>
+                          </SubHeader>
                         </Box>
                       )}
                     </Box>
@@ -380,12 +385,36 @@ export default function DialogMovieDetail({
                       height={height}
                     />
                   </Grid>
+                  {type === "tv" &&
+                    Array.isArray(detail?.seasons) &&
+                    detail?.seasons?.length > 0 && (
+                      <Grid item xs={12}>
+                        <SubHeader title={"Stagioni"}>
+                          <ListSeasonTv
+                            tvID={detail?.id}
+                            seasons={detail.seasons}
+                            isDesktop={isDesktop}
+                          />
+                        </SubHeader>
+                      </Grid>
+                    )}
                   <Grid item xs={12}>
-                    <Typography sx={{ fontSize: "0.6rem" }} variant={"button"}>
-                      {"Immagini"}
-                    </Typography>
-                    <ListImagesMovie images={detail?.images?.backdrops} />
+                    <SubHeader title={"Raccomandati"}>
+                      <ListSimilarMoviesAndTv
+                        id={detail?.id}
+                        type={type}
+                        isDesktop={isDesktop}
+                        subItemClick={subItemClick}
+                      />
+                    </SubHeader>
                   </Grid>
+                  {detail?.images?.backdrops?.length > 0 && (
+                    <Grid item xs={12}>
+                      <SubHeader title={"Immagini"}>
+                        <ListImagesMovie images={detail?.images?.backdrops} />
+                      </SubHeader>
+                    </Grid>
+                  )}
                 </Grid>
               </Box>
             </Box>

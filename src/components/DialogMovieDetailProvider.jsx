@@ -8,6 +8,10 @@ export default function DialogMovieDetailProvider({ children }) {
   const [movieID, setMovieID] = React.useState(null);
   const [type, setType] = React.useState(null);
 
+  const [openSubDialog, setOpenSubDialog] = React.useState(false);
+  const [movieIDSubDialog, setMovieIDSubDialog] = React.useState(null);
+  const [typeSubDialog, setTypeSubDialog] = React.useState(null);
+
   const contextValue = React.useMemo(
     () => ({
       openDialogMovieDetail(movieID, type) {
@@ -25,6 +29,18 @@ export default function DialogMovieDetailProvider({ children }) {
     setType(null);
   }
 
+  function handleCloseSubDialog() {
+    setOpenSubDialog(false);
+    setMovieIDSubDialog(null);
+    setTypeSubDialog(null);
+  }
+
+  const handleClickSubItem = (movieID, type) => {
+    setOpenSubDialog(true);
+    setMovieIDSubDialog(movieID);
+    setTypeSubDialog(type);
+  };
+
   return (
     <React.Fragment>
       <DialogMovieDetailContext.Provider value={contextValue}>
@@ -36,6 +52,16 @@ export default function DialogMovieDetailProvider({ children }) {
           handleClose={handleClose}
           movieID={movieID}
           type={type}
+          subItemClick={handleClickSubItem}
+        />
+      )}
+      {movieIDSubDialog && typeSubDialog && (
+        <DialogMovieDetail
+          open={openSubDialog}
+          handleClose={handleCloseSubDialog}
+          movieID={movieIDSubDialog}
+          type={typeSubDialog}
+          subItemClick={handleClickSubItem}
         />
       )}
     </React.Fragment>

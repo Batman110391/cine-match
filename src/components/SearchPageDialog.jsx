@@ -137,9 +137,11 @@ export default function SearchPageDialog({ open, setOpen }) {
     setOpen(false);
   };
 
+  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
+
   return (
     <Dialog
-      fullScreen={useMediaQuery(theme.breakpoints.up("sm")) ? false : true}
+      fullScreen={isDesktop ? false : true}
       fullWidth={true}
       maxWidth={"md"}
       open={open}
@@ -217,8 +219,8 @@ export default function SearchPageDialog({ open, setOpen }) {
                   <Box>
                     <CircularProgressWithLabel
                       to={percentRating}
-                      size={35}
-                      labelSize={11}
+                      size={isDesktop ? 35 : 30}
+                      labelSize={isDesktop ? 11 : 10}
                       durationAnimate={0}
                     />
                   </Box>

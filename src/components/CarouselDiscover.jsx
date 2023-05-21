@@ -62,17 +62,19 @@ export default function CarouselDiscover({
         }, */
       }}
     >
-      <Stack
-        mb={1}
-        flexDirection={"row"}
-        justifyContent={"space-between"}
-        alignItems={"center"}
-      >
-        <Typography variant="body1">{titleDiscover}</Typography>
-        <Button LinkComponent={Link} to={path} onClick={onAction}>
-          <Typography variant="button">{"Vedi tutti"}</Typography>
-        </Button>
-      </Stack>
+      {titleDiscover && (
+        <Stack
+          mb={1}
+          flexDirection={"row"}
+          justifyContent={"space-between"}
+          alignItems={"center"}
+        >
+          <Typography variant="body1">{titleDiscover}</Typography>
+          <Button LinkComponent={Link} to={path} onClick={onAction}>
+            <Typography variant="button">{"Vedi tutti"}</Typography>
+          </Button>
+        </Stack>
+      )}
       <Swiper
         style={{
           width: "100%",
@@ -81,23 +83,11 @@ export default function CarouselDiscover({
         slidesPerView={"auto"}
         navigation={isDesktop}
         spaceBetween={10}
-        edgeSwipeDetection={true}
-        edgeSwipeThreshold={20}
         freeMode={{
           enabled: true,
-          momentumVelocityRatio: 1,
+          sticky: true,
         }}
         modules={[Navigation, FreeMode]}
-        touch={{
-          enabled: true,
-          releaseOnEdges: false,
-          releaseOnEdgesRatio: 0.5,
-          momentum: true,
-          momentumRatio: 1,
-          momentumBounce: true,
-          momentumBounceRatio: 1,
-          threshold: 10,
-        }}
       >
         {slides &&
           slides.length > 0 &&
@@ -137,14 +127,16 @@ function LoadingCarousel({ titleDiscover, isDesktop }) {
         my: 2,
       }}
     >
-      <Stack
-        mb={1}
-        flexDirection={"row"}
-        justifyContent={"space-between"}
-        alignItems={"center"}
-      >
-        <Typography variant="body1">{titleDiscover}</Typography>
-      </Stack>
+      {titleDiscover && (
+        <Stack
+          mb={1}
+          flexDirection={"row"}
+          justifyContent={"space-between"}
+          alignItems={"center"}
+        >
+          <Typography variant="body1">{titleDiscover}</Typography>
+        </Stack>
+      )}
       <Stack
         flexDirection={"row"}
         alignItems={"center"}
