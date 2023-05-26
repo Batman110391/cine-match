@@ -49,6 +49,7 @@ export default function DialogMovieDetail({
   movieID,
   type,
   subItemClick,
+  openPersonDialog,
 }) {
   const theme = useTheme();
 
@@ -242,6 +243,7 @@ export default function DialogMovieDetail({
                               - DIRETTO DA
                             </Typography>
                             <Chip
+                              onClick={() => openPersonDialog(director?.id)}
                               key={director?.id}
                               variant="outlined"
                               avatar={
@@ -271,6 +273,7 @@ export default function DialogMovieDetail({
                                 <Chip
                                   key={dir?.id}
                                   variant="outlined"
+                                  onClick={() => openPersonDialog(dir?.id)}
                                   avatar={
                                     dir?.profile_path ? (
                                       <Avatar
@@ -383,6 +386,7 @@ export default function DialogMovieDetail({
                     <CastListDetail
                       person={detail?.credits?.cast}
                       height={height}
+                      openDialogPersonDetail={openPersonDialog}
                     />
                   </Grid>
                   {type === "tv" &&

@@ -1,5 +1,6 @@
 import React from "react";
 import DialogMovieDetail from "./DialogMovieDetail";
+import DialogPersonDetail from "./DialogPersonDetail";
 
 export const DialogMovieDetailContext = React.createContext({});
 
@@ -12,12 +13,19 @@ export default function DialogMovieDetailProvider({ children }) {
   const [movieIDSubDialog, setMovieIDSubDialog] = React.useState(null);
   const [typeSubDialog, setTypeSubDialog] = React.useState(null);
 
+  const [openPersonDialog, setOpenPersonDialog] = React.useState(false);
+  const [personID, setPersonID] = React.useState(null);
+
   const contextValue = React.useMemo(
     () => ({
       openDialogMovieDetail(movieID, type) {
         setOpen(true);
         setMovieID(movieID);
         setType(type);
+      },
+      openDialogPersonDetail(personID) {
+        setOpenPersonDialog(true);
+        setPersonID(personID);
       },
     }),
     []
@@ -35,10 +43,20 @@ export default function DialogMovieDetailProvider({ children }) {
     setTypeSubDialog(null);
   }
 
+  function handleClosePersonDialog() {
+    setOpenPersonDialog(false);
+    setPersonID(null);
+  }
+
   const handleClickSubItem = (movieID, type) => {
     setOpenSubDialog(true);
     setMovieIDSubDialog(movieID);
     setTypeSubDialog(type);
+  };
+
+  const handleClickPerson = (personID) => {
+    setOpenPersonDialog(true);
+    setPersonID(personID);
   };
 
   return (
@@ -53,6 +71,7 @@ export default function DialogMovieDetailProvider({ children }) {
           movieID={movieID}
           type={type}
           subItemClick={handleClickSubItem}
+          openPersonDialog={handleClickPerson}
         />
       )}
       {movieIDSubDialog && typeSubDialog && (
@@ -61,6 +80,15 @@ export default function DialogMovieDetailProvider({ children }) {
           handleClose={handleCloseSubDialog}
           movieID={movieIDSubDialog}
           type={typeSubDialog}
+          subItemClick={handleClickSubItem}
+          openPersonDialog={handleClickPerson}
+        />
+      )}
+      {personID && (
+        <DialogPersonDetail
+          open={openPersonDialog}
+          handleClose={handleClosePersonDialog}
+          personID={personID}
           subItemClick={handleClickSubItem}
         />
       )}

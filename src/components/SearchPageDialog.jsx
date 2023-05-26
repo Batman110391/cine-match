@@ -105,7 +105,9 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 });
 
 export default function SearchPageDialog({ open, setOpen }) {
-  const { openDialogMovieDetail } = React.useContext(DialogMovieDetailContext);
+  const { openDialogMovieDetail, openDialogPersonDetail } = React.useContext(
+    DialogMovieDetailContext
+  );
 
   const [typeQuery, setTypeQuery] = React.useState("movie");
   const [searchInput, setSearchInput] = React.useState("");
@@ -226,139 +228,136 @@ export default function SearchPageDialog({ open, setOpen }) {
                   </Box>
                 ) : null;
 
-                return (
-                  <React.Fragment key={typeQuery + i}>
-                    {typeQuery === "movie" || typeQuery === "tv" ? (
-                      <>
-                        <ListItem
-                          disablePadding
-                          sx={{
-                            position: "relative",
-                            "& .MuiListItemSecondaryAction-root": {
-                              top: 30,
-                              right: 10,
-                            },
-                          }}
-                          secondaryAction={secondaryAction}
+                if (typeQuery === "movie" || typeQuery === "tv") {
+                  return (
+                    <React.Fragment key={typeQuery + i}>
+                      <ListItem
+                        disablePadding
+                        sx={{
+                          position: "relative",
+                          "& .MuiListItemSecondaryAction-root": {
+                            top: 30,
+                            right: 10,
+                          },
+                        }}
+                        secondaryAction={secondaryAction}
+                      >
+                        <ListItemButton
+                          alignItems="flex-start"
+                          sx={{ gap: 2 }}
+                          onClick={() => redirectMovie(curMovie?.id, typeQuery)}
+                          key={i + "movieSearchs"}
                         >
-                          <ListItemButton
-                            alignItems="flex-start"
-                            sx={{ gap: 2 }}
-                            onClick={() =>
-                              redirectMovie(curMovie?.id, typeQuery)
-                            }
-                            key={i + "movieSearch"}
-                          >
-                            <ListItemAvatar>
-                              <MovieCard
-                                title={curMovie?.title || curMovie?.name}
-                                bg={curMovie?.poster_path}
-                                w={MOVIE_CARD_WIDTH_MOBILE}
-                                h={MOVIE_CARD_HEIGTH_MOBILE}
-                                isDesktop={false}
-                              />
-                            </ListItemAvatar>
-                            <ListItemText
-                              primary={
-                                <Typography
-                                  sx={{ fontSize: "1rem" }}
-                                  variant={"h6"}
-                                >
-                                  {curMovie?.title || curMovie?.name}
-                                </Typography>
-                              }
-                              secondary={
-                                <>
-                                  <Typography
-                                    component="span"
-                                    sx={{ fontSize: "0.7rem" }}
-                                    variant={"button"}
-                                  >
-                                    {curMovie?.release_date ||
-                                      curMovie?.first_air_date}
-                                  </Typography>
-                                  <Typography
-                                    component="span"
-                                    fontWeight={300}
-                                    sx={{
-                                      mt: 1,
-                                      fontSize: "0.8rem",
-                                      display: "-webkit-box",
-                                      overflow: "hidden",
-                                      WebkitBoxOrient: "vertical",
-                                      WebkitLineClamp: 4,
-                                    }}
-                                    variant={"body2"}
-                                  >
-                                    {curMovie?.overview}
-                                  </Typography>
-                                </>
-                              }
+                          <ListItemAvatar>
+                            <MovieCard
+                              title={curMovie?.title || curMovie?.name}
+                              bg={curMovie?.poster_path}
+                              w={MOVIE_CARD_WIDTH_MOBILE}
+                              h={MOVIE_CARD_HEIGTH_MOBILE}
+                              isDesktop={false}
                             />
-                          </ListItemButton>
-                        </ListItem>
-                        <Divider component="li" />
-                      </>
-                    ) : (
-                      <>
-                        <ListItem disablePadding sx={{ position: "relative" }}>
-                          <ListItemButton
-                            alignItems="flex-start"
-                            sx={{ gap: 2, flexGrow: 0 }}
-                            onClick={() =>
-                              redirectMovie(curMovie?.id, typeQuery)
-                            }
-                            key={i + "moviePerson"}
-                          >
-                            <ListItemAvatar>
-                              <CastsCard
-                                known_for_department={
-                                  curMovie?.known_for_department
-                                }
-                                name={curMovie?.name}
-                                bg={curMovie?.profile_path}
-                                noMotion
-                                text={false}
-                                badge={false}
-                                w={MOVIE_CARD_WIDTH_MOBILE}
-                                h={MOVIE_CARD_HEIGTH_MOBILE}
-                                isDesktop={false}
-                              />
-                            </ListItemAvatar>
-                          </ListItemButton>
+                          </ListItemAvatar>
                           <ListItemText
-                            sx={{ pl: 1 }}
                             primary={
                               <Typography
-                                sx={{ fontSize: "1rem", pl: 1 }}
+                                sx={{ fontSize: "1rem" }}
                                 variant={"h6"}
                               >
-                                {curMovie?.name}
+                                {curMovie?.title || curMovie?.name}
                               </Typography>
                             }
                             secondary={
                               <>
                                 <Typography
                                   component="span"
-                                  sx={{
-                                    pl: 1,
-                                    fontSize: "0.7rem",
-                                    color: "text.secondary",
-                                  }}
+                                  sx={{ fontSize: "0.7rem" }}
                                   variant={"button"}
                                 >
-                                  {curMovie?.known_for_department === "Acting"
-                                    ? "Attore"
-                                    : "Regista"}
+                                  {curMovie?.release_date ||
+                                    curMovie?.first_air_date}
                                 </Typography>
-                                <Stack
-                                  component={"span"}
-                                  flexDirection={"row"}
-                                  gap={1}
-                                  sx={{ mt: 1 }}
+                                <Typography
+                                  component="span"
+                                  fontWeight={300}
+                                  sx={{
+                                    mt: 1,
+                                    fontSize: "0.8rem",
+                                    display: "-webkit-box",
+                                    overflow: "hidden",
+                                    WebkitBoxOrient: "vertical",
+                                    WebkitLineClamp: 4,
+                                  }}
+                                  variant={"body2"}
                                 >
-                                  {curMovie?.known_for &&
-                                    curMovie?.known_for?.map((movie) => (
+                                  {curMovie?.overview}
+                                </Typography>
+                              </>
+                            }
+                          />
+                        </ListItemButton>
+                      </ListItem>
+                      <Divider component="li" />
+                    </React.Fragment>
+                  );
+                } else {
+                  return (
+                    <React.Fragment key={"personSearchQuery" + i}>
+                      <ListItem disablePadding sx={{ position: "relative" }}>
+                        <ListItemButton
+                          alignItems="flex-start"
+                          sx={{ gap: 2, flexGrow: 0 }}
+                          onClick={() => openDialogPersonDetail(curMovie?.id)}
+                        >
+                          <ListItemAvatar>
+                            <CastsCard
+                              known_for_department={
+                                curMovie?.known_for_department
+                              }
+                              name={curMovie?.name}
+                              bg={curMovie?.profile_path}
+                              noMotion
+                              text={false}
+                              badge={false}
+                              w={MOVIE_CARD_WIDTH_MOBILE}
+                              h={MOVIE_CARD_HEIGTH_MOBILE}
+                              isDesktop={false}
+                            />
+                          </ListItemAvatar>
+                        </ListItemButton>
+                        <ListItemText
+                          sx={{ pl: 1 }}
+                          primary={
+                            <Typography
+                              sx={{ fontSize: "1rem", pl: 1 }}
+                              variant={"h6"}
+                            >
+                              {curMovie?.name}
+                            </Typography>
+                          }
+                          secondary={
+                            <>
+                              <Typography
+                                component="span"
+                                sx={{
+                                  pl: 1,
+                                  fontSize: "0.7rem",
+                                  color: "text.secondary",
+                                }}
+                                variant={"button"}
+                              >
+                                {curMovie?.known_for_department === "Acting"
+                                  ? "Attore"
+                                  : "Regista"}
+                              </Typography>
+                              <Stack
+                                component={"span"}
+                                flexDirection={"row"}
+                                gap={1}
+                                sx={{ mt: 1 }}
+                              >
+                                {curMovie?.known_for &&
+                                  curMovie?.known_for?.map((movie, index) => (
+                                    <React.Fragment key={movie?.id + index}>
                                       <Tooltip
                                         title={movie?.title || movie?.name}
                                       >
@@ -378,17 +377,17 @@ export default function SearchPageDialog({ open, setOpen }) {
                                           />
                                         </Button>
                                       </Tooltip>
-                                    ))}
-                                </Stack>
-                              </>
-                            }
-                          />
-                        </ListItem>
-                        <Divider component="li" />
-                      </>
-                    )}
-                  </React.Fragment>
-                );
+                                    </React.Fragment>
+                                  ))}
+                              </Stack>
+                            </>
+                          }
+                        />
+                      </ListItem>
+                      <Divider component="li" />
+                    </React.Fragment>
+                  );
+                }
               })}
             </List>
           )}

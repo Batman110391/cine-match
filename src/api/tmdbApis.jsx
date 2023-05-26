@@ -426,11 +426,25 @@ export async function fetchDetailMovieById(id, type) {
 export async function fetchPersonDetailById(personID) {
   return fetchPromise(
     `https://api.themoviedb.org/3/person/${personID}?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+  ).then(async (data) => {
+    if (data) {
+      const combinedCredits = await fetchCombinedCreditsPersonById(personID);
+
+      return { ...data, ...combinedCredits };
+    } else {
+      return {};
+    }
+  });
+}
+
+export async function fetchCombinedCreditsPersonById(personID) {
+  return fetchPromise(
+    `https://api.themoviedb.org/3/person/${personID}/combined_credits?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
   ).then((data) => {
     if (data) {
       return data;
     } else {
-      return [];
+      return {};
     }
   });
 }

@@ -11,6 +11,7 @@ export default function MovieCard({
   badgeRating,
   onClick,
   isDesktop = true,
+  sx,
 }) {
   const percentRating = badgeRating && (badgeRating.toFixed(1) * 100) / 10;
 
@@ -33,6 +34,7 @@ export default function MovieCard({
         transform: selected ? "scale(1.3)" : "scale(1)",
         transition: "all 0.3s ease-out",
         cursor: onClick ? "pointer" : "inherit",
+        ...sx,
       }}
     >
       {!bg && (

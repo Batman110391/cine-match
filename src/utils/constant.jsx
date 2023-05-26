@@ -23,3 +23,10 @@ export const MINI_MOVIE_CARD_WIDTH = 60;
 export const MINI_MOVIE_CARD_HEIGTH = 85;
 
 export const MAX_CAST_VISUALIZATION = 4;
+
+export const DEPARTMENT_PERSONS = {
+  Acting: "Recitazione",
+  Directing: "Direzione",
+  Production: "Produzione",
+  Writing: "Scrittura",
+};

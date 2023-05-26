@@ -18,14 +18,13 @@ import { motion } from "framer-motion";
 import * as React from "react";
 import { MAX_CAST_VISUALIZATION } from "../utils/constant";
 import SubHeader from "./SubHeader";
-import { DialogPersonDetailContext } from "./DialogPersonDetailProvider";
 
-export default function CastListDetail({ person, height }) {
+export default function CastListDetail({
+  person,
+  height,
+  openDialogPersonDetail,
+}) {
   const theme = useTheme();
-
-  const { openDialogPersonDetail } = React.useContext(
-    DialogPersonDetailContext
-  );
 
   const [maxPersonRow, setMaxPersonRow] = React.useState(
     MAX_CAST_VISUALIZATION
