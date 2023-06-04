@@ -170,6 +170,7 @@ export default function ShowTvPage() {
             typeView={viewGrid}
             handleClickItem={handleClickItem}
             isDesktop={isDesktop}
+            mediaType={"tv"}
           />
         </InfiniteScroll>
       </Box>

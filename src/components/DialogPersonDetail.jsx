@@ -20,15 +20,13 @@ import { useQuery } from "react-query";
 import { fetchPersonDetailById } from "../api/tmdbApis";
 import {
   DEPARTMENT_PERSONS,
-  MOVIE_CARD_HEIGTH_MOBILE,
-  MOVIE_CARD_WIDTH_MOBILE,
   PERSON_DETAIL_HEIGHT,
   PERSON_DETAIL_HEIGHT_MOBILE,
   PERSON_DETAIL_WIDTH,
   PERSON_DETAIL_WIDTH_MOBILE,
 } from "../utils/constant";
 import CastsCard from "./CastsCard";
-import MovieCard from "./MovieCard";
+import DataGridListCreditsPerson from "./DataGridListCreditsPerson";
 import SubHeader from "./SubHeader";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -42,8 +40,6 @@ export default function DialogPersonDetail({
   subItemClick,
 }) {
   const theme = useTheme();
-
-  const [currentDepartment, setCurrentDepartment] = React.useState(null);
 
   const { isLoading, error, data } = useQuery(["personDetail", personID], () =>
     fetchPersonDetailById(personID)
@@ -64,19 +60,6 @@ export default function DialogPersonDetail({
     },
     { key: "place_of_birth", info: "Nato a:" },
   ];
-
-  const department = currentDepartment
-    ? DEPARTMENT_PERSONS[currentDepartment]
-    : DEPARTMENT_PERSONS[data?.known_for_department];
-
-  const listsForDepartment =
-    department === "Recitazione"
-      ? data?.cast
-      : data?.crew.filter((credit) => {
-          if (DEPARTMENT_PERSONS?.[credit.department] === department) {
-            return credit;
-          }
-        });
 
   return (
     <Dialog
@@ -133,6 +116,7 @@ export default function DialogPersonDetail({
                       : PERSON_DETAIL_HEIGHT_MOBILE
                   }
                   badge={false}
+                  text={false}
                   noMotion={true}
                   noAction={true}
                 />
@@ -168,46 +152,15 @@ export default function DialogPersonDetail({
                 )}
               </Stack>
             </Grid>
-            {department && (
-              <Grid item xs={12}>
-                <SubHeader title={department}>
-                  <Box
-                    sx={{
-                      pt: 2,
-                      px: 0,
-                      display: "grid",
-                      gridTemplateColumns: `repeat(auto-fill, ${MOVIE_CARD_WIDTH_MOBILE}px)`,
-                      gridTemplateRows: `repeat(auto-fill, ${MOVIE_CARD_HEIGTH_MOBILE}px)`,
-                      gridGap: "1rem",
-                      justifyContent: "center",
-                    }}
-                  >
-                    {listsForDepartment.map((departmentItem, index) => {
-                      return (
-                        <React.Fragment key={"departmentItem" + index}>
-                          <MovieCard
-                            title={
-                              departmentItem?.title || departmentItem?.name
-                            }
-                            bg={departmentItem?.poster_path}
-                            w={MOVIE_CARD_WIDTH_MOBILE}
-                            h={MOVIE_CARD_HEIGTH_MOBILE}
-                            isDesktop={false}
-                            badgeRating={departmentItem?.vote_average}
-                            onClick={() =>
-                              subItemClick(
-                                departmentItem?.id,
-                                departmentItem?.media_type
-                              )
-                            }
-                          />
-                        </React.Fragment>
-                      );
-                    })}
-                  </Box>
-                </SubHeader>
-              </Grid>
-            )}
+            <Grid item xs={12}>
+              <SubHeader title={"Crediti"}>
+                <DataGridListCreditsPerson
+                  isDesktop={isDesktop}
+                  data={[...(data?.cast || []), ...(data?.crew || [])]}
+                  subItemClick={subItemClick}
+                />
+              </SubHeader>
+            </Grid>
             <Grid item xs={12}>
               <SubHeader title={"Biografia"} startHidden={true}>
                 <Typography fontWeight={200} sx={{ mt: 3 }} variant={"body2"}>

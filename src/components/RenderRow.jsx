@@ -15,6 +15,7 @@ export default function RenderRow({
   typeView,
   handleClickItem,
   isDesktop,
+  mediaType,
 }) {
   if (typeView === "detail") {
     return (
@@ -49,7 +50,6 @@ export default function RenderRow({
                 alignItems: "center",
                 justifyContent: "center",
               }}
-              onClick={() => handleClickItem(movie.id)}
             >
               <MovieCardDetail
                 movie={movie}
@@ -63,6 +63,8 @@ export default function RenderRow({
                     ? MOVIE_PAGE_CARD_HEIGHT
                     : MOVIE_PAGE_CARD_HEIGTH_MOBILE
                 }
+                mediaType={mediaType}
+                onClick={() => handleClickItem(movie.id)}
               />
             </Grid>
           ))}

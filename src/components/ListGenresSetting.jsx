@@ -9,8 +9,11 @@ import Grid from "@mui/material/Unstable_Grid2";
 export default function ListGenresSetting({
   selectedItemsGenres = [],
   setSelectedItemsGenres,
+  type,
 }) {
-  const { isLoading, error, data } = useQuery(["genres"], () => fetchGenres());
+  const { isLoading, error, data } = useQuery(["genres"], () =>
+    fetchGenres(type)
+  );
 
   if (isLoading) return <LoadingPage />;
 

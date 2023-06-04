@@ -13,6 +13,7 @@
     "@emotion/styled": "^11.10.0",
     "@mui/icons-material": "^5.8.4",
     "@mui/material": "^5.10.0",
+    "@mui/x-data-grid": "^6.5.0",
     "@mui/x-date-pickers": "^5.0.0",
     "@reduxjs/toolkit": "^1.9.3",
     "dayjs": "^1.11.7",

@@ -3,12 +3,18 @@ import React from "react";
 import { CircularProgressWithLabel } from "./ChartCompatibility";
 import Highlighter from "react-highlight-words";
 import MovieCard from "./MovieCard";
-import { genresList } from "../api/tmdbApis";
+import { genresList, genresListTv } from "../api/tmdbApis";
 import { useSelector } from "react-redux";
 import PeopleIcon from "@mui/icons-material/People";
 import { useTheme } from "@emotion/react";
 
-export default function MovieCardDetail({ movie, w = 175, h = 275 }) {
+export default function MovieCardDetail({
+  movie,
+  w = 175,
+  h = 275,
+  mediaType,
+  onClick,
+}) {
   const theme = useTheme();
 
   const genres =
@@ -17,7 +23,9 @@ export default function MovieCardDetail({ movie, w = 175, h = 275 }) {
   const percentRating =
     movie?.vote_average && (movie?.vote_average.toFixed(1) * 100) / 10;
 
-  const currGenres = genresList
+  const currentGenresList = mediaType === "movie" ? genresList : genresListTv;
+
+  const currGenres = currentGenresList
     .map(({ id, name }) => {
       if (movie?.genre_ids.includes(id)) {
         return name;
@@ -44,6 +52,7 @@ export default function MovieCardDetail({ movie, w = 175, h = 275 }) {
                   title={movie?.title || movie?.name}
                   w={w}
                   h={h}
+                  onClick={onClick}
                 />
                 {!useMediaQuery(theme.breakpoints.up("sm")) && (
                   <Stack sx={{ flex: 1 }} gap={1}>

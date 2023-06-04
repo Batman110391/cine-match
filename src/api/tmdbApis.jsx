@@ -73,6 +73,63 @@ const getUrlSerieTvWithCustomParams = ({
   }${providers ? "&with_ott_providers=" + providers : ""}`;
 };
 
+export const genresListTv = [
+  {
+    pos: 2,
+    id: 16,
+    name: "Animazione",
+    bg: "/images/genres/animation.jpg",
+  },
+  {
+    pos: 3,
+    id: 35,
+    name: "Commedia",
+    bg: "/images/genres/comedy.jpg",
+  },
+  {
+    pos: 4,
+    id: 80,
+    name: "Crimine",
+    bg: "/images/genres/crime.jpg",
+  },
+  {
+    pos: 5,
+    id: 99,
+    name: "Documentario",
+    bg: "/images/genres/documentary.jpg",
+  },
+  {
+    pos: 6,
+    id: 18,
+    name: "Dramma",
+    bg: "/images/genres/dramatic.jpg",
+  },
+  {
+    pos: 13,
+    id: 9648,
+    name: "Mistero",
+    bg: "/images/genres/thriller.jpg",
+  },
+  {
+    pos: 7,
+    id: 14,
+    name: "Fantasy",
+    bg: "/images/genres/fantasy.jpg",
+  },
+  {
+    pos: 14,
+    id: 10768,
+    name: "Guerra",
+    bg: "/images/genres/war.jpg",
+  },
+  {
+    pos: 15,
+    id: 37,
+    name: "Western",
+    bg: "/images/genres/western.jpg",
+  },
+];
+
 export const genresList = [
   {
     pos: 0,
@@ -172,8 +229,12 @@ export const genresList = [
   },
 ];
 
-export function fetchGenres() {
-  return new Promise((resolve) => resolve(genresList));
+export function fetchGenres(type) {
+  if (type === "tv") {
+    return new Promise((resolve) => resolve(genresListTv));
+  } else {
+    return new Promise((resolve) => resolve(genresList));
+  }
 }
 
 export async function fetchProviders() {

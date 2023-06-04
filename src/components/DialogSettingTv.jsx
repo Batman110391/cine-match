@@ -224,6 +224,7 @@ export default function DialogSettingTv({
             <ListGenresSetting
               selectedItemsGenres={selectedItemsGenres}
               setSelectedItemsGenres={setSelectedItemsGenres}
+              type={"tv"}
             />
           </Box>
           <Divider sx={{ my: 2 }} />

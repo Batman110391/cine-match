@@ -56,24 +56,23 @@ export default function CastsCard({
           }
         />
       )}
-      {text ||
-        (!bg && (
-          <Typography
-            sx={{
-              mb: 1,
-              textAlign: "center",
-              userSelect: "none",
-              letterSpacing: ".1em",
-              textShadow: `-1px -1px 1px #1111116b,
+      {(text || !bg) && (
+        <Typography
+          sx={{
+            mb: 1,
+            textAlign: "center",
+            userSelect: "none",
+            letterSpacing: ".1em",
+            textShadow: `-1px -1px 1px #1111116b,
           2px 2px 1px #36363691`,
-              fontSize: { xs: "1rem", md: "1.5rem" },
-            }}
-            variant="button"
-            fontWeight="bold"
-          >
-            {name}
-          </Typography>
-        ))}
+            fontSize: { xs: "1rem", md: "1.5rem" },
+          }}
+          variant="button"
+          fontWeight="bold"
+        >
+          {name}
+        </Typography>
+      )}
     </Card>
   );
 }

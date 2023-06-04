@@ -170,6 +170,7 @@ export default function MoviesPage() {
             typeView={viewGrid}
             handleClickItem={handleClickItem}
             isDesktop={isDesktop}
+            mediaType={"movie"}
           />
         </InfiniteScroll>
       </Box>
