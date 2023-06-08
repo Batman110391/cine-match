@@ -16,6 +16,9 @@ export default function DialogMovieDetailProvider({ children }) {
   const [openPersonDialog, setOpenPersonDialog] = React.useState(false);
   const [personID, setPersonID] = React.useState(null);
 
+  const [openPersonDialogSub, setOpenPersonDialogSub] = React.useState(false);
+  const [personIDSub, setPersonIDSub] = React.useState(null);
+
   const contextValue = React.useMemo(
     () => ({
       openDialogMovieDetail(movieID, type) {
@@ -48,6 +51,11 @@ export default function DialogMovieDetailProvider({ children }) {
     setPersonID(null);
   }
 
+  function handleClosePersonDialogSub() {
+    setOpenPersonDialogSub(false);
+    setPersonIDSub(null);
+  }
+
   const handleClickSubItem = (movieID, type) => {
     setOpenSubDialog(true);
     setMovieIDSubDialog(movieID);
@@ -57,6 +65,11 @@ export default function DialogMovieDetailProvider({ children }) {
   const handleClickPerson = (personID) => {
     setOpenPersonDialog(true);
     setPersonID(personID);
+  };
+
+  const handleClickPersonSub = (personID) => {
+    setOpenPersonDialogSub(true);
+    setPersonIDSub(personID);
   };
 
   return (
@@ -81,7 +94,9 @@ export default function DialogMovieDetailProvider({ children }) {
           movieID={movieIDSubDialog}
           type={typeSubDialog}
           subItemClick={handleClickSubItem}
-          openPersonDialog={handleClickPerson}
+          openPersonDialog={
+            openSubDialog ? handleClickPersonSub : handleClickPerson
+          }
         />
       )}
       {personID && (
@@ -89,6 +104,14 @@ export default function DialogMovieDetailProvider({ children }) {
           open={openPersonDialog}
           handleClose={handleClosePersonDialog}
           personID={personID}
+          subItemClick={handleClickSubItem}
+        />
+      )}
+      {personIDSub && (
+        <DialogPersonDetail
+          open={openPersonDialogSub}
+          handleClose={handleClosePersonDialogSub}
+          personID={personIDSub}
           subItemClick={handleClickSubItem}
         />
       )}

@@ -20,6 +20,10 @@ import { useQuery } from "react-query";
 import { fetchPersonDetailById } from "../api/tmdbApis";
 import {
   DEPARTMENT_PERSONS,
+  MOVIE_CARD_HEIGTH_MOBILE,
+  MOVIE_CARD_WIDTH_MOBILE,
+  MOVIE_PAGE_CARD_HEIGTH_MOBILE,
+  MOVIE_PAGE_CARD_WIDTH_MOBILE,
   PERSON_DETAIL_HEIGHT,
   PERSON_DETAIL_HEIGHT_MOBILE,
   PERSON_DETAIL_WIDTH,
@@ -27,6 +31,8 @@ import {
 } from "../utils/constant";
 import CastsCard from "./CastsCard";
 import DataGridListCreditsPerson from "./DataGridListCreditsPerson";
+import GridListImageVisualizations from "./GridListImageVisualizations";
+import MovieCard from "./MovieCard";
 import SubHeader from "./SubHeader";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -47,8 +53,6 @@ export default function DialogPersonDetail({
 
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
 
-  console.log("person", data);
-
   const personalInformation = [
     { key: "name", info: "Nome:" },
     { key: "deathday", info: "Morto il:" },
@@ -59,6 +63,24 @@ export default function DialogPersonDetail({
       info: "Conosciuto per:",
     },
     { key: "place_of_birth", info: "Nato a:" },
+  ];
+
+  const actorsMovies = data?.cast;
+  const directorsMovies = data?.crew?.filter(
+    (dMovie) => dMovie?.department === "Directing"
+  );
+  const productorsMovies = data?.crew?.filter(
+    (pMovie) => pMovie?.department === "Production"
+  );
+  const wrtiterMovies = data?.crew?.filter(
+    (wMovie) => wMovie?.department === "Writing"
+  );
+
+  const aggregateCredits = [
+    { type: "Recitazione", data: actorsMovies },
+    { type: "Direzione", data: directorsMovies },
+    { type: "Produzione", data: productorsMovies },
+    { type: "Scrittura", data: wrtiterMovies },
   ];
 
   return (
@@ -152,22 +174,67 @@ export default function DialogPersonDetail({
                 )}
               </Stack>
             </Grid>
-            <Grid item xs={12}>
-              <SubHeader title={"Crediti"}>
-                <DataGridListCreditsPerson
-                  isDesktop={isDesktop}
-                  data={[...(data?.cast || []), ...(data?.crew || [])]}
-                  subItemClick={subItemClick}
-                />
-              </SubHeader>
-            </Grid>
-            <Grid item xs={12}>
-              <SubHeader title={"Biografia"} startHidden={true}>
-                <Typography fontWeight={200} sx={{ mt: 3 }} variant={"body2"}>
-                  {data?.biography}
-                </Typography>
-              </SubHeader>
-            </Grid>
+
+            {aggregateCredits?.map(({ type, data }) => {
+              if (data.length > 0) {
+                return (
+                  <Grid key={type} item xs={12}>
+                    <SubHeader title={type}>
+                      <GridListImageVisualizations
+                        w={
+                          isDesktop
+                            ? MOVIE_PAGE_CARD_WIDTH_MOBILE
+                            : MOVIE_CARD_WIDTH_MOBILE
+                        }
+                      >
+                        {data.map(
+                          ({ id, title, name, poster_path, media_type }) => (
+                            <React.Fragment key={type + id}>
+                              <MovieCard
+                                title={title || name}
+                                bg={poster_path}
+                                isDesktop={isDesktop}
+                                w={
+                                  isDesktop
+                                    ? MOVIE_PAGE_CARD_WIDTH_MOBILE
+                                    : MOVIE_CARD_WIDTH_MOBILE + 15
+                                }
+                                h={
+                                  isDesktop
+                                    ? MOVIE_PAGE_CARD_HEIGTH_MOBILE
+                                    : MOVIE_CARD_HEIGTH_MOBILE + 15
+                                }
+                                onClick={() => subItemClick(id, media_type)}
+                              />
+                            </React.Fragment>
+                          )
+                        )}
+                      </GridListImageVisualizations>
+                    </SubHeader>
+                  </Grid>
+                );
+              }
+            })}
+
+            {isDesktop && (
+              <Grid item xs={12}>
+                <SubHeader title={"Tabella informativa"}>
+                  <DataGridListCreditsPerson
+                    data={[...(data?.cast || []), ...(data?.crew || [])]}
+                    subItemClick={subItemClick}
+                  />
+                </SubHeader>
+              </Grid>
+            )}
+            {data?.biography && (
+              <Grid item xs={12}>
+                <SubHeader title={"Biografia"}>
+                  <Typography fontWeight={200} sx={{ mt: 3 }} variant={"body2"}>
+                    {data?.biography}
+                  </Typography>
+                </SubHeader>
+              </Grid>
+            )}
           </Grid>
         </DialogContent>
       )}

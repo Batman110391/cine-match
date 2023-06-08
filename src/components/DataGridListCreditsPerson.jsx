@@ -1,9 +1,5 @@
 import { Box, LinearProgress, Rating, alpha } from "@mui/material";
-import {
-  DataGrid,
-  GridToolbar,
-  getGridNumericOperators,
-} from "@mui/x-data-grid";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import _ from "lodash";
 import * as React from "react";
 import {
@@ -12,39 +8,22 @@ import {
   MOVIE_CARD_HEIGHT_DATA_GRID,
   MOVIE_CARD_WIDTH_DATA_GRID,
 } from "../utils/constant";
-import MovieCard from "./MovieCard";
 import { roundToHalf } from "../utils/numberFormatting";
+import MovieCard from "./MovieCard";
 
-import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import TrendingFlatIcon from "@mui/icons-material/TrendingFlat";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
+import TrendingFlatIcon from "@mui/icons-material/TrendingFlat";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 
-function TrendValue({ value, isDesktop }) {
+function TrendValue({ value }) {
   const currentPopularity = Number.parseFloat(value).toFixed(0);
 
-  console.log(currentPopularity);
-
   if (currentPopularity >= 1000) {
-    return (
-      <TrendingUpIcon
-        color="success"
-        fontSize={isDesktop ? "medium" : "small"}
-      />
-    );
+    return <TrendingUpIcon color="success" fontSize={"medium"} />;
   } else if (currentPopularity >= 100) {
-    return (
-      <TrendingFlatIcon
-        color="inherit"
-        fontSize={isDesktop ? "medium" : "small"}
-      />
-    );
+    return <TrendingFlatIcon color="inherit" fontSize={"medium"} />;
   } else {
-    return (
-      <TrendingDownIcon
-        color="error"
-        fontSize={isDesktop ? "medium" : "small"}
-      />
-    );
+    return <TrendingDownIcon color="error" fontSize={"medium"} />;
   }
 }
 
@@ -137,40 +116,32 @@ const ratingOnlyOperators = [
   },
 ];
 
-export default function DataGridListCreditsPerson({
-  isDesktop,
-  data,
-  subItemClick,
-}) {
+export default function DataGridListCreditsPerson({ data, subItemClick }) {
   const OVERDROW = 10;
 
   const filtered = _.uniqBy(data, "id");
 
   const columns = [
-    ...(isDesktop
-      ? [
-          {
-            field: "bg",
-            headerName: "",
-            width: MOVIE_CARD_WIDTH_DATA_GRID + OVERDROW,
-            filterable: false,
-            disableColumnMenu: true,
-            sortable: false,
-            renderCell: (params) => {
-              const { title, bg } = params.row;
+    {
+      field: "bg",
+      headerName: "",
+      width: MOVIE_CARD_WIDTH_DATA_GRID + OVERDROW,
+      filterable: false,
+      disableColumnMenu: true,
+      sortable: false,
+      renderCell: (params) => {
+        const { title, bg } = params.row;
 
-              return (
-                <MovieCard
-                  title={title}
-                  bg={bg}
-                  w={MOVIE_CARD_WIDTH_DATA_GRID}
-                  h={MOVIE_CARD_HEIGHT_DATA_GRID - OVERDROW}
-                />
-              );
-            },
-          },
-        ]
-      : []),
+        return (
+          <MovieCard
+            title={title}
+            bg={bg}
+            w={MOVIE_CARD_WIDTH_DATA_GRID}
+            h={MOVIE_CARD_HEIGHT_DATA_GRID - OVERDROW}
+          />
+        );
+      },
+    },
     {
       field: "title",
       headerName: "Titolo",
@@ -194,7 +165,7 @@ export default function DataGridListCreditsPerson({
 
         return (
           <Rating
-            size={isDesktop ? "medium" : "small"}
+            size={"medium"}
             value={roundToHalf(rating)}
             precision={0.5}
             readOnly
@@ -211,7 +182,7 @@ export default function DataGridListCreditsPerson({
       renderCell: (params) => {
         const { popularity } = params.row;
 
-        return <TrendValue isDesktop={isDesktop} value={popularity} />;
+        return <TrendValue value={popularity} />;
       },
     },
   ];
@@ -270,12 +241,10 @@ export default function DataGridListCreditsPerson({
       slotProps={{
         loadingOverlay: LinearProgress,
         toolbar: {
-          showQuickFilter: isDesktop ? true : false,
+          showQuickFilter: true,
           quickFilterProps: { debounceMs: 500 },
         },
       }}
-      disableDensitySelector={isDesktop ? false : true}
-      disableColumnFilter={isDesktop ? false : true}
       disableRowSelectionOnClick
       disableColumnSelector
       sx={{
@@ -295,6 +264,9 @@ export default function DataGridListCreditsPerson({
         },
         "& .MuiDataGrid-withBorderColor": {
           borderColor: (theme) => alpha(theme.palette.background.paper, 0.5),
+        },
+        "& .MuiDataGrid-virtualScroller": {
+          overflowX: "hidden",
         },
       }}
     />
