@@ -203,16 +203,7 @@ export default function SearchPage() {
           isDesktop={isDesktop}
           type={"movie"}
         />
-        <CarouselDiscover
-          slides={italianMovie}
-          titleDiscover={"Film italiani"}
-          isLoading={isLoading}
-          path={"/movies"}
-          onAction={handleSeeAllMovieItaian}
-          handleClickItem={handleClickItem}
-          isDesktop={isDesktop}
-          type={"movie"}
-        />
+
         {KEYWORDS_SEARCH_MOVIE.map(({ id, name, type }) => (
           <Fragment key={type}>
             <CarouselDiscover
@@ -220,7 +211,7 @@ export default function SearchPage() {
               titleDiscover={name}
               isLoading={isLoading}
               path={"/movies"}
-              onAction={() => handleSeeAllMovieItaian(id)}
+              onAction={() => handleSeeAllMovieKeywords(id)}
               handleClickItem={handleClickItem}
               isDesktop={isDesktop}
               type={"movie"}

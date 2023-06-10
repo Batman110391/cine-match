@@ -186,6 +186,7 @@ export default function DialogPersonDetail({
                             ? MOVIE_PAGE_CARD_WIDTH_MOBILE
                             : MOVIE_CARD_WIDTH_MOBILE
                         }
+                        gap={16}
                       >
                         {data.map(
                           ({ id, title, name, poster_path, media_type }) => (
@@ -197,12 +198,12 @@ export default function DialogPersonDetail({
                                 w={
                                   isDesktop
                                     ? MOVIE_PAGE_CARD_WIDTH_MOBILE
-                                    : MOVIE_CARD_WIDTH_MOBILE + 15
+                                    : MOVIE_CARD_WIDTH_MOBILE
                                 }
                                 h={
                                   isDesktop
                                     ? MOVIE_PAGE_CARD_HEIGTH_MOBILE
-                                    : MOVIE_CARD_HEIGTH_MOBILE + 15
+                                    : MOVIE_CARD_HEIGTH_MOBILE
                                 }
                                 onClick={() => subItemClick(id, media_type)}
                               />
