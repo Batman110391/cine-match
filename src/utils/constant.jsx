@@ -1,3 +1,5 @@
+export const HEIGHT_NAVIGATION_MOBILE = 70;
+
 export const MOVIE_CARD_WIDTH = 150;
 export const MOVIE_CARD_HEIGHT = 230;
 

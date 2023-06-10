@@ -1,6 +1,7 @@
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
+  CssBaseline,
   Button,
   Stack,
   Typography,
@@ -16,6 +17,7 @@ import CarouselDiscover from "../components/CarouselDiscover";
 import { DialogMovieDetailContext } from "../components/DialogMovieDetailProvider";
 import SearchPageDialog from "../components/SearchPageDialog";
 import { setQuery } from "../store/movieQuery";
+import { HEIGHT_NAVIGATION_MOBILE } from "../utils/constant";
 
 export default function SearchPage() {
   const { openDialogMovieDetail } = useContext(DialogMovieDetailContext);
@@ -89,7 +91,7 @@ export default function SearchPage() {
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
 
   return (
-    <Box sx={{ p: 2 }}>
+    <Box sx={{ p: 2, height: "100%" }}>
       <Box>
         <Button
           sx={{
@@ -114,7 +116,7 @@ export default function SearchPage() {
         </Button>
         <SearchPageDialog open={openSearchMovie} setOpen={setOpenSearchMovie} />
       </Box>
-      <Box sx={{ width: "100%" }}>
+      <Box sx={{ width: "100%", height: "100%" }}>
         <CarouselDiscover
           slides={popularMovies}
           titleDiscover={"Film di tendenza"}
@@ -146,6 +148,8 @@ export default function SearchPage() {
           type={"movie"}
         />
       </Box>
+
+      {!isDesktop && <Box sx={{ height: `${HEIGHT_NAVIGATION_MOBILE}px` }} />}
     </Box>
   );
 }

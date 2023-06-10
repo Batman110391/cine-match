@@ -1,14 +1,17 @@
 import {
+  alpha,
   Accordion,
   AccordionDetails,
   AccordionSummary,
   Box,
   Divider,
+  IconButton,
   LinearProgress,
   List,
   ListItem,
   ListItemAvatar,
   ListItemButton,
+  Popover,
   ListItemText,
   Stack,
   Typography,
@@ -26,9 +29,12 @@ import {
 } from "../utils/constant";
 import { CircularProgressWithLabel } from "./ChartCompatibility";
 import { formatMinutes } from "../utils/timeFormat";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 
 export default function ListSeasonTv({ tvID, seasons, isDesktop }) {
   const [expanded, setExpanded] = React.useState(false);
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [overviewPop, setOverviewPop] = React.useState(null);
 
   const handleChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
@@ -39,6 +45,21 @@ export default function ListSeasonTv({ tvID, seasons, isDesktop }) {
   );
 
   if (error) return null;
+
+  const handleClickPop = (event, overview) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setAnchorEl(event.currentTarget);
+    setOverviewPop(overview);
+  };
+
+  const handleClosePop = () => {
+    setAnchorEl(null);
+    setOverviewPop(null);
+  };
+
+  const openPop = Boolean(anchorEl) && overviewPop;
+  const idPop = openPop ? "info-overview" : undefined;
 
   return (
     <Box>
@@ -82,13 +103,58 @@ export default function ListSeasonTv({ tvID, seasons, isDesktop }) {
                         isDesktop={false}
                       />
                     </Box>
-                    <Typography
-                      fontWeight={200}
-                      variant={"body2"}
-                      sx={{ px: 2, fontSize: "0.8rem" }}
-                    >
-                      {season?.overview}
-                    </Typography>
+                    <Stack flexDirection={"row"} gap={1}>
+                      <Typography
+                        fontWeight={200}
+                        variant={"body2"}
+                        sx={{ px: 2, fontSize: "0.8rem" }}
+                      >
+                        {season?.overview &&
+                        season.overview.length >= 185 &&
+                        !isDesktop
+                          ? season.overview.substring(0, 185) + "..."
+                          : season.overview}
+                      </Typography>
+                      {!isDesktop &&
+                        season?.overview &&
+                        season.overview.length >= 185 && (
+                          <IconButton
+                            sx={{ height: "fit-content" }}
+                            onClick={(e) => handleClickPop(e, season.overview)}
+                          >
+                            <InfoOutlinedIcon fontSize="small" />
+                          </IconButton>
+                        )}
+                      <Popover
+                        id={idPop}
+                        open={openPop}
+                        anchorEl={anchorEl}
+                        onClose={handleClosePop}
+                        anchorOrigin={{
+                          vertical: "top",
+                          horizontal: "left",
+                        }}
+                        transformOrigin={{
+                          vertical: "center",
+                          horizontal: "right",
+                        }}
+                        PaperProps={{
+                          elevation: 0,
+                          sx: {
+                            backgroundColor: (theme) =>
+                              alpha(theme.palette.background.paperDark, 0.9),
+                          },
+                        }}
+                      >
+                        <Typography
+                          fontWeight={200}
+                          variant={"body2"}
+                          sx={{ p: 2, fontSize: "0.8rem" }}
+                        >
+                          {overviewPop}
+                        </Typography>
+                      </Popover>
+                    </Stack>
                   </Stack>
                 </Stack>
               </AccordionSummary>

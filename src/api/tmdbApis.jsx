@@ -253,7 +253,7 @@ export async function fetchProviders() {
 
 export async function fetchSimilarMoviesOrTvById(id, type) {
   return fetchPromise(
-    `https://api.themoviedb.org/3/${type}/${id}/recommendations?api_key=${API_KEY}&page=${1}&${CURRENT_LANGUAGE}`
+    `https://api.themoviedb.org/3/${type}/${id}/similar?api_key=${API_KEY}&page=${1}&${CURRENT_LANGUAGE}`
   ).then((data) => {
     if (data && data?.results?.length > 0) {
       return data?.results;

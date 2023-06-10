@@ -8,7 +8,6 @@ import {
   Chip,
   Dialog,
   DialogContent,
-  Divider,
   Grid,
   LinearProgress,
   Rating,
@@ -26,16 +25,23 @@ import React from "react";
 import YouTubePlayer from "react-player/youtube";
 import { useQuery } from "react-query";
 import { fetchDetailMovieById } from "../api/tmdbApis";
+import {
+  MOVIE_CARD_HEIGTH_MOBILE,
+  MOVIE_CARD_WIDTH_MOBILE,
+  MOVIE_PAGE_CARD_HEIGTH_MOBILE,
+  MOVIE_PAGE_CARD_WIDTH_MOBILE,
+} from "../utils/constant";
 import { roundToHalf } from "../utils/numberFormatting";
 import { formatMinutes } from "../utils/timeFormat";
 import useElementSize from "../utils/useElementSize";
 import CastListDetail from "./CastListDetail";
 import ListImagesMovie from "./ListImagesMovie";
-import SpeedDialShare from "./SpeedDialShare";
-import Tmdb from "./icons/Tmdb";
-import SubHeader from "./SubHeader";
 import ListSeasonTv from "./ListSeasonTv";
 import ListSimilarMoviesAndTv from "./ListSimilarMoviesAndTv";
+import MovieCard from "./MovieCard";
+import SpeedDialShare from "./SpeedDialShare";
+import SubHeader from "./SubHeader";
+import Tmdb from "./icons/Tmdb";
 
 const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
@@ -200,112 +206,149 @@ export default function DialogMovieDetail({
                 <Grid container spacing={5}>
                   <Grid item xs={12} sm={8}>
                     <Box ref={infoMovieRef}>
-                      <Typography sx={{ fontSize: "1.2rem" }} variant={"h6"}>
-                        {detail?.title || detail?.name}
-                      </Typography>
-                      {detail?.title !== detail?.original_title && (
-                        <Typography
-                          sx={{ fontSize: "0.6rem" }}
-                          variant={"button"}
-                          color={"text.secondary"}
-                        >
-                          {detail?.original_title}
-                        </Typography>
-                      )}
-                      {detail?.name !== detail?.original_name && (
-                        <Typography
-                          sx={{ fontSize: "0.6rem" }}
-                          variant={"button"}
-                          color={"text.secondary"}
-                        >
-                          {detail?.original_name}
-                        </Typography>
-                      )}
-                      <Stack
-                        flexDirection={"row"}
-                        flexWrap={"wrap"}
-                        alignItems={"center"}
-                        gap={1}
-                      >
-                        <Typography
-                          sx={{ fontSize: "0.7rem" }}
-                          variant={"button"}
-                        >
-                          {detail?.release_date?.substring(0, 4) ||
-                            detail?.first_air_date?.substring(0, 4)}
-                        </Typography>
-                        {director && type === "movie" && (
-                          <>
+                      <Stack flexDirection={"row"} gap={2}>
+                        <Box>
+                          <MovieCard
+                            bg={detail?.poster_path}
+                            title={detail?.title || detail?.name}
+                            w={
+                              isDesktop
+                                ? MOVIE_PAGE_CARD_WIDTH_MOBILE
+                                : MOVIE_CARD_WIDTH_MOBILE
+                            }
+                            h={
+                              isDesktop
+                                ? MOVIE_PAGE_CARD_HEIGTH_MOBILE
+                                : MOVIE_CARD_HEIGTH_MOBILE
+                            }
+                            isDesktop={isDesktop}
+                          />
+                        </Box>
+                        <Box>
+                          <Typography
+                            sx={{ fontSize: "1.2rem" }}
+                            variant={"h6"}
+                          >
+                            {detail?.title || detail?.name}
+                          </Typography>
+                          {detail?.title !== detail?.original_title && (
                             <Typography
                               sx={{ fontSize: "0.6rem" }}
-                              variant={"body2"}
+                              variant={"button"}
+                              color={"text.secondary"}
                             >
-                              - DIRETTO DA
+                              {detail?.original_title}
                             </Typography>
-                            <Chip
-                              onClick={() => openPersonDialog(director?.id)}
-                              key={director?.id}
-                              variant="outlined"
-                              avatar={
-                                director?.profile_path ? (
-                                  <Avatar
-                                    alt={director?.name}
-                                    src={`http://image.tmdb.org/t/p/w500${director?.profile_path}`}
-                                  />
-                                ) : (
-                                  <Avatar>{director?.name?.charAt(0)}</Avatar>
-                                )
-                              }
-                              label={director?.name}
-                            />
-                          </>
-                        )}
-                        {director && type === "tv" && (
-                          <>
+                          )}
+                          {detail?.name !== detail?.original_name && (
                             <Typography
                               sx={{ fontSize: "0.6rem" }}
-                              variant={"body2"}
+                              variant={"button"}
+                              color={"text.secondary"}
                             >
-                              - IDEATO DA
+                              {detail?.original_name}
                             </Typography>
-                            <Box>
-                              {director.map((dir) => (
+                          )}
+                          <Stack
+                            flexDirection={"row"}
+                            flexWrap={"wrap"}
+                            alignItems={"center"}
+                            gap={1}
+                          >
+                            <Typography
+                              sx={{ fontSize: "0.7rem" }}
+                              variant={"button"}
+                            >
+                              {detail?.release_date?.substring(0, 4) ||
+                                detail?.first_air_date?.substring(0, 4)}
+                            </Typography>
+                            {director && type === "movie" && (
+                              <>
+                                <Typography
+                                  sx={{ fontSize: "0.6rem" }}
+                                  variant={"body2"}
+                                >
+                                  - DIRETTO DA
+                                </Typography>
                                 <Chip
-                                  key={dir?.id}
+                                  onClick={() => openPersonDialog(director?.id)}
+                                  key={director?.id}
                                   variant="outlined"
-                                  onClick={() => openPersonDialog(dir?.id)}
                                   avatar={
-                                    dir?.profile_path ? (
+                                    director?.profile_path ? (
                                       <Avatar
-                                        alt={dir?.name}
-                                        src={`http://image.tmdb.org/t/p/w500${dir?.profile_path}`}
+                                        alt={director?.name}
+                                        src={`http://image.tmdb.org/t/p/w500${director?.profile_path}`}
                                       />
                                     ) : (
-                                      <Avatar>{dir?.name?.charAt(0)}</Avatar>
+                                      <Avatar>
+                                        {director?.name?.charAt(0)}
+                                      </Avatar>
                                     )
                                   }
-                                  label={dir?.name}
+                                  label={director?.name}
                                 />
-                              ))}
-                            </Box>
-                          </>
-                        )}
-                      </Stack>
+                              </>
+                            )}
+                            {director &&
+                              Array.isArray(director) &&
+                              director.length > 0 &&
+                              type === "tv" && (
+                                <>
+                                  <Typography
+                                    sx={{ fontSize: "0.6rem" }}
+                                    variant={"body2"}
+                                  >
+                                    - IDEATO DA
+                                  </Typography>
+                                  <Box>
+                                    {director.map((dir) => (
+                                      <Chip
+                                        key={dir?.id}
+                                        variant="outlined"
+                                        onClick={() =>
+                                          openPersonDialog(dir?.id)
+                                        }
+                                        avatar={
+                                          dir?.profile_path ? (
+                                            <Avatar
+                                              alt={dir?.name}
+                                              src={`http://image.tmdb.org/t/p/w500${dir?.profile_path}`}
+                                            />
+                                          ) : (
+                                            <Avatar>
+                                              {dir?.name?.charAt(0)}
+                                            </Avatar>
+                                          )
+                                        }
+                                        label={dir?.name}
+                                      />
+                                    ))}
+                                  </Box>
+                                </>
+                              )}
+                          </Stack>
 
-                      <Typography
-                        sx={{ fontSize: "0.6rem" }}
-                        variant={"button"}
-                        color={"text.secondary"}
-                      >
-                        {detail?.release_date || detail?.first_air_date}
-                      </Typography>
-                      <Typography variant={"body2"} sx={{ mt: 1 }}>
-                        {`${
-                          detail?.runtime
-                            ? formatMinutes(detail?.runtime) + "-"
-                            : ""
-                        } ${detail?.genres?.map((g) => g.name).join(", ")}`}
-                      </Typography>
+                          <Typography
+                            sx={{ fontSize: "0.6rem" }}
+                            variant={"button"}
+                            color={"text.secondary"}
+                          >
+                            {detail?.release_date || detail?.first_air_date}
+                          </Typography>
+
+                          <Typography
+                            variant={"body2"}
+                            sx={{ mt: 1, fontSize: "0.7rem" }}
+                          >
+                            {`${
+                              detail?.runtime
+                                ? formatMinutes(detail?.runtime) + " - "
+                                : ""
+                            } ${detail?.genres?.map((g) => g.name).join(", ")}`}
+                          </Typography>
+                        </Box>
+                      </Stack>
                       <Box sx={{ mt: 2 }}>
                         <Chip
                           sx={{ borderColor: "transparent" }}
@@ -365,21 +408,29 @@ export default function DialogMovieDetail({
                         {detail?.overview}
                       </Typography>
 
-                      {detail?.providers?.flatrate && (
-                        <Box sx={{ mt: 2 }}>
-                          <SubHeader title={"Disponibile sulle piattaforme"}>
-                            <Stack flexDirection={"row"} gap={2} sx={{ mt: 2 }}>
-                              {detail?.providers?.flatrate?.map((provider) => (
-                                <Avatar
-                                  key={provider?.provider_id}
-                                  alt={provider?.provider_name}
-                                  src={`http://image.tmdb.org/t/p/w500${provider?.logo_path}`}
-                                />
-                              ))}
-                            </Stack>
-                          </SubHeader>
-                        </Box>
-                      )}
+                      {detail?.providers?.flatrate &&
+                        detail.providers.flatrate.length > 0 && (
+                          <Box sx={{ mt: 2 }}>
+                            <SubHeader title={"Disponibile sulle piattaforme"}>
+                              <Stack
+                                flexDirection={"row"}
+                                flexWrap={"wrap"}
+                                gap={2}
+                                sx={{ mt: 2 }}
+                              >
+                                {detail?.providers?.flatrate?.map(
+                                  (provider) => (
+                                    <Avatar
+                                      key={provider?.provider_id}
+                                      alt={provider?.provider_name}
+                                      src={`http://image.tmdb.org/t/p/w500${provider?.logo_path}`}
+                                    />
+                                  )
+                                )}
+                              </Stack>
+                            </SubHeader>
+                          </Box>
+                        )}
                     </Box>
                   </Grid>
                   <Grid item xs={12} sm={4}>
@@ -403,7 +454,11 @@ export default function DialogMovieDetail({
                       </Grid>
                     )}
                   <Grid item xs={12}>
-                    <SubHeader title={"Raccomandati"}>
+                    <SubHeader
+                      title={
+                        type === "movie" ? "Film simili" : "Serie Tv simili"
+                      }
+                    >
                       <ListSimilarMoviesAndTv
                         id={detail?.id}
                         type={type}

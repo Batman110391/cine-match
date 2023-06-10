@@ -58,6 +58,10 @@ export default function CastListDetail({
         ]
       : [];
 
+  if (!filterPersonForMobile.length > 0) {
+    return <></>;
+  }
+
   return (
     <List
       component={motion.div}
