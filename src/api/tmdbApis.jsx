@@ -40,9 +40,11 @@ const getUrlMoviesWithCustomParams = ({
     with_ott_providers.length > 0
       ? with_ott_providers.map((g) => g.provider_id).join("|")
       : null;
+  const ordering =
+    order_by === "vote_average.desc" ? "&vote_count.gte=300" : "";
 
   return `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&${CURRENT_LANGUAGE}
-  &air_date.lte=${DATE_SIX_MONTHS_LATER}&certification_country=IT&ott_region=IT&release_date.gte=${from}&release_date.lte=${to}&show_me=0&sort_by=${order_by}&vote_average.gte=0&vote_average.lte=10
+  &certification_country=IT&ott_region=IT&release_date.gte=${from}&release_date.lte=${to}&show_me=0&sort_by=${order_by}&vote_average.gte=0&vote_average.lte=10
   &vote_count.gte=0&with_runtime.gte=0&with_runtime.lte=400&region=IT${
     genres ? "&with_genres=" + genres : ""
   }${providers ? "&with_ott_providers=" + providers : ""}${
@@ -51,7 +53,7 @@ const getUrlMoviesWithCustomParams = ({
     with_original_language
       ? "&with_original_language=" + with_original_language
       : ""
-  }${with_keywords ? "&with_keywords=" + with_keywords : ""}`;
+  }${with_keywords ? "&with_keywords=" + with_keywords : ""}${ordering}`;
 };
 
 const getUrlSerieTvWithCustomParams = ({
@@ -72,12 +74,14 @@ const getUrlSerieTvWithCustomParams = ({
     with_ott_providers.length > 0
       ? with_ott_providers.map((g) => g.provider_id).join("|")
       : PROVIDERS;
+  const ordering =
+    order_by === "vote_average.desc" ? "&vote_count.gte=300" : "";
 
   return `https://api.themoviedb.org/3/discover/tv?api_key=${API_KEY}&${CURRENT_LANGUAGE}
   &air_date.lte=${DATE_SIX_MONTHS_LATER}&certification_country=IT&ott_region=IT&release_date.gte=${from}&release_date.lte=${to}&show_me=0&sort_by=${order_by}&vote_average.gte=0&vote_average.lte=10
   &vote_count.gte=0&with_runtime.gte=0&with_runtime.lte=400&region=IT${
     genres ? "&with_genres=" + genres : ""
-  }${providers ? "&with_ott_providers=" + providers : ""}`;
+  }${providers ? "&with_ott_providers=" + providers : ""}${ordering}`;
 };
 
 export const genresListTv = [
@@ -533,6 +537,18 @@ export async function fetchCombinedCreditsPersonById(personID) {
       return data;
     } else {
       return {};
+    }
+  });
+}
+
+export async function fetchCounties() {
+  return fetchPromise(
+    `https://api.themoviedb.org/3/configuration/countries?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+  ).then((data) => {
+    if (data) {
+      return data;
+    } else {
+      return [];
     }
   });
 }

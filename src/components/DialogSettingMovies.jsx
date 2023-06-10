@@ -27,15 +27,12 @@ import ListGenresSetting from "./ListGenresSetting";
 import SearchPeriods from "./SearchPeriods";
 import dayjs from "dayjs";
 import ListProviderSettng from "./ListProviderSettng";
+import CountrySelect from "./CountrySelect";
 
 const ORDERS = [
-  { name: "Popolarità Decrescente", label: "popularity.desc" },
-  { name: "Popolarità Crescente", label: "popularity.asc" },
-  { name: "Valutazione Decrescente", label: "vote_average.desc" },
-  { name: "Valutazione Crescente", label: "vote_average.asc" },
-  { name: "Data Rilascio Crescente", label: "primary_release_date.asc" },
-  { name: "Titolo (A-Z)", label: "title.asc" },
-  { name: "Data Rilascio Decrescente", label: "primary_release_date.desc" },
+  { name: "Popolari", label: "popularity.desc" },
+  { name: "Più Votati", label: "vote_average.desc" },
+  { name: "Più recenti", label: "primary_release_date.desc" },
 ];
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -67,6 +64,9 @@ export default function DialogSettingMovies({
   const providerPrev = useSelector(
     (state) => state.movieQuery.querySearch?.with_ott_providers
   );
+  const languagePrev = useSelector(
+    (state) => state.movieQuery.querySearch?.with_original_language
+  );
 
   const [periods, setPeriods] = useState({
     from: fromPrev,
@@ -76,12 +76,14 @@ export default function DialogSettingMovies({
   const [exactSearch, setExactSearch] = useState(exactPrev);
   const [selectedItemsGenres, setSelectedItemsGenres] = useState(genresPrev);
   const [providerSearch, setProviderSearch] = useState(providerPrev);
+  const [languageMovie, setLanguageMovie] = useState(languagePrev);
 
   const disableSaveAction =
     sort === orderPrev &&
     exactSearch === exactPrev &&
     selectedItemsGenres === genresPrev &&
-    providerSearch === providerPrev;
+    providerSearch === providerPrev &&
+    languageMovie === languagePrev;
 
   useEffect(() => {
     setPeriods({
@@ -92,7 +94,17 @@ export default function DialogSettingMovies({
     setExactSearch(exactPrev);
     setSelectedItemsGenres(genresPrev);
     setProviderSearch(providerPrev);
-  }, [fromPrev, toPrev, orderPrev, exactPrev, genresPrev, providerPrev, open]);
+    setLanguageMovie(languagePrev);
+  }, [
+    fromPrev,
+    toPrev,
+    orderPrev,
+    exactPrev,
+    genresPrev,
+    providerPrev,
+    languagePrev,
+    open,
+  ]);
 
   const onSelectPeriod = (data) => {
     setPeriods({
@@ -120,6 +132,7 @@ export default function DialogSettingMovies({
           with_genres: selectedItemsGenres,
           with_ott_providers: providerSearch,
           exact_search: exactSearch,
+          with_original_language: languageMovie,
         },
       })
     );
@@ -235,6 +248,16 @@ export default function DialogSettingMovies({
             <ListProviderSettng
               selectedItemsProviders={providerSearch}
               setSelectedItemsProviders={setProviderSearch}
+            />
+          </Box>
+          <Divider sx={{ my: 2 }} />
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Typography variant="button" gutterBottom>
+              Lingua
+            </Typography>
+            <CountrySelect
+              languageMovie={languageMovie}
+              setLanguageMovie={setLanguageMovie}
             />
           </Box>
           <Divider sx={{ my: 2 }} />

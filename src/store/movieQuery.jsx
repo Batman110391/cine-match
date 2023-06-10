@@ -9,6 +9,7 @@ export const initialState = {
     with_genres: [],
     with_ott_providers: [],
     exact_search: false,
+    with_original_language: null,
   },
   querySearchTv: {
     from: "1975-01-01",
@@ -17,6 +18,7 @@ export const initialState = {
     with_genres: [],
     with_ott_providers: [],
     exact_search: false,
+    with_original_language: null,
   },
   currentRoute: 0,
 };
