@@ -29,6 +29,24 @@ export const MINI_MOVIE_CARD_HEIGTH = 85;
 
 export const MAX_CAST_VISUALIZATION = 4;
 
+export const KEYWORDS_SEARCH_MOVIE = [
+  {
+    id: "224636",
+    name: "Film Horror divertenti",
+    type: "horor_comedy",
+  },
+  {
+    id: "272581|9672|231069|318778",
+    name: "Film basati su storie vere",
+    type: "true_story",
+  },
+  {
+    id: "286646|262404|311371",
+    name: "Film violenti",
+    type: "violence_movie",
+  },
+];
+
 export const DEPARTMENT_PERSONS = {
   Acting: "Recitazione",
   Directing: "Direzione",

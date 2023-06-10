@@ -3,6 +3,7 @@ import isBetween from "dayjs/plugin/isBetween";
 import _ from "lodash";
 import { fetchPromise } from "../utils/fetchPromise";
 import { uniqueArray } from "../utils/uniqueArray";
+import { KEYWORDS_SEARCH_MOVIE } from "../utils/constant";
 dayjs.extend(isBetween);
 
 const API_KEY = import.meta.env.VITE_API_KEY;
@@ -26,6 +27,8 @@ const getUrlMoviesWithCustomParams = ({
   with_ott_providers = [],
   exact_search = false,
   with_release_type = null,
+  with_original_language = null,
+  with_keywords = null,
 }) => {
   const genres =
     with_genres.length > 0 && exact_search
@@ -44,7 +47,11 @@ const getUrlMoviesWithCustomParams = ({
     genres ? "&with_genres=" + genres : ""
   }${providers ? "&with_ott_providers=" + providers : ""}${
     with_release_type ? "&with_release_type=" + with_release_type : ""
-  }`;
+  }${
+    with_original_language
+      ? "&with_original_language=" + with_original_language
+      : ""
+  }${with_keywords ? "&with_keywords=" + with_keywords : ""}`;
 };
 
 const getUrlSerieTvWithCustomParams = ({
@@ -264,6 +271,17 @@ export async function fetchSimilarMoviesOrTvById(id, type) {
 }
 
 export async function fetchMoviesDiscover(page = 1) {
+  const keywordsMovies = KEYWORDS_SEARCH_MOVIE.map((ksm) => {
+    return {
+      name: ksm.type,
+      api: fetchPromise(
+        `${getUrlMoviesWithCustomParams({
+          with_keywords: ksm.id,
+        })}&page=${page}`
+      ),
+    };
+  });
+
   const resourcesAll = [
     {
       name: "trending_movie",
@@ -282,6 +300,15 @@ export async function fetchMoviesDiscover(page = 1) {
         })}&page=${page}`
       ),
     },
+    {
+      name: "italian_movie",
+      api: fetchPromise(
+        `${getUrlMoviesWithCustomParams({
+          with_original_language: "it",
+        })}&page=${page}`
+      ),
+    },
+    ...keywordsMovies,
   ];
 
   const aggregationResources = await Promise.all(
