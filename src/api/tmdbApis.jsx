@@ -186,12 +186,6 @@ export const genresListTv = [
     bg: "/images/genres/thriller.jpg",
   },
   {
-    pos: 7,
-    id: 14,
-    name: "Fantasy",
-    bg: "/images/genres/fantasy.jpg",
-  },
-  {
     pos: 14,
     id: 10768,
     name: "Guerra",

@@ -467,13 +467,16 @@ export default function DialogMovieDetail({
                       />
                     </SubHeader>
                   </Grid>
-                  {detail?.images?.backdrops?.length > 0 && (
-                    <Grid item xs={12}>
-                      <SubHeader title={"Immagini"}>
-                        <ListImagesMovie images={detail?.images?.backdrops} />
-                      </SubHeader>
-                    </Grid>
-                  )}
+                  {detail?.images?.backdrops &&
+                    detail?.images?.backdrops?.filter((ele) => !ele?.iso_639_1)
+                      .length > 0 && (
+                      <Grid item xs={12}>
+                        <SubHeader title={"Immagini"}>
+                          <ListImagesMovie images={detail?.images?.backdrops} />
+                        </SubHeader>
+                      </Grid>
+                    )}
+                  <Box sx={{ height: 40, width: "100%" }} />
                 </Grid>
               </Box>
             </Box>

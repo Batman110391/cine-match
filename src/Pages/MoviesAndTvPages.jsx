@@ -73,7 +73,7 @@ export default function MoviesAndTvPages({ typeSearch }) {
     hasNextPage,
     fetchNextPage,
   } = useInfiniteQuery({
-    queryKey: [keyQuery, changeFilters],
+    queryKey: [keyQuery, changeFilters, querySearch],
     getNextPageParam: (prevData) => prevData.nextPage,
     queryFn: ({ pageParam = 1 }) => functionCall(pageParam, querySearch),
   });

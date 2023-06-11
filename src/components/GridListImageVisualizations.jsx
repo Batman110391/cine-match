@@ -7,7 +7,9 @@ export default function GridListImageVisualizations({ w, gap, children }) {
   useEffect(() => {
     const updateNumItems = () => {
       const containerWidth = containerRef.current.offsetWidth;
-      const calculatedNumItems = Math.floor(containerWidth / w);
+
+      const calculatedNumItems = Math.floor(containerWidth / (w + gap));
+
       setNumItems(calculatedNumItems);
     };
 
