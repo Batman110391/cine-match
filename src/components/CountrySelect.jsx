@@ -1,11 +1,31 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
-import Autocomplete from "@mui/material/Autocomplete";
+import Autocomplete, { autocompleteClasses } from "@mui/material/Autocomplete";
 import { fetchCounties } from "../api/tmdbApis";
 import { useQuery } from "react-query";
+import { Popper } from "@mui/material";
+
+const CustomPopper = ({ anchorEl, ...props }) => (
+  <Popper
+    anchorEl={anchorEl}
+    placement={"top"}
+    {...props}
+    sx={{
+      [`& .${autocompleteClasses.listbox}`]: {
+        boxSizing: "border-box",
+        "& ul": {
+          padding: 0,
+          margin: 0,
+        },
+      },
+    }}
+  />
+);
 
 export default function CountrySelect({ languageMovie, setLanguageMovie }) {
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const autocompleteRef = React.useRef(null);
   const [inputValue, setInputValue] = React.useState("");
 
   const { isLoading, error, data } = useQuery(["countries"], () =>
@@ -20,7 +40,11 @@ export default function CountrySelect({ languageMovie, setLanguageMovie }) {
 
   return (
     <Autocomplete
+      ref={autocompleteRef}
       sx={{ width: 300 }}
+      PopperComponent={(popperProps) => (
+        <CustomPopper anchorEl={anchorEl} {...popperProps} />
+      )}
       loading={isLoading}
       options={data || []}
       autoHighlight
@@ -30,7 +54,6 @@ export default function CountrySelect({ languageMovie, setLanguageMovie }) {
         setInputValue(newInputValue);
       }}
       onChange={(event, newValue) => {
-        console.log("newValue", newValue);
         setLanguageMovie(newValue?.iso_3166_1?.toLowerCase());
       }}
       getOptionLabel={(option) => option?.native_name}
@@ -58,6 +81,7 @@ export default function CountrySelect({ languageMovie, setLanguageMovie }) {
             ...params.inputProps,
             autoComplete: "new-password", // disable autocomplete and autofill
           }}
+          onClick={() => setAnchorEl(autocompleteRef.current)}
         />
       )}
     />

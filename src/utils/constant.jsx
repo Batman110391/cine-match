@@ -31,19 +31,192 @@ export const MAX_CAST_VISUALIZATION = 4;
 
 export const KEYWORDS_SEARCH_MOVIE = [
   {
-    id: "224636",
-    name: "Film Horror divertenti",
-    type: "horor_comedy",
+    label: "Film Fantascientifici",
+    name: "science_movie",
+    queries: [
+      {
+        id: 310,
+        name: "artificial intelligence",
+      },
+      {
+        id: 1432,
+        name: "nasa",
+      },
+      {
+        id: 1521,
+        name: "time warp",
+      },
+      {
+        id: 1612,
+        name: "spacecraft",
+      },
+
+      {
+        id: 2964,
+        name: "future",
+      },
+
+      {
+        id: 3801,
+        name: "space travel",
+      },
+
+      {
+        id: 4380,
+        name: "black hole",
+      },
+      {
+        id: 4565,
+        name: "dystopia",
+      },
+      {
+        id: 4776,
+        name: "race against time",
+      },
+      {
+        id: 8056,
+        name: "quantum mechanics",
+      },
+      {
+        id: 9882,
+        name: "space",
+      },
+
+      {
+        id: 14760,
+        name: "scientist",
+      },
+
+      {
+        id: 195114,
+        name: "space adventure",
+      },
+    ],
   },
   {
-    id: "272581|9672|231069|318778",
-    name: "Film basati su storie vere",
-    type: "true_story",
+    label: "Film Horror divertenti",
+    name: "horor_comedy",
+    queries: [
+      {
+        id: 224636,
+        name: "horror comedy",
+      },
+      {
+        id: 12416,
+        name: "horror spoof",
+      },
+
+      {
+        id: 249969,
+        name: "horror parody",
+      },
+    ],
   },
   {
-    id: "286646|262404|311371",
-    name: "Film violenti",
-    type: "violence_movie",
+    label: "Film basati su storie vere",
+    name: "true_story",
+    queries: [
+      {
+        id: 272581,
+        name: "true story",
+      },
+      {
+        id: 9672,
+        name: "based on true story",
+      },
+      {
+        id: 231069,
+        name: "inspired by true story",
+      },
+      {
+        id: 318778,
+        name: "inspired by a true story",
+      },
+    ],
+  },
+  {
+    label: "Film violenti",
+    name: "violence_movie",
+    queries: [
+      {
+        id: 312898,
+        name: "violence",
+      },
+      {
+        id: 280044,
+        name: "violence against animals",
+      },
+      {
+        id: 281523,
+        name: "gender violence",
+      },
+      {
+        id: 286646,
+        name: "brutal violence",
+      },
+      {
+        id: 181858,
+        name: "gang violence",
+      },
+      {
+        id: 291725,
+        name: "pinky violence",
+      },
+      {
+        id: 5927,
+        name: "violence against women",
+      },
+      {
+        id: 163656,
+        name: "gun violence",
+      },
+      {
+        id: 262404,
+        name: "extreme violence",
+      },
+      {
+        id: 296359,
+        name: "graphic violence",
+      },
+      {
+        id: 310672,
+        name: "violence action",
+      },
+      {
+        id: 311371,
+        name: "psychological violence",
+      },
+    ],
+  },
+  {
+    label: "Film Coreani",
+    name: "korean_movie",
+    queries: [
+      {
+        id: 261681,
+        name: "south korea",
+      },
+      {
+        id: 290327,
+        name: "seoul, south korea",
+      },
+      {
+        id: 260672,
+        name: "korea",
+      },
+      {
+        id: 284606,
+        name: "koreano",
+      },
+      {
+        id: 260266,
+        name: "korean spy",
+      },
+      {
+        id: 292026,
+        name: "korean food",
+      },
+    ],
   },
 ];
 

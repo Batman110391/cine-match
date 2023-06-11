@@ -28,6 +28,7 @@ import SearchPeriods from "./SearchPeriods";
 import dayjs from "dayjs";
 import ListProviderSettng from "./ListProviderSettng";
 import CountrySelect from "./CountrySelect";
+import AutocompleteSearchKeywords from "./AutocompleteSearchKeywords";
 
 const ORDERS = [
   { name: "Popolari", label: "popularity.desc" },
@@ -67,6 +68,9 @@ export default function DialogSettingMovies({
   const languagePrev = useSelector(
     (state) => state.movieQuery.querySearch?.with_original_language
   );
+  const keywordsPrev = useSelector(
+    (state) => state.movieQuery.querySearch?.with_keywords
+  );
 
   const [periods, setPeriods] = useState({
     from: fromPrev,
@@ -77,13 +81,15 @@ export default function DialogSettingMovies({
   const [selectedItemsGenres, setSelectedItemsGenres] = useState(genresPrev);
   const [providerSearch, setProviderSearch] = useState(providerPrev);
   const [languageMovie, setLanguageMovie] = useState(languagePrev);
+  const [selectedKeywords, setSelectedKeywords] = useState(keywordsPrev);
 
   const disableSaveAction =
     sort === orderPrev &&
     exactSearch === exactPrev &&
     selectedItemsGenres === genresPrev &&
     providerSearch === providerPrev &&
-    languageMovie === languagePrev;
+    languageMovie === languagePrev &&
+    selectedKeywords === keywordsPrev;
 
   useEffect(() => {
     setPeriods({
@@ -95,6 +101,7 @@ export default function DialogSettingMovies({
     setSelectedItemsGenres(genresPrev);
     setProviderSearch(providerPrev);
     setLanguageMovie(languagePrev);
+    setSelectedKeywords(keywordsPrev);
   }, [
     fromPrev,
     toPrev,
@@ -103,6 +110,7 @@ export default function DialogSettingMovies({
     genresPrev,
     providerPrev,
     languagePrev,
+    keywordsPrev,
     open,
   ]);
 
@@ -258,6 +266,16 @@ export default function DialogSettingMovies({
             <CountrySelect
               languageMovie={languageMovie}
               setLanguageMovie={setLanguageMovie}
+            />
+          </Box>
+          <Divider sx={{ my: 2 }} />
+          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+            <Typography variant="button" gutterBottom>
+              Parole chiavi
+            </Typography>
+            <AutocompleteSearchKeywords
+              selectedKeywords={selectedKeywords}
+              setSelectedKeywords={setSelectedKeywords}
             />
           </Box>
           <Divider sx={{ my: 2 }} />

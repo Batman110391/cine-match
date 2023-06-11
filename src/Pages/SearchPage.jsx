@@ -130,7 +130,7 @@ export default function SearchPage() {
   const keywordsMovie = KEYWORDS_SEARCH_MOVIE.reduce((prevKsm, currKsm) => {
     return {
       ...prevKsm,
-      [currKsm.type]: data?.[currKsm.type]?.results || [],
+      [currKsm.name]: data?.[currKsm.name]?.results || [],
     };
   }, {});
 
@@ -204,14 +204,14 @@ export default function SearchPage() {
           type={"movie"}
         />
 
-        {KEYWORDS_SEARCH_MOVIE.map(({ id, name, type }) => (
-          <Fragment key={type}>
+        {KEYWORDS_SEARCH_MOVIE.map((ksm) => (
+          <Fragment key={ksm.name}>
             <CarouselDiscover
-              slides={keywordsMovie[type]}
-              titleDiscover={name}
+              slides={keywordsMovie[ksm.name]}
+              titleDiscover={ksm.label}
               isLoading={isLoading}
               path={"/movies"}
-              onAction={() => handleSeeAllMovieKeywords(id)}
+              onAction={() => handleSeeAllMovieKeywords(ksm.queries)}
               handleClickItem={handleClickItem}
               isDesktop={isDesktop}
               type={"movie"}

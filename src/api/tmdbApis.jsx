@@ -28,7 +28,7 @@ const getUrlMoviesWithCustomParams = ({
   exact_search = false,
   with_release_type = null,
   with_original_language = null,
-  with_keywords = null,
+  with_keywords = [],
 }) => {
   const genres =
     with_genres.length > 0 && exact_search
@@ -43,9 +43,11 @@ const getUrlMoviesWithCustomParams = ({
   const ordering =
     order_by === "vote_average.desc" ? "&vote_count.gte=300" : "";
 
+  const keywords = with_keywords?.map((k) => k.id)?.join("|") || [];
+
   return `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&${CURRENT_LANGUAGE}
   &certification_country=IT&ott_region=IT&release_date.gte=${from}&release_date.lte=${to}&show_me=0&sort_by=${order_by}&vote_average.gte=0&vote_average.lte=10
-  &vote_count.gte=0&with_runtime.gte=0&with_runtime.lte=400&region=IT${
+  &vote_count.gte=0&with_runtime.gte=0&with_runtime.lte=400${
     genres ? "&with_genres=" + genres : ""
   }${providers ? "&with_ott_providers=" + providers : ""}${
     with_release_type ? "&with_release_type=" + with_release_type : ""
@@ -53,7 +55,7 @@ const getUrlMoviesWithCustomParams = ({
     with_original_language
       ? "&with_original_language=" + with_original_language
       : ""
-  }${with_keywords ? "&with_keywords=" + with_keywords : ""}${ordering}`;
+  }${keywords.length > 0 ? "&with_keywords=" + keywords : ""}${ordering}`;
 };
 
 const getUrlSerieTvWithCustomParams = ({
@@ -277,10 +279,10 @@ export async function fetchSimilarMoviesOrTvById(id, type) {
 export async function fetchMoviesDiscover(page = 1) {
   const keywordsMovies = KEYWORDS_SEARCH_MOVIE.map((ksm) => {
     return {
-      name: ksm.type,
+      name: ksm.name,
       api: fetchPromise(
         `${getUrlMoviesWithCustomParams({
-          with_keywords: ksm.id,
+          with_keywords: ksm.queries,
         })}&page=${page}`
       ),
     };
@@ -550,5 +552,21 @@ export async function fetchCounties() {
     } else {
       return [];
     }
+  });
+}
+
+export async function fetchKeywords(page, querySearch) {
+  return fetchPromise(
+    `https://api.themoviedb.org/3/search/keyword?query=${querySearch}&api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+  ).then((data) => {
+    const hasNext = page <= data.total_pages;
+
+    const keywords = {
+      results: data?.results,
+      nextPage: hasNext ? page + 1 : undefined,
+      previousPage: page > 1 ? page - 1 : undefined,
+    };
+
+    return keywords;
   });
 }
