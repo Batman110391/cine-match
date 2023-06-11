@@ -179,7 +179,7 @@ export default function MoviesPage() {
         setOpen={setOpenSettingMovie}
         changeFilters={changeFilters}
         setChangeFilters={setChangeFilters}
-        //refetchPagination={refetch}
+        movieQueryType={"movie"}
       />
       <FloatingActionButton
         onClick={() => setOpenSettingMovie(true)}

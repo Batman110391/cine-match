@@ -24,13 +24,13 @@ import { useInfiniteQuery } from "react-query";
 import { useSelector } from "react-redux";
 import { fetchShowTvPage } from "../api/tmdbApis";
 import { DialogMovieDetailContext } from "../components/DialogMovieDetailProvider";
-import DialogSettingTv from "../components/DialogSettingTv";
 import FloatingActionButton from "../components/FloatingActionButton";
 import LoadingPage from "../components/LoadingPage";
 import RenderRow from "../components/RenderRow";
 import { areEqual } from "../utils/areEqual";
 import _ from "lodash";
 import { useParams, useNavigate } from "react-router-dom";
+import DialogSettingMovies from "../components/DialogSettingMovies";
 
 export default function ShowTvPage() {
   const theme = useTheme();
@@ -174,12 +174,12 @@ export default function ShowTvPage() {
           />
         </InfiniteScroll>
       </Box>
-      <DialogSettingTv
+      <DialogSettingMovies
         open={openSettingTv}
         setOpen={setOpenSettingTv}
         changeFilters={changeFilters}
         setChangeFilters={setChangeFilters}
-        //refetchPagination={refetch}
+        movieQueryType={"tv"}
       />
       <FloatingActionButton
         onClick={() => setOpenSettingTv(true)}

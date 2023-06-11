@@ -7,7 +7,8 @@ import { KEYWORDS_SEARCH_MOVIE } from "../utils/constant";
 dayjs.extend(isBetween);
 
 const API_KEY = import.meta.env.VITE_API_KEY;
-const CURRENT_LANGUAGE = "language=it-IT";
+const LANGUAGE = "it-IT";
+const CURRENT_LANGUAGE = `language=${LANGUAGE}`;
 
 export const PROVIDERS = "8|119|337|29|39|359|110|222";
 
@@ -31,31 +32,56 @@ const getUrlMoviesWithCustomParams = ({
   with_keywords = [],
 }) => {
   const genres =
-    with_genres.length > 0 && exact_search
-      ? with_genres.map((g) => g.id).join(",")
-      : with_genres.length > 0 && !exact_search
-      ? with_genres.map((g) => g.id).join("|")
+    with_genres.length > 0
+      ? with_genres.map((g) => g.id).join(exact_search ? "," : "|")
       : null;
+
   const providers =
     with_ott_providers.length > 0
-      ? with_ott_providers.map((g) => g.provider_id).join("|")
+      ? with_ott_providers.map((p) => p.provider_id).join("|")
       : null;
-  const ordering =
-    order_by === "vote_average.desc" ? "&vote_count.gte=300" : "";
 
-  const keywords = with_keywords?.map((k) => k.id)?.join("|") || [];
+  const keywords = with_keywords.map((k) => k.id).join("|");
 
-  return `https://api.themoviedb.org/3/discover/movie?api_key=${API_KEY}&${CURRENT_LANGUAGE}
-  &certification_country=IT&ott_region=IT&release_date.gte=${from}&release_date.lte=${to}&show_me=0&sort_by=${order_by}&vote_average.gte=0&vote_average.lte=10
-  &vote_count.gte=0&with_runtime.gte=0&with_runtime.lte=400${
-    genres ? "&with_genres=" + genres : ""
-  }${providers ? "&with_ott_providers=" + providers : ""}${
-    with_release_type ? "&with_release_type=" + with_release_type : ""
-  }${
-    with_original_language
-      ? "&with_original_language=" + with_original_language
-      : ""
-  }${keywords.length > 0 ? "&with_keywords=" + keywords : ""}${ordering}`;
+  const url = new URL("https://api.themoviedb.org/3/discover/movie");
+  url.searchParams.set("api_key", API_KEY);
+  url.searchParams.set("language", LANGUAGE);
+  url.searchParams.set("certification_country", "IT");
+  url.searchParams.set("ott_region", "IT");
+  url.searchParams.set("release_date.gte", from);
+  url.searchParams.set("release_date.lte", to);
+  url.searchParams.set("show_me", "0");
+  url.searchParams.set("sort_by", order_by);
+  url.searchParams.set("vote_average.gte", "0");
+  url.searchParams.set("vote_average.lte", "10");
+  url.searchParams.set(
+    "vote_count.gte",
+    order_by === "vote_average.desc" ? "300" : "0"
+  );
+  url.searchParams.set("with_runtime.gte", "0");
+  url.searchParams.set("with_runtime.lte", "400");
+
+  if (genres) {
+    url.searchParams.set("with_genres", genres);
+  }
+
+  if (providers) {
+    url.searchParams.set("with_ott_providers", providers);
+  }
+
+  if (with_release_type) {
+    url.searchParams.set("with_release_type", with_release_type);
+  }
+
+  if (with_original_language) {
+    url.searchParams.set("with_original_language", with_original_language);
+  }
+
+  if (keywords.length > 0) {
+    url.searchParams.set("with_keywords", keywords);
+  }
+
+  return url.toString();
 };
 
 const getUrlSerieTvWithCustomParams = ({
@@ -69,29 +95,53 @@ const getUrlSerieTvWithCustomParams = ({
   with_keywords = [],
 }) => {
   const genres =
-    with_genres.length > 0 && exact_search
-      ? with_genres.map((g) => g.id).join(",")
-      : with_genres.length > 0 && !exact_search
-      ? with_genres.map((g) => g.id).join("|")
+    with_genres.length > 0
+      ? with_genres.map((g) => g.id).join(exact_search ? "," : "|")
       : null;
+
   const providers =
     with_ott_providers.length > 0
-      ? with_ott_providers.map((g) => g.provider_id).join("|")
+      ? with_ott_providers.map((p) => p.provider_id).join("|")
       : PROVIDERS;
-  const ordering =
-    order_by === "vote_average.desc" ? "&vote_count.gte=300" : "";
 
-  const keywords = with_keywords?.map((k) => k.id)?.join("|") || [];
+  const keywords = with_keywords.map((k) => k.id).join("|");
 
-  return `https://api.themoviedb.org/3/discover/tv?api_key=${API_KEY}&${CURRENT_LANGUAGE}
-  &air_date.lte=${DATE_SIX_MONTHS_LATER}&certification_country=IT&ott_region=IT&release_date.gte=${from}&release_date.lte=${to}&show_me=0&sort_by=${order_by}&vote_average.gte=0&vote_average.lte=10
-  &vote_count.gte=0&with_runtime.gte=0&with_runtime.lte=400&region=IT${
-    genres ? "&with_genres=" + genres : ""
-  }${providers ? "&with_ott_providers=" + providers : ""}${
-    with_original_language
-      ? "&with_original_language=" + with_original_language
-      : ""
-  }${keywords.length > 0 ? "&with_keywords=" + keywords : ""}${ordering}`;
+  const url = new URL("https://api.themoviedb.org/3/discover/tv");
+  url.searchParams.set("api_key", API_KEY);
+  url.searchParams.set("language", LANGUAGE);
+  url.searchParams.set("air_date.lte", DATE_SIX_MONTHS_LATER);
+  url.searchParams.set("certification_country", "IT");
+  url.searchParams.set("ott_region", "IT");
+  url.searchParams.set("release_date.gte", from);
+  url.searchParams.set("release_date.lte", to);
+  url.searchParams.set("show_me", "0");
+  url.searchParams.set("sort_by", order_by);
+  url.searchParams.set("vote_average.gte", "0");
+  url.searchParams.set("vote_average.lte", "10");
+  url.searchParams.set(
+    "vote_count.gte",
+    order_by === "vote_average.desc" ? "300" : "0"
+  );
+  url.searchParams.set("with_runtime.gte", "0");
+  url.searchParams.set("with_runtime.lte", "400");
+
+  if (genres) {
+    url.searchParams.set("with_genres", genres);
+  }
+
+  if (providers) {
+    url.searchParams.set("with_ott_providers", providers);
+  }
+
+  if (with_original_language) {
+    url.searchParams.set("with_original_language", with_original_language);
+  }
+
+  if (keywords.length > 0) {
+    url.searchParams.set("with_keywords", keywords);
+  }
+
+  return url.toString();
 };
 
 export const genresListTv = [

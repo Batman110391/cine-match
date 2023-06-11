@@ -46,30 +46,38 @@ export default function DialogSettingMovies({
   changeFilters,
   setChangeFilters,
   refetchPagination,
+  movieQueryType,
 }) {
   const theme = useTheme();
 
   const dispatch = useDispatch();
 
-  const fromPrev = useSelector((state) => state.movieQuery.querySearch?.from);
-  const toPrev = useSelector((state) => state.movieQuery.querySearch?.to);
+  const popertiesDispatch =
+    movieQueryType === "movie" ? "querySearch" : "querySearchTv";
+
+  const fromPrev = useSelector(
+    (state) => state.movieQuery?.[popertiesDispatch]?.from
+  );
+  const toPrev = useSelector(
+    (state) => state.movieQuery?.[popertiesDispatch]?.to
+  );
   const orderPrev = useSelector(
-    (state) => state.movieQuery.querySearch?.order_by
+    (state) => state.movieQuery?.[popertiesDispatch]?.order_by
   );
   const exactPrev = useSelector(
-    (state) => state.movieQuery.querySearch?.exact_search
+    (state) => state.movieQuery?.[popertiesDispatch]?.exact_search
   );
   const genresPrev = useSelector(
-    (state) => state.movieQuery.querySearch?.with_genres
+    (state) => state.movieQuery?.[popertiesDispatch]?.with_genres
   );
   const providerPrev = useSelector(
-    (state) => state.movieQuery.querySearch?.with_ott_providers
+    (state) => state.movieQuery?.[popertiesDispatch]?.with_ott_providers
   );
   const languagePrev = useSelector(
-    (state) => state.movieQuery.querySearch?.with_original_language
+    (state) => state.movieQuery?.[popertiesDispatch]?.with_original_language
   );
   const keywordsPrev = useSelector(
-    (state) => state.movieQuery.querySearch?.with_keywords
+    (state) => state.movieQuery?.[popertiesDispatch]?.with_keywords
   );
 
   const [periods, setPeriods] = useState({
@@ -133,7 +141,7 @@ export default function DialogSettingMovies({
   const handleSaveSetting = () => {
     dispatch(
       setQuery({
-        querySearch: {
+        [popertiesDispatch]: {
           from: periods.from,
           to: periods.to,
           order_by: sort,
@@ -141,6 +149,7 @@ export default function DialogSettingMovies({
           with_ott_providers: providerSearch,
           exact_search: exactSearch,
           with_original_language: languageMovie,
+          with_keywords: selectedKeywords,
         },
       })
     );
@@ -245,7 +254,7 @@ export default function DialogSettingMovies({
             <ListGenresSetting
               selectedItemsGenres={selectedItemsGenres}
               setSelectedItemsGenres={setSelectedItemsGenres}
-              type={"movie"}
+              type={movieQueryType}
             />
           </Box>
           <Divider sx={{ my: 2 }} />

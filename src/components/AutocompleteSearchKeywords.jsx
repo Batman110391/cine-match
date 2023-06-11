@@ -258,7 +258,7 @@ export default function AutocompleteSearchKeywords({
         <TextField
           {...params}
           placeholder={
-            selectedKeywords.length > 0
+            selectedKeywords?.length > 0
               ? ""
               : "Aggiungi o rimuovi parole chiavi"
           }

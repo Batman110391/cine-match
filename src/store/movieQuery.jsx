@@ -10,6 +10,7 @@ export const initialState = {
     with_ott_providers: [],
     exact_search: false,
     with_original_language: null,
+    with_keywords: [],
   },
   querySearchTv: {
     from: "1975-01-01",
