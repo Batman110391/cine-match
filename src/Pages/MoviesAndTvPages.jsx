@@ -22,7 +22,7 @@ import {
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useInfiniteQuery } from "react-query";
 import { useSelector } from "react-redux";
-import { fetchMoviesPage } from "../api/tmdbApis";
+import { fetchMoviesPage, fetchShowTvPage } from "../api/tmdbApis";
 import { DialogMovieDetailContext } from "../components/DialogMovieDetailProvider";
 import DialogSettingMovies from "../components/DialogSettingMovies";
 import FloatingActionButton from "../components/FloatingActionButton";
@@ -32,7 +32,14 @@ import { areEqual } from "../utils/areEqual";
 import _ from "lodash";
 import { useParams, useNavigate } from "react-router-dom";
 
-export default function MoviesPage() {
+export default function MoviesAndTvPages({ typeSearch }) {
+  const keyQuery = typeSearch === "movie" ? "moviesPage" : "showTvPage";
+  const functionCall =
+    typeSearch === "movie" ? fetchMoviesPage : fetchShowTvPage;
+  const redirectPages = typeSearch === "movie" ? "/movies" : "/showtv";
+  const queryTypeDispatch =
+    typeSearch === "movie" ? "querySearch" : "querySearchTv";
+
   const theme = useTheme();
   const navigate = useNavigate();
   const { movieID, type } = useParams();
@@ -42,7 +49,9 @@ export default function MoviesPage() {
 
   const [changeFilters, setChangeFilters] = useState(false);
   const [openSettingMovie, setOpenSettingMovie] = useState(false);
-  const querySearch = useSelector((state) => state.movieQuery.querySearch);
+  const querySearch = useSelector(
+    (state) => state.movieQuery?.[queryTypeDispatch]
+  );
 
   const [viewGrid, setViewGrid] = useState("compact");
 
@@ -64,9 +73,9 @@ export default function MoviesPage() {
     hasNextPage,
     fetchNextPage,
   } = useInfiniteQuery({
-    queryKey: ["moviesPage", changeFilters],
+    queryKey: [keyQuery, changeFilters],
     getNextPageParam: (prevData) => prevData.nextPage,
-    queryFn: ({ pageParam = 1 }) => fetchMoviesPage(pageParam, querySearch),
+    queryFn: ({ pageParam = 1 }) => functionCall(pageParam, querySearch),
   });
 
   const debounceFetchNextPage = _.debounce(() => {
@@ -80,7 +89,7 @@ export default function MoviesPage() {
   useEffect(() => {
     if (movieID && type) {
       openDialogMovieDetail(movieID, type);
-      navigate("/movies", { replace: true });
+      navigate(redirectPages, { replace: true });
     }
   }, []);
 
@@ -110,7 +119,7 @@ export default function MoviesPage() {
     }, {});
 
   const handleClickItem = (movieID) => {
-    openDialogMovieDetail(movieID, "movie");
+    openDialogMovieDetail(movieID, typeSearch);
   };
 
   const handleViewGrid = (event, newValue) => {
@@ -170,7 +179,7 @@ export default function MoviesPage() {
             typeView={viewGrid}
             handleClickItem={handleClickItem}
             isDesktop={isDesktop}
-            mediaType={"movie"}
+            mediaType={typeSearch}
           />
         </InfiniteScroll>
       </Box>
@@ -179,7 +188,7 @@ export default function MoviesPage() {
         setOpen={setOpenSettingMovie}
         changeFilters={changeFilters}
         setChangeFilters={setChangeFilters}
-        movieQueryType={"movie"}
+        movieQueryType={typeSearch}
       />
       <FloatingActionButton
         onClick={() => setOpenSettingMovie(true)}

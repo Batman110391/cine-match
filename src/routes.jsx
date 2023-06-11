@@ -1,8 +1,7 @@
 import React from "react";
 
 import SearchPage from "./Pages/SearchPage";
-import MoviesPage from "./Pages/MoviesPage";
-import ShowTvPages from "./Pages/ShowTvPage";
+import MoviesAndTvPages from "./Pages/MoviesAndTvPages";
 
 export const routes = [
   {
@@ -16,13 +15,13 @@ export const routes = [
     key: "movies",
     route: "/movies/:movieID?/:type?",
     exact: false,
-    component: <MoviesPage />,
+    component: <MoviesAndTvPages typeSearch={"movie"} />,
   },
   {
     name: "showTv",
     key: "showtv",
     route: "/showtv/:movieID?/:type?",
     exact: false,
-    component: <ShowTvPages />,
+    component: <MoviesAndTvPages typeSearch={"tv"} />,
   },
 ];

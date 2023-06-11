@@ -12,7 +12,12 @@ import dayjs from "dayjs";
 import { useContext, useState, Fragment } from "react";
 import { useQuery } from "react-query";
 import { useDispatch } from "react-redux";
-import { DATA_TOMORROW, fetchMoviesDiscover } from "../api/tmdbApis";
+import {
+  CURRENT_DATE_FORMATTING,
+  DATA_TOMORROW,
+  DATE_SIX_MONTHS_LATER,
+  fetchMoviesDiscover,
+} from "../api/tmdbApis";
 import CarouselDiscover from "../components/CarouselDiscover";
 import { DialogMovieDetailContext } from "../components/DialogMovieDetailProvider";
 import SearchPageDialog from "../components/SearchPageDialog";
@@ -43,7 +48,7 @@ export default function SearchPage() {
         currentRoute: 1,
         querySearch: {
           from: "1970-01-01",
-          to: dayjs(new Date()).format("YYYY-MM-DD"),
+          to: CURRENT_DATE_FORMATTING,
           order_by: "popularity.desc",
           with_genres: [],
           with_ott_providers: [],
@@ -58,7 +63,7 @@ export default function SearchPage() {
         currentRoute: 2,
         querySearchTv: {
           from: "1970-01-01",
-          to: dayjs(new Date()).format("YYYY-MM-DD"),
+          to: CURRENT_DATE_FORMATTING,
           order_by: "popularity.desc",
           with_genres: [],
           with_ott_providers: [],
@@ -74,12 +79,12 @@ export default function SearchPage() {
         currentRoute: 1,
         querySearch: {
           from: DATA_TOMORROW,
-          to: dayjs(new Date()).add(6, "month").format("YYYY-MM-DD"),
+          to: DATE_SIX_MONTHS_LATER,
           order_by: "popularity.desc",
           with_genres: [],
           with_ott_providers: [],
           exact_search: false,
-          with_release_type: "3|4",
+          with_release_type: "3",
         },
       })
     );
@@ -91,7 +96,7 @@ export default function SearchPage() {
         currentRoute: 1,
         querySearch: {
           from: "1970-01-01",
-          to: dayjs(new Date()).format("YYYY-MM-DD"),
+          to: CURRENT_DATE_FORMATTING,
           order_by: "popularity.desc",
           with_genres: [],
           with_ott_providers: [],
@@ -108,7 +113,7 @@ export default function SearchPage() {
         currentRoute: 1,
         querySearch: {
           from: "1970-01-01",
-          to: dayjs(new Date()).format("YYYY-MM-DD"),
+          to: CURRENT_DATE_FORMATTING,
           order_by: "popularity.desc",
           with_genres: [],
           with_ott_providers: [],

@@ -10,20 +10,21 @@ const API_KEY = import.meta.env.VITE_API_KEY;
 const LANGUAGE = "it-IT";
 const CURRENT_LANGUAGE = `language=${LANGUAGE}`;
 
-export const PROVIDERS = "8|119|337|29|39|359|110|222";
+export const PROVIDERS =
+  "8|119|337|350|29|39|359|40|109|110|222|1726|531|582|1796";
 
 export const CURRENT_DATE_FORMATTING = dayjs(new Date()).format("YYYY-MM-DD");
 export const DATA_TOMORROW = dayjs(CURRENT_DATE_FORMATTING)
   .add(1, "day")
   .format("YYYY-MM-DD");
 export const DATE_SIX_MONTHS_LATER = dayjs(CURRENT_DATE_FORMATTING)
-  .add(6, "month")
+  .add(2, "month")
   .format("YYYY-MM-DD");
 
 const getUrlMoviesWithCustomParams = ({
   order_by = "popularity.desc",
   from = "1970-01-01",
-  to = DATE_SIX_MONTHS_LATER,
+  to = CURRENT_DATE_FORMATTING,
   with_genres = [],
   with_ott_providers = [],
   exact_search = false,
@@ -87,7 +88,7 @@ const getUrlMoviesWithCustomParams = ({
 const getUrlSerieTvWithCustomParams = ({
   order_by = "popularity.desc",
   from = "1970-01-01",
-  to = DATE_SIX_MONTHS_LATER,
+  to = CURRENT_DATE_FORMATTING,
   with_genres = [],
   with_ott_providers = [],
   exact_search = false,
@@ -109,11 +110,10 @@ const getUrlSerieTvWithCustomParams = ({
   const url = new URL("https://api.themoviedb.org/3/discover/tv");
   url.searchParams.set("api_key", API_KEY);
   url.searchParams.set("language", LANGUAGE);
-  url.searchParams.set("air_date.lte", DATE_SIX_MONTHS_LATER);
+  url.searchParams.set("air_date.gte", from);
+  url.searchParams.set("air_date.lte", to);
   url.searchParams.set("certification_country", "IT");
   url.searchParams.set("ott_region", "IT");
-  url.searchParams.set("release_date.gte", from);
-  url.searchParams.set("release_date.lte", to);
   url.searchParams.set("show_me", "0");
   url.searchParams.set("sort_by", order_by);
   url.searchParams.set("vote_average.gte", "0");
@@ -124,6 +124,10 @@ const getUrlSerieTvWithCustomParams = ({
   );
   url.searchParams.set("with_runtime.gte", "0");
   url.searchParams.set("with_runtime.lte", "400");
+  url.searchParams.set(
+    "with_watch_monetization_types",
+    "flatrate|free|ads|rent|buy"
+  );
 
   if (genres) {
     url.searchParams.set("with_genres", genres);
@@ -360,7 +364,8 @@ export async function fetchMoviesDiscover(page = 1) {
       api: fetchPromise(
         `${getUrlMoviesWithCustomParams({
           from: DATA_TOMORROW,
-          with_release_type: "3|4",
+          to: DATE_SIX_MONTHS_LATER,
+          with_release_type: "3",
         })}&page=${page}`
       ),
     },

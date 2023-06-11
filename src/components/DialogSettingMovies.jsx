@@ -92,6 +92,8 @@ export default function DialogSettingMovies({
   const [selectedKeywords, setSelectedKeywords] = useState(keywordsPrev);
 
   const disableSaveAction =
+    fromPrev === periods.from &&
+    toPrev === periods.to &&
     sort === orderPrev &&
     exactSearch === exactPrev &&
     selectedItemsGenres === genresPrev &&

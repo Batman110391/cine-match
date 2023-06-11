@@ -18,7 +18,7 @@ export default function SearchPeriods({ periods, onSelectPeriod }) {
     } else {
       onSelectPeriod({ from: initialDate, to: lastDate, error: false });
     }
-  }, [initialDate, errorLastDate, errorInitialDate]);
+  }, [initialDate, lastDate, errorLastDate, errorInitialDate]);
 
   const props = {
     initialDate,
