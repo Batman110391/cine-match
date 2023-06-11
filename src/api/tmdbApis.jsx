@@ -65,6 +65,8 @@ const getUrlSerieTvWithCustomParams = ({
   with_genres = [],
   with_ott_providers = [],
   exact_search = false,
+  with_original_language = null,
+  with_keywords = [],
 }) => {
   const genres =
     with_genres.length > 0 && exact_search
@@ -79,11 +81,17 @@ const getUrlSerieTvWithCustomParams = ({
   const ordering =
     order_by === "vote_average.desc" ? "&vote_count.gte=300" : "";
 
+  const keywords = with_keywords?.map((k) => k.id)?.join("|") || [];
+
   return `https://api.themoviedb.org/3/discover/tv?api_key=${API_KEY}&${CURRENT_LANGUAGE}
   &air_date.lte=${DATE_SIX_MONTHS_LATER}&certification_country=IT&ott_region=IT&release_date.gte=${from}&release_date.lte=${to}&show_me=0&sort_by=${order_by}&vote_average.gte=0&vote_average.lte=10
   &vote_count.gte=0&with_runtime.gte=0&with_runtime.lte=400&region=IT${
     genres ? "&with_genres=" + genres : ""
-  }${providers ? "&with_ott_providers=" + providers : ""}${ordering}`;
+  }${providers ? "&with_ott_providers=" + providers : ""}${
+    with_original_language
+      ? "&with_original_language=" + with_original_language
+      : ""
+  }${keywords.length > 0 ? "&with_keywords=" + keywords : ""}${ordering}`;
 };
 
 export const genresListTv = [

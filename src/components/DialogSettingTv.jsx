@@ -29,13 +29,9 @@ import dayjs from "dayjs";
 import ListProviderSettng from "./ListProviderSettng";
 
 const ORDERS = [
-  { name: "Popolarità Decrescente", label: "popularity.desc" },
-  { name: "Popolarità Crescente", label: "popularity.asc" },
-  { name: "Valutazione Decrescente", label: "vote_average.desc" },
-  { name: "Valutazione Crescente", label: "vote_average.asc" },
-  { name: "Data Rilascio Crescente", label: "primary_release_date.asc" },
-  { name: "Titolo (A-Z)", label: "title.asc" },
-  { name: "Data Rilascio Decrescente", label: "primary_release_date.desc" },
+  { name: "Popolari", label: "popularity.desc" },
+  { name: "Più Votati", label: "vote_average.desc" },
+  { name: "Più recenti", label: "primary_release_date.desc" },
 ];
 
 const Transition = React.forwardRef(function Transition(props, ref) {
