@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 
 export default function GridListImageVisualizations({ w, gap, children }) {
   const containerRef = useRef(null);
@@ -6,93 +6,79 @@ export default function GridListImageVisualizations({ w, gap, children }) {
 
   useEffect(() => {
     const updateNumItems = () => {
-      const containerWidth = containerRef.current.offsetWidth;
-
-      const calculatedNumItems = Math.floor(containerWidth / (w + gap));
-
-      setNumItems(calculatedNumItems);
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        const calculatedNumItems = Math.floor(containerWidth / (w + gap));
+        setNumItems(calculatedNumItems);
+      }
     };
 
-    if (containerRef.current) {
-      updateNumItems();
-    }
+    updateNumItems();
 
-    window.addEventListener("resize", updateNumItems);
+    const handleResize = () => {
+      updateNumItems();
+    };
+
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", updateNumItems);
+      window.removeEventListener("resize", handleResize);
     };
-  }, [containerRef]);
+  }, [w, gap]);
 
-  const lineItems = React.Children.toArray(children);
-  const lines = [];
-  let currentLine = [];
+  const lineItems = useMemo(() => React.Children.toArray(children), [children]);
 
-  lineItems.forEach((item, index) => {
-    currentLine.push(
-      <div
-        key={index}
-        style={{
-          marginBottom: `${gap}px`,
-        }}
-      >
-        {item}
-      </div>
-    );
-
-    if (
-      currentLine.length === numItems ||
-      (index === lineItems.length - 1 && currentLine.length > 0)
-    ) {
-      const shouldGrow = currentLine.length === numItems;
-      const missingItems = numItems - currentLine.length;
-
-      const line = (
-        <div
-          key={lines.length}
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            flexWrap: "wrap",
-            gap: `${gap}px`,
-          }}
-        >
-          {currentLine.map((lineItem, lineIndex) => (
+  return (
+    <div ref={containerRef} style={{ marginTop: `${gap}px` }}>
+      {lineItems
+        .reduce((acc, item, index) => {
+          const lineIndex = Math.floor(index / numItems);
+          if (!acc[lineIndex]) {
+            acc[lineIndex] = [];
+          }
+          acc[lineIndex].push(
             <div
-              key={lineIndex}
+              key={index}
               style={{
                 display: "flex",
                 justifyContent: "center",
                 flexGrow: 1,
               }}
             >
-              {lineItem}
+              {item}
             </div>
-          ))}
-          {!shouldGrow &&
-            missingItems > 0 &&
-            Array.from({ length: missingItems }).map((_, i) => (
-              <div
-                key={currentLine.length + i}
-                style={{
-                  display: "flex",
-                  justifyContent: "center",
-                  flexGrow: 1,
-                  width: `${w}px`,
-                }}
-              />
-            ))}
-        </div>
-      );
-
-      lines.push(line);
-      currentLine = [];
-    }
-  });
-
-  return (
-    <div ref={containerRef} style={{ marginTop: `${gap}px` }}>
-      {lines}
+          );
+          return acc;
+        }, [])
+        .map((lineItems, index) => (
+          <React.Fragment key={index}>
+            <div
+              style={{
+                display: "grid",
+                justifyContent: "center",
+                gridTemplateColumns: `repeat(${numItems}, 1fr)`,
+                gap: `${gap}px`,
+                marginBottom: `${gap}px`,
+              }}
+            >
+              {lineItems}
+              {lineItems.length < numItems &&
+                Array.from({ length: numItems - lineItems.length }).map(
+                  (_, i) => (
+                    <div
+                      key={lineItems.length + i}
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        flexGrow: 1,
+                        width: `${w}px`,
+                      }}
+                    />
+                  )
+                )}
+            </div>
+          </React.Fragment>
+        ))}
     </div>
   );
 }

@@ -60,8 +60,8 @@ export default function ListProviderSettng({
                 position: "relative",
                 borderRadius: "15px",
                 backgroundImage: selected
-                  ? `linear-gradient(-180deg, rgba(206, 147, 216, 0.6), rgba(206, 147, 216, 0.6)), url(http://image.tmdb.org/t/p/w500${provider.logo_path})`
-                  : `linear-gradient(-180deg, rgba(34,34,34,0.8), rgba(32,32,32,0.8)), url(http://image.tmdb.org/t/p/w500${provider.logo_path})`,
+                  ? `linear-gradient(-180deg, rgba(206, 147, 216, 0.6), rgba(206, 147, 216, 0.6)), url(http://image.tmdb.org/t/p/w342${provider.logo_path})`
+                  : `linear-gradient(-180deg, rgba(34,34,34,0.8), rgba(32,32,32,0.8)), url(http://image.tmdb.org/t/p/w342${provider.logo_path})`,
                 backgroundSize: "cover",
                 backgroundRepeat: "no-repeat",
                 backgroundPosition: "center center",

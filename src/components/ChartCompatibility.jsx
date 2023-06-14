@@ -142,7 +142,7 @@ function ChipGroup({ groups, ...rest }) {
           const existPath = item?.profile_path ? (
             <Avatar
               alt={item.name}
-              src={`http://image.tmdb.org/t/p/w500${item.profile_path}`}
+              src={`http://image.tmdb.org/t/p/w342${item.profile_path}`}
             />
           ) : (
             <Avatar>{item.name.charAt(0)}</Avatar>

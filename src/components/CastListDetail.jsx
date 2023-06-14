@@ -104,7 +104,7 @@ export default function CastListDetail({
                   <ListItemAvatar>
                     <Avatar
                       alt={`Avatar ${name}`}
-                      src={`http://image.tmdb.org/t/p/w500${profile_path}`}
+                      src={`http://image.tmdb.org/t/p/w342${profile_path}`}
                     />
                   </ListItemAvatar>
                   <ListItemText

@@ -278,7 +278,7 @@ export default function DialogMovieDetail({
                                     director?.profile_path ? (
                                       <Avatar
                                         alt={director?.name}
-                                        src={`http://image.tmdb.org/t/p/w500${director?.profile_path}`}
+                                        src={`http://image.tmdb.org/t/p/w342${director?.profile_path}`}
                                       />
                                     ) : (
                                       <Avatar>
@@ -313,7 +313,7 @@ export default function DialogMovieDetail({
                                           dir?.profile_path ? (
                                             <Avatar
                                               alt={dir?.name}
-                                              src={`http://image.tmdb.org/t/p/w500${dir?.profile_path}`}
+                                              src={`http://image.tmdb.org/t/p/w342${dir?.profile_path}`}
                                             />
                                           ) : (
                                             <Avatar>
@@ -423,7 +423,7 @@ export default function DialogMovieDetail({
                                     <Avatar
                                       key={provider?.provider_id}
                                       alt={provider?.provider_name}
-                                      src={`http://image.tmdb.org/t/p/w500${provider?.logo_path}`}
+                                      src={`http://image.tmdb.org/t/p/w342${provider?.logo_path}`}
                                     />
                                   )
                                 )}
