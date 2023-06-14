@@ -32,6 +32,8 @@ export default function CarouselDiscover({
   handleClickItem,
   isDesktop,
   type,
+  invertBg,
+  nobg,
 }) {
   if (isLoading) {
     return (
@@ -39,27 +41,45 @@ export default function CarouselDiscover({
     );
   }
 
+  const optionsMobileSwiper = {
+    cssMode: true,
+    slidesPerView: "auto",
+    spaceBetween: 10,
+  };
+
+  const optionsDesktopSwiper = {
+    grabCursor: true,
+    slidesPerView: "auto",
+    navigation: true,
+    spaceBetween: 10,
+    freeMode: {
+      enabled: true,
+      sticky: true,
+    },
+    modules: [Navigation, FreeMode],
+  };
+
   return (
     <Box
       sx={{
         width: "100%",
         my: 2,
-        /*  position: "relative",
+        position: "relative",
 
         "&:before": {
           content: "''",
-          backgroundImage: "url(/images/svg/trending-bg.svg)",
-          backgroundPosition: "50% 200px",
-          backgroundSize: "100%",
+          backgroundImage: nobg ? "" : "url(/images/svg/trending-bg.svg)",
+          backgroundSize: isDesktop ? "157%" : "210%",
           backgroundRepeat: "no-repeat",
           position: "absolute",
           top: "0px",
           right: "0px",
-          bottom: "0px",
+          bottom: isDesktop ? "-44px" : "-24px",
           left: "0px",
-          opacity: 0.75,
+          opacity: 0.35,
+          transform: invertBg ? "rotate(180deg) scaleX(-1)" : "rotate(180deg)",
           transition: "background-image 0.8s cubic-bezier(0, 0.71, 0.2, 1.01)",
-        }, */
+        },
       }}
     >
       {titleDiscover && (
@@ -79,15 +99,7 @@ export default function CarouselDiscover({
         style={{
           width: "100%",
         }}
-        grabCursor={true}
-        slidesPerView={"auto"}
-        navigation={isDesktop}
-        spaceBetween={10}
-        freeMode={{
-          enabled: true,
-          sticky: true,
-        }}
-        modules={[Navigation, FreeMode]}
+        {...(isDesktop ? optionsDesktopSwiper : optionsMobileSwiper)}
       >
         {slides &&
           slides.length > 0 &&
@@ -114,12 +126,12 @@ export default function CarouselDiscover({
             );
           })}
       </Swiper>
-      <Divider sx={{ my: 2 }} />
+      <Divider sx={{ my: 2, borderColor: "transparent" }} />
     </Box>
   );
 }
 
-function LoadingCarousel({ titleDiscover, isDesktop }) {
+function LoadingCarousel({ titleDiscover, isDesktop, invertBg }) {
   return (
     <Box
       sx={{
@@ -155,7 +167,7 @@ function LoadingCarousel({ titleDiscover, isDesktop }) {
         ))}
       </Stack>
 
-      <Divider sx={{ my: 2 }} />
+      <Divider sx={{ my: 2, borderColor: "transparent" }} />
     </Box>
   );
 }

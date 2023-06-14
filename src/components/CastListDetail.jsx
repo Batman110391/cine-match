@@ -100,11 +100,13 @@ export default function CastListDetail({
                 <ListItemButton
                   disableGutters
                   onClick={() => handleClickItem(id)}
+                  sx={!isDesktop ? { gap: 2 } : {}}
                 >
                   <ListItemAvatar>
                     <Avatar
                       alt={`Avatar ${name}`}
                       src={`http://image.tmdb.org/t/p/w342${profile_path}`}
+                      sx={!isDesktop ? { width: 56, height: 56 } : {}}
                     />
                   </ListItemAvatar>
                   <ListItemText

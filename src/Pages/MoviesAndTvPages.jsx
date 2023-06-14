@@ -7,6 +7,7 @@ import {
   CircularProgress,
   ToggleButton,
   ToggleButtonGroup,
+  Typography,
   useMediaQuery,
 } from "@mui/material";
 import { motion, useScroll, useSpring } from "framer-motion";
@@ -129,67 +130,83 @@ export default function MoviesAndTvPages({ typeSearch }) {
   };
 
   return (
-    <Box sx={{ position: "relative" }}>
-      <Box
-        component={motion.div}
-        sx={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          height: "4px",
-          background: (theme) => theme.palette.gradient.extraLight,
-          transformOrigin: "0%",
-          zIndex: 2,
-        }}
-        style={{ scaleX }}
-      />
-      <Box
-        sx={{
-          p: 2,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <ToggleButtonGroup value={viewGrid} exclusive onChange={handleViewGrid}>
-          <ToggleButton value="detail">
-            <TableRowsIcon />
-          </ToggleButton>
-          <ToggleButton value="compact">
-            <ViewCompactIcon />
-          </ToggleButton>
-        </ToggleButtonGroup>
-      </Box>
-      <Box sx={{ overflow: "hidden", pb: 5 }}>
-        <InfiniteScroll
-          ref={scrollContainerRef}
-          style={{ overflow: "hidden" }}
-          dataLength={movies?.results?.length || 0}
-          next={() => debounceFetchNextPage()}
-          hasMore={hasNextPage}
-          loader={
-            <Box sx={{ display: "flex", justifyContent: "center" }}>
-              <CircularProgress />
-            </Box>
-          }
-        >
-          <ItemRow
-            itemData={movies?.results}
-            typeView={viewGrid}
-            handleClickItem={handleClickItem}
-            isDesktop={isDesktop}
-            mediaType={typeSearch}
+    <>
+      {movies?.results?.length > 0 ? (
+        <Box sx={{ position: "relative" }}>
+          <Box
+            component={motion.div}
+            sx={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              height: "4px",
+              background: (theme) => theme.palette.gradient.extraLight,
+              transformOrigin: "0%",
+              zIndex: 2,
+            }}
+            style={{ scaleX }}
           />
-        </InfiniteScroll>
-      </Box>
-      <DialogSettingMovies
-        open={openSettingMovie}
-        setOpen={setOpenSettingMovie}
-        changeFilters={changeFilters}
-        setChangeFilters={setChangeFilters}
-        movieQueryType={typeSearch}
-      />
+          <Box
+            sx={{
+              p: 2,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <ToggleButtonGroup
+              value={viewGrid}
+              exclusive
+              onChange={handleViewGrid}
+            >
+              <ToggleButton value="detail">
+                <TableRowsIcon />
+              </ToggleButton>
+              <ToggleButton value="compact">
+                <ViewCompactIcon />
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+          <Box sx={{ overflow: "hidden", pb: 5 }}>
+            <InfiniteScroll
+              ref={scrollContainerRef}
+              style={{ overflow: "hidden" }}
+              dataLength={movies?.results?.length || 0}
+              next={() => debounceFetchNextPage()}
+              hasMore={hasNextPage}
+              loader={
+                <Box sx={{ display: "flex", justifyContent: "center" }}>
+                  <CircularProgress />
+                </Box>
+              }
+            >
+              <ItemRow
+                itemData={movies?.results}
+                typeView={viewGrid}
+                handleClickItem={handleClickItem}
+                isDesktop={isDesktop}
+                mediaType={typeSearch}
+              />
+            </InfiniteScroll>
+          </Box>
+        </Box>
+      ) : (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            height: "100vh",
+            width: "100%",
+          }}
+        >
+          <Typography variant="h6" sx={{ textAlign: "center" }}>
+            {`Nessun risultato trovato.`}
+          </Typography>
+        </Box>
+      )}
       <FloatingActionButton
         onClick={() => setOpenSettingMovie(true)}
         position={"right"}
@@ -199,7 +216,14 @@ export default function MoviesAndTvPages({ typeSearch }) {
       >
         <TuneIcon fontSize="large" color="action" />
       </FloatingActionButton>
-    </Box>
+      <DialogSettingMovies
+        open={openSettingMovie}
+        setOpen={setOpenSettingMovie}
+        changeFilters={changeFilters}
+        setChangeFilters={setChangeFilters}
+        movieQueryType={typeSearch}
+      />
+    </>
   );
 }
 

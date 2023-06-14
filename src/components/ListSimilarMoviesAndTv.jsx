@@ -28,6 +28,7 @@ export default function ListSimilarMoviesAndTv({
           handleClickItem={handleClickItem}
           isDesktop={isDesktop}
           type={type}
+          nobg={true}
         />
       )}
       {!isLoading && (error || !data || !data.length > 0) && (

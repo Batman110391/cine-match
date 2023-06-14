@@ -187,6 +187,7 @@ export default function SearchPage() {
           handleClickItem={handleClickItem}
           isDesktop={isDesktop}
           type={"tv"}
+          invertBg={true}
         />
         <CarouselDiscover
           slides={incomingMovie}
@@ -207,9 +208,10 @@ export default function SearchPage() {
           handleClickItem={handleClickItem}
           isDesktop={isDesktop}
           type={"movie"}
+          invertBg={true}
         />
 
-        {KEYWORDS_SEARCH_MOVIE.map((ksm) => (
+        {KEYWORDS_SEARCH_MOVIE.map((ksm, i) => (
           <Fragment key={ksm.name}>
             <CarouselDiscover
               slides={keywordsMovie[ksm.name]}
@@ -220,6 +222,7 @@ export default function SearchPage() {
               handleClickItem={handleClickItem}
               isDesktop={isDesktop}
               type={"movie"}
+              invertBg={i % 2 !== 0}
             />
           </Fragment>
         ))}

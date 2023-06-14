@@ -60,6 +60,7 @@ export default function DialogMovieDetail({
   const theme = useTheme();
 
   const [openTrailerDialog, setOpenTrailerDialog] = React.useState(false);
+  const [selectedImage, setSelectedImage] = React.useState(null);
 
   const [infoMovieRef, { height }] = useElementSize();
 
@@ -87,6 +88,10 @@ export default function DialogMovieDetail({
 
   const handleCloseDialogTrailer = () => {
     setOpenTrailerDialog(false);
+  };
+
+  const handleCloseImageOpen = () => {
+    setSelectedImage(null);
   };
 
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
@@ -211,17 +216,10 @@ export default function DialogMovieDetail({
                           <MovieCard
                             bg={detail?.poster_path}
                             title={detail?.title || detail?.name}
-                            w={
-                              isDesktop
-                                ? MOVIE_PAGE_CARD_WIDTH_MOBILE
-                                : MOVIE_CARD_WIDTH_MOBILE
-                            }
-                            h={
-                              isDesktop
-                                ? MOVIE_PAGE_CARD_HEIGTH_MOBILE
-                                : MOVIE_CARD_HEIGTH_MOBILE
-                            }
+                            w={MOVIE_PAGE_CARD_WIDTH_MOBILE}
+                            h={MOVIE_PAGE_CARD_HEIGTH_MOBILE}
                             isDesktop={isDesktop}
+                            onClick={() => setSelectedImage(true)}
                           />
                         </Box>
                         <Box>
@@ -301,7 +299,11 @@ export default function DialogMovieDetail({
                                   >
                                     - IDEATO DA
                                   </Typography>
-                                  <Box>
+                                  <Stack
+                                    flexDirection={"row"}
+                                    gap={1}
+                                    flexWrap={"wrap"}
+                                  >
                                     {director.map((dir) => (
                                       <Chip
                                         key={dir?.id}
@@ -324,7 +326,7 @@ export default function DialogMovieDetail({
                                         label={dir?.name}
                                       />
                                     ))}
-                                  </Box>
+                                  </Stack>
                                 </>
                               )}
                           </Stack>
@@ -482,6 +484,28 @@ export default function DialogMovieDetail({
             </Box>
           </DialogContent>
         )}
+      </Dialog>
+      <Dialog open={selectedImage !== null} onClose={handleCloseImageOpen}>
+        <IconButton
+          sx={{
+            position: "absolute",
+            top: theme.spacing(1),
+            right: theme.spacing(1),
+            zIndex: 1,
+          }}
+          onClick={handleCloseImageOpen}
+        >
+          <CloseIcon />
+        </IconButton>
+        <DialogContent sx={{ padding: 0 }}>
+          <MovieCard
+            bg={detail?.poster_path}
+            title={detail?.title || detail?.name}
+            w={300}
+            h={480}
+            isDesktop={isDesktop}
+          />
+        </DialogContent>
       </Dialog>
     </div>
   );

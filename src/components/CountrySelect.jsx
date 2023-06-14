@@ -45,6 +45,16 @@ export default function CountrySelect({ languageMovie, setLanguageMovie }) {
       PopperComponent={(popperProps) => (
         <CustomPopper anchorEl={anchorEl} {...popperProps} />
       )}
+      filterOptions={(options, { inputValue }) =>
+        options
+          .filter(
+            (option) =>
+              option?.native_name
+                .toLowerCase()
+                .indexOf(inputValue.toLowerCase()) !== -1
+          )
+          .slice(0, 4)
+      }
       loading={isLoading}
       options={data || []}
       autoHighlight

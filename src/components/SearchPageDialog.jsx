@@ -10,6 +10,7 @@ import {
   Divider,
   Grow,
   IconButton,
+  InputAdornment,
   InputBase,
   LinearProgress,
   List,
@@ -28,6 +29,7 @@ import * as React from "react";
 
 import { useTheme } from "@emotion/react";
 import CloseIcon from "@mui/icons-material/Close";
+import ClearIcon from "@mui/icons-material/Clear";
 import { green, grey, orange, purple } from "@mui/material/colors";
 import { useQuery } from "react-query";
 import { fetchMoviesByKeywords } from "../api/tmdbApis";
@@ -70,15 +72,17 @@ const SearchIconWrapper = styled("div")(({ theme }) => ({
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
   color: "inherit",
   width: "100%",
+  paddingRight: theme.spacing(1),
   "& .MuiInputBase-input": {
     padding: theme.spacing(1, 1, 1, 0),
     // vertical padding + font size from searchIcon
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
+
     transition: theme.transitions.create("width"),
     width: "100%",
-    [theme.breakpoints.up("md")]: {
-      width: "20ch",
-    },
+    // [theme.breakpoints.up("md")]: {
+    //   width: "20ch",
+    // },
   },
 }));
 
@@ -135,6 +139,14 @@ export default function SearchPageDialog({ open, setOpen }) {
     }
   };
 
+  const handleSearchInputChange = (e) => {
+    setSearchInput(e.target.value);
+  };
+
+  const handleClearSearchInput = () => {
+    setSearchInput("");
+  };
+
   const handleClose = () => {
     setOpen(false);
   };
@@ -160,7 +172,35 @@ export default function SearchPageDialog({ open, setOpen }) {
             <StyledInputBase
               placeholder="Cerca film, serie tv, cast..."
               value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
+              onChange={handleSearchInputChange}
+              endAdornment={
+                searchInput && (
+                  <InputAdornment position="end">
+                    <Chip
+                      sx={{
+                        borderRadius: "0",
+                      }}
+                      size="small"
+                      label={
+                        <Typography
+                          sx={{
+                            padding: 0,
+                            margin: 0,
+                          }}
+                          fontSize={"0.6rem"}
+                          variant="button"
+                        >
+                          {"azzera"}
+                        </Typography>
+                      }
+                      color="secondary"
+                      onClick={handleClearSearchInput}
+                      variant="outlined"
+                      clickable
+                    />
+                  </InputAdornment>
+                )
+              }
             />
           </Search>
         </Box>
