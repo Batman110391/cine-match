@@ -21,6 +21,69 @@ export const DATE_SIX_MONTHS_LATER = dayjs(CURRENT_DATE_FORMATTING)
   .add(2, "month")
   .format("YYYY-MM-DD");
 
+function buildCorsFreeUrl(url) {
+  return `https://proxy.cors.sh/${url}`;
+}
+
+export async function fetchRatingMovieById(id, originalTitle) {
+  if (!originalTitle || !id) {
+    return null;
+  }
+
+  const url = `https://flickmetrix.com/api2/values/getFilms?amazonRegion=us&cast=&comboScoreMax=100&comboScoreMin=0&countryCode=us&criticRatingMax=100&criticRatingMin=0&criticReviewsMax=1000&criticReviewsMin=0&currentPage=0&deviceID=1&director=&format=movies&genreAND=false&imdbRatingMax=10&imdbRatingMin=0&imdbVotesMax=2800000&imdbVotesMin=0&inCinemas=true&includeDismissed=true&includeSeen=true&includeWantToWatch=true&isCastSearch=false&isDirectorSearch=false&isPersonSearch=false&language=all&letterboxdScoreMax=100&letterboxdScoreMin=0&letterboxdVotesMax=1200000&letterboxdVotesMin=0&metacriticRatingMax=100&metacriticRatingMin=0&metacriticReviewsMax=100&metacriticReviewsMin=0&onAmazonPrime=false&onAmazonVideo=false&onDVD=false&onNetflix=false&pageSize=20&path=/&person=&plot=&queryType=GetFilmsToSieve&searchTerm=${originalTitle}&sharedUser=&sortOrder=comboScoreDesc&title=&token=&watchedRating=0&writer=&yearMax=2023&yearMin=1900`;
+  let responseJson = null;
+
+  try {
+    const encodeURL = buildCorsFreeUrl(url);
+
+    const responseRating = await fetchPromise(encodeURL);
+
+    if (!responseRating) return null;
+
+    responseJson = await JSON.parse(responseRating);
+  } catch (e) {
+    const encodeURL = `https://api.allorigins.win/get?url=${encodeURIComponent(
+      url
+    )}`;
+
+    const responseRating = await fetchPromise(encodeURL);
+
+    if (!responseRating) return null;
+
+    responseJson = await JSON.parse(JSON.parse(responseRating.contents));
+  }
+
+  try {
+    const { imdb_id } = await fetchPromise(
+      `https://api.themoviedb.org/3/movie/${id}/external_ids?api_key=${API_KEY}`
+    );
+
+    const currentMovieRating = responseJson?.find(
+      (obj) => obj.imdbID === imdb_id
+    );
+
+    const convertPercent = (number) => (parseFloat(number) * 10) / 100;
+
+    return {
+      ratings: [
+        {
+          source: "Imdb",
+          value: currentMovieRating?.imdbRating || null,
+          count: currentMovieRating?.imdbVotes || 0,
+        },
+        {
+          source: "Letterboxd",
+          value: convertPercent(currentMovieRating?.LetterboxdScore) || null,
+          count: currentMovieRating?.letterboxdVotes || 0,
+        },
+      ],
+    };
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}
+
 const getUrlMoviesWithCustomParams = ({
   order_by = "popularity.desc",
   from = "1970-01-01",
@@ -567,7 +630,7 @@ export async function fetchShowTvPage(page, querySearch) {
   });
 }
 
-export async function fetchDetailMovieById(id, type) {
+export async function fetchDetailMovieById(id, type, originalTitle) {
   return fetchPromise(
     `https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
   ).then(async (data) => {

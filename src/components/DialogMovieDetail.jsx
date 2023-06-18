@@ -40,6 +40,7 @@ import MovieCard from "./MovieCard";
 import SpeedDialShare from "./SpeedDialShare";
 import SubHeader from "./SubHeader";
 import Tmdb from "./icons/Tmdb";
+import RatingsWorld from "./RatingsWorld";
 
 const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
@@ -341,7 +342,14 @@ export default function DialogMovieDetail({
                           </Typography>
                         </Box>
                       </Stack>
-                      <Box sx={{ mt: 2 }}>
+                      <Box
+                        sx={{
+                          mt: 2,
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 0.5,
+                        }}
+                      >
                         <Chip
                           sx={{ borderColor: "transparent" }}
                           variant="outlined"
@@ -354,7 +362,16 @@ export default function DialogMovieDetail({
                             />
                           }
                         />
+                        <Typography fontWeight={"bold"} variant={"caption"}>
+                          {detail?.vote_average?.toFixed(1)}
+                        </Typography>
                       </Box>
+
+                      <RatingsWorld
+                        id={detail?.id}
+                        originalTitle={detail?.original_title}
+                      />
+
                       {detail?.videos?.results[0]?.key && (
                         <Button
                           sx={{ pl: 0, mt: 1 }}
