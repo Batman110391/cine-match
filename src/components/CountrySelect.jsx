@@ -1,30 +1,14 @@
-import * as React from "react";
+import { Popper } from "@mui/material";
+import Autocomplete from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
-import Autocomplete, { autocompleteClasses } from "@mui/material/Autocomplete";
-import { fetchCounties } from "../api/tmdbApis";
+import * as React from "react";
 import { useQuery } from "react-query";
-import { Popper } from "@mui/material";
+import { fetchCounties } from "../api/tmdbApis";
 
-const CustomPopper = ({ anchorEl, ...props }) => (
-  <Popper
-    anchorEl={anchorEl}
-    placement={"top"}
-    {...props}
-    sx={{
-      [`& .${autocompleteClasses.listbox}`]: {
-        boxSizing: "border-box",
-        "& ul": {
-          padding: 0,
-          margin: 0,
-        },
-      },
-    }}
-  />
-);
+const CustomPopper = ({ ...props }) => <Popper {...props} />;
 
 export default function CountrySelect({ languageMovie, setLanguageMovie }) {
-  const [anchorEl, setAnchorEl] = React.useState(null);
   const autocompleteRef = React.useRef(null);
   const [inputValue, setInputValue] = React.useState("");
 
@@ -42,9 +26,7 @@ export default function CountrySelect({ languageMovie, setLanguageMovie }) {
     <Autocomplete
       ref={autocompleteRef}
       sx={{ width: 300 }}
-      PopperComponent={(popperProps) => (
-        <CustomPopper anchorEl={anchorEl} {...popperProps} />
-      )}
+      PopperComponent={(popperProps) => <CustomPopper {...popperProps} />}
       filterOptions={(options, { inputValue }) =>
         options
           .filter(
@@ -91,7 +73,6 @@ export default function CountrySelect({ languageMovie, setLanguageMovie }) {
             ...params.inputProps,
             autoComplete: "new-password", // disable autocomplete and autofill
           }}
-          onClick={() => setAnchorEl(autocompleteRef.current)}
         />
       )}
     />

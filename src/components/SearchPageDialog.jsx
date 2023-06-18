@@ -1,6 +1,5 @@
 import SearchIcon from "@mui/icons-material/Search";
 import {
-  Avatar,
   Box,
   Button,
   Chip,
@@ -29,21 +28,24 @@ import * as React from "react";
 
 import { useTheme } from "@emotion/react";
 import CloseIcon from "@mui/icons-material/Close";
-import ClearIcon from "@mui/icons-material/Clear";
-import { green, grey, orange, purple } from "@mui/material/colors";
+import { green, lightBlue, orange, purple } from "@mui/material/colors";
 import { useQuery } from "react-query";
 import { fetchMoviesByKeywords } from "../api/tmdbApis";
 import CastsCard from "../components/CastsCard";
 import MovieCard from "../components/MovieCard";
-import { useDebounce } from "../utils/useDebounce";
-import { CircularProgressWithLabel } from "./ChartCompatibility";
-import { DialogMovieDetailContext } from "./DialogMovieDetailProvider";
 import {
   MINI_MOVIE_CARD_HEIGTH,
   MINI_MOVIE_CARD_WIDTH,
   MOVIE_CARD_HEIGTH_MOBILE,
   MOVIE_CARD_WIDTH_MOBILE,
 } from "../utils/constant";
+import { useDebounce } from "../utils/useDebounce";
+import { CircularProgressWithLabel } from "./ChartCompatibility";
+import { DialogMovieDetailContext } from "./DialogMovieDetailProvider";
+import LiveTvIcon from "@mui/icons-material/LiveTv";
+import MovieIcon from "@mui/icons-material/Movie";
+import PersonIcon from "@mui/icons-material/Person";
+import DialogWrapperResponsivness from "./DialogWrapperResponsivness";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -88,6 +90,11 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 
 const SEARCH_TYPE = [
   {
+    label: "Tutti",
+    type: "multi",
+    color: lightBlue[600],
+  },
+  {
     label: "Film",
     type: "movie",
     color: orange[600],
@@ -113,7 +120,7 @@ export default function SearchPageDialog({ open, setOpen }) {
     DialogMovieDetailContext
   );
 
-  const [typeQuery, setTypeQuery] = React.useState("movie");
+  const [typeQuery, setTypeQuery] = React.useState("multi");
   const [searchInput, setSearchInput] = React.useState("");
 
   const theme = useTheme();
@@ -154,14 +161,11 @@ export default function SearchPageDialog({ open, setOpen }) {
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
 
   return (
-    <Dialog
-      fullScreen={isDesktop ? false : true}
-      fullWidth={true}
-      maxWidth={"md"}
+    <DialogWrapperResponsivness
       open={open}
-      scroll={"paper"}
       onClose={handleClose}
-      TransitionComponent={Transition}
+      isDesktop={isDesktop}
+      scroll={"paper"}
     >
       <DialogTitle sx={{ bgcolor: "background.paper", p: 2, pb: 0 }}>
         <Box sx={{ width: "90%" }}>
@@ -268,7 +272,14 @@ export default function SearchPageDialog({ open, setOpen }) {
                   </Box>
                 ) : null;
 
-                if (typeQuery === "movie" || typeQuery === "tv") {
+                const isPerson =
+                  curMovie?.gender ||
+                  curMovie?.known_for_department ||
+                  curMovie?.profile_path;
+
+                const isSerieTv = curMovie?.name || curMovie?.first_air_date;
+
+                if (!isPerson) {
                   return (
                     <React.Fragment key={typeQuery + i}>
                       <ListItem
@@ -331,6 +342,29 @@ export default function SearchPageDialog({ open, setOpen }) {
                                 >
                                   {curMovie?.overview}
                                 </Typography>
+                                <Chip
+                                  component={"span"}
+                                  size="small"
+                                  icon={
+                                    isSerieTv ? <LiveTvIcon /> : <MovieIcon />
+                                  }
+                                  label={
+                                    <Typography
+                                      variant="button"
+                                      fontSize={"0.6rem"}
+                                    >
+                                      {isSerieTv ? "Serie Tv" : "Film"}
+                                    </Typography>
+                                  }
+                                  sx={{
+                                    backgroundColor: isSerieTv
+                                      ? alpha(orange[600], 0.5)
+                                      : alpha(green[600], 0.5),
+                                    px: 0.5,
+                                    pb: 0.2,
+                                    mt: 2,
+                                  }}
+                                />
                               </>
                             }
                           />
@@ -433,6 +467,6 @@ export default function SearchPageDialog({ open, setOpen }) {
           )}
         </Box>
       </DialogContent>
-    </Dialog>
+    </DialogWrapperResponsivness>
   );
 }

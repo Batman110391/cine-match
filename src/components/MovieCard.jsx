@@ -21,6 +21,10 @@ export default function MovieCard({
       elevation={3}
       sx={{
         position: "relative",
+        backgroundImage: `url(http://image.tmdb.org/t/p/w500${bg})`,
+        backgroundSize: "cover",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "center center",
         height: h ? `${h}px` : "200px",
         width: w ? `${w}px` : "133px",
         display: "flex",
@@ -33,19 +37,6 @@ export default function MovieCard({
         ...sx,
       }}
     >
-      <Box
-        sx={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "100%",
-          backgroundImage: `url(http://image.tmdb.org/t/p/w342${bg})`,
-          backgroundSize: "cover",
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "center",
-        }}
-      />
       {!bg && (
         <Typography
           sx={{

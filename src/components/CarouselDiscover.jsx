@@ -69,7 +69,7 @@ export default function CarouselDiscover({
         "&:before": {
           content: "''",
           backgroundImage: nobg ? "" : "url(/images/svg/trending-bg.svg)",
-          backgroundSize: isDesktop ? "157%" : "210%",
+          backgroundSize: isDesktop ? "1370px" : "1200px",
           backgroundRepeat: "no-repeat",
           position: "absolute",
           top: "0px",

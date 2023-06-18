@@ -2,10 +2,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import {
   AppBar,
   Box,
-  Dialog,
   DialogContent,
   Grid,
-  Grow,
   IconButton,
   LinearProgress,
   Stack,
@@ -31,13 +29,10 @@ import {
 } from "../utils/constant";
 import CastsCard from "./CastsCard";
 import DataGridListCreditsPerson from "./DataGridListCreditsPerson";
+import DialogWrapperResponsivness from "./DialogWrapperResponsivness";
 import GridListImageVisualizations from "./GridListImageVisualizations";
 import MovieCard from "./MovieCard";
 import SubHeader from "./SubHeader";
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Grow in={true} ref={ref} {...props} />;
-});
 
 export default function DialogPersonDetail({
   open,
@@ -84,13 +79,11 @@ export default function DialogPersonDetail({
   ];
 
   return (
-    <Dialog
-      fullScreen={isDesktop ? false : true}
-      fullWidth={true}
-      maxWidth={"xl"}
+    <DialogWrapperResponsivness
       open={open}
       onClose={handleClose}
-      TransitionComponent={Transition}
+      isDesktop={isDesktop}
+      maxWidth={"xl"}
       PaperProps={{
         sx: {
           height: "100%",
@@ -239,6 +232,6 @@ export default function DialogPersonDetail({
           </Grid>
         </DialogContent>
       )}
-    </Dialog>
+    </DialogWrapperResponsivness>
   );
 }

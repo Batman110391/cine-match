@@ -17,17 +17,14 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import AppBar from "@mui/material/AppBar";
-import Grow from "@mui/material/Grow ";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import { motion } from "framer-motion";
-import React from "react";
+import React, { useEffect } from "react";
 import YouTubePlayer from "react-player/youtube";
 import { useQuery } from "react-query";
 import { fetchDetailMovieById } from "../api/tmdbApis";
 import {
-  MOVIE_CARD_HEIGTH_MOBILE,
-  MOVIE_CARD_WIDTH_MOBILE,
   MOVIE_PAGE_CARD_HEIGTH_MOBILE,
   MOVIE_PAGE_CARD_WIDTH_MOBILE,
 } from "../utils/constant";
@@ -35,6 +32,7 @@ import { roundToHalf } from "../utils/numberFormatting";
 import { formatMinutes } from "../utils/timeFormat";
 import useElementSize from "../utils/useElementSize";
 import CastListDetail from "./CastListDetail";
+import DialogWrapperResponsivness from "./DialogWrapperResponsivness";
 import ListImagesMovie from "./ListImagesMovie";
 import ListSeasonTv from "./ListSeasonTv";
 import ListSimilarMoviesAndTv from "./ListSimilarMoviesAndTv";
@@ -44,10 +42,6 @@ import SubHeader from "./SubHeader";
 import Tmdb from "./icons/Tmdb";
 
 const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Grow in={true} ref={ref} {...props} />;
-});
 
 export default function DialogMovieDetail({
   open,
@@ -70,8 +64,6 @@ export default function DialogMovieDetail({
   );
 
   const detail = data;
-
-  console.log(detail);
 
   const bgContainerPoster = detail?.images?.logos?.find(
     (p) => p?.iso_639_1 === "en"
@@ -98,13 +90,11 @@ export default function DialogMovieDetail({
 
   return (
     <div>
-      <Dialog
-        fullScreen={isDesktop ? false : true}
-        fullWidth={true}
-        maxWidth={"xl"}
+      <DialogWrapperResponsivness
         open={open}
         onClose={handleClose}
-        TransitionComponent={Transition}
+        isDesktop={isDesktop}
+        maxWidth={"xl"}
         PaperProps={{
           sx: {
             height: "100%",
@@ -276,7 +266,7 @@ export default function DialogMovieDetail({
                                     director?.profile_path ? (
                                       <Avatar
                                         alt={director?.name}
-                                        src={`http://image.tmdb.org/t/p/w342${director?.profile_path}`}
+                                        src={`http://image.tmdb.org/t/p/w500${director?.profile_path}`}
                                       />
                                     ) : (
                                       <Avatar>
@@ -315,7 +305,7 @@ export default function DialogMovieDetail({
                                           dir?.profile_path ? (
                                             <Avatar
                                               alt={dir?.name}
-                                              src={`http://image.tmdb.org/t/p/w342${dir?.profile_path}`}
+                                              src={`http://image.tmdb.org/t/p/w500${dir?.profile_path}`}
                                             />
                                           ) : (
                                             <Avatar>
@@ -425,7 +415,7 @@ export default function DialogMovieDetail({
                                     <Avatar
                                       key={provider?.provider_id}
                                       alt={provider?.provider_name}
-                                      src={`http://image.tmdb.org/t/p/w342${provider?.logo_path}`}
+                                      src={`http://image.tmdb.org/t/p/w500${provider?.logo_path}`}
                                     />
                                   )
                                 )}
@@ -484,7 +474,7 @@ export default function DialogMovieDetail({
             </Box>
           </DialogContent>
         )}
-      </Dialog>
+      </DialogWrapperResponsivness>
       <Dialog open={selectedImage !== null} onClose={handleCloseImageOpen}>
         <IconButton
           sx={{

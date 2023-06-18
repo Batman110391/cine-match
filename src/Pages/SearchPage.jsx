@@ -102,6 +102,10 @@ export default function SearchPage() {
           with_ott_providers: [],
           exact_search: false,
           with_original_language: "it",
+          region: "IT",
+          watch_region: "IT",
+          with_release_type: "4|5|6",
+          vote_count: "30",
         },
       })
     );

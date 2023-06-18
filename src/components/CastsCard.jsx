@@ -24,7 +24,7 @@ export default function CastsCard({
           })}
       sx={{
         position: "relative",
-        backgroundImage: `linear-gradient(-180deg, rgba(54,54,54,0.2), rgba(32,32,32,0.6)), url(http://image.tmdb.org/t/p/w342${bg})`,
+        backgroundImage: `linear-gradient(-180deg, rgba(54,54,54,0.2), rgba(32,32,32,0.6)), url(http://image.tmdb.org/t/p/w500${bg})`,
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center center",

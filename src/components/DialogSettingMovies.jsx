@@ -11,34 +11,29 @@ import {
 } from "@mui/material";
 import AppBar from "@mui/material/AppBar";
 import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
 import Divider from "@mui/material/Divider";
-import Grow from "@mui/material/Grow ";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import { Stack } from "@mui/system";
+import dayjs from "dayjs";
 import { motion } from "framer-motion";
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setQuery } from "../store/movieQuery";
-import ListGenresSetting from "./ListGenresSetting";
-import SearchPeriods from "./SearchPeriods";
-import dayjs from "dayjs";
-import ListProviderSettng from "./ListProviderSettng";
-import CountrySelect from "./CountrySelect";
 import AutocompleteSearchKeywords from "./AutocompleteSearchKeywords";
+import CountrySelect from "./CountrySelect";
+import DialogWrapperResponsivness from "./DialogWrapperResponsivness";
+import ListGenresSetting from "./ListGenresSetting";
+import ListProviderSettng from "./ListProviderSettng";
+import SearchPeriods from "./SearchPeriods";
 
 const ORDERS = [
   { name: "Popolari", label: "popularity.desc" },
   { name: "Più Votati", label: "vote_average.desc" },
   { name: "Più recenti", label: "primary_release_date.desc" },
 ];
-
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Grow in={true} ref={ref} {...props} />;
-});
 
 export default function DialogSettingMovies({
   open,
@@ -78,6 +73,10 @@ export default function DialogSettingMovies({
   );
   const keywordsPrev = useSelector(
     (state) => state.movieQuery?.[popertiesDispatch]?.with_keywords
+  );
+
+  const restQuery = useSelector(
+    (state) => state.movieQuery?.[popertiesDispatch]
   );
 
   const [periods, setPeriods] = useState({
@@ -144,6 +143,7 @@ export default function DialogSettingMovies({
     dispatch(
       setQuery({
         [popertiesDispatch]: {
+          ...restQuery,
           from: periods.from,
           to: periods.to,
           order_by: sort,
@@ -165,15 +165,15 @@ export default function DialogSettingMovies({
     handleClose();
   };
 
+  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
+
   return (
     <div>
-      <Dialog
-        fullScreen={useMediaQuery(theme.breakpoints.up("sm")) ? false : true}
-        fullWidth={true}
-        maxWidth={"lg"}
+      <DialogWrapperResponsivness
         open={open}
         onClose={handleClose}
-        TransitionComponent={Transition}
+        isDesktop={isDesktop}
+        maxWidth={"lg"}
       >
         <AppBar sx={{ position: "relative" }}>
           <Toolbar>
@@ -291,7 +291,7 @@ export default function DialogSettingMovies({
           </Box>
           <Divider sx={{ my: 2 }} />
         </DialogContent>
-      </Dialog>
+      </DialogWrapperResponsivness>
     </div>
   );
 }

@@ -31,6 +31,9 @@ const getUrlMoviesWithCustomParams = ({
   with_release_type = null,
   with_original_language = null,
   with_keywords = [],
+  region = null,
+  watch_region = null,
+  vote_count = null,
 }) => {
   const genres =
     with_genres.length > 0
@@ -57,7 +60,7 @@ const getUrlMoviesWithCustomParams = ({
   url.searchParams.set("vote_average.lte", "10");
   url.searchParams.set(
     "vote_count.gte",
-    order_by === "vote_average.desc" ? "300" : "0"
+    vote_count ? vote_count : order_by === "vote_average.desc" ? "300" : "0"
   );
   url.searchParams.set("with_runtime.gte", "0");
   url.searchParams.set("with_runtime.lte", "400");
@@ -80,6 +83,14 @@ const getUrlMoviesWithCustomParams = ({
 
   if (keywords.length > 0) {
     url.searchParams.set("with_keywords", keywords);
+  }
+
+  if (region) {
+    url.searchParams.set("region", region);
+  }
+
+  if (watch_region) {
+    url.searchParams.set("watch_region", watch_region);
   }
 
   return url.toString();
@@ -368,6 +379,10 @@ export async function fetchMoviesDiscover(page = 1) {
       api: fetchPromise(
         `${getUrlMoviesWithCustomParams({
           with_original_language: "it",
+          region: "IT",
+          watch_region: "IT",
+          with_release_type: "4|5|6",
+          vote_count: "30",
         })}&page=${page}`
       ),
     },
@@ -410,6 +425,20 @@ export async function fetchDetailSeasonTvById(tvID, seasons) {
 export async function fetchMoviesByKeywords(keyword, typeQuery, page = 1) {
   const keyWordNotNull = keyword && keyword !== "";
 
+  if (keyWordNotNull && typeQuery === "multi") {
+    return await fetchPromise(
+      `https://api.themoviedb.org/3/search/multi?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}&query=${encodeURI(
+        keyword
+      )}&region=IT`
+    ).then((data) => {
+      if (data && data?.results?.length > 0) {
+        return data?.results;
+      } else {
+        return [];
+      }
+    });
+  }
+
   if (keyWordNotNull && typeQuery === "movie") {
     return await fetchPromise(
       `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}&query=${encodeURI(
@@ -444,6 +473,36 @@ export async function fetchMoviesByKeywords(keyword, typeQuery, page = 1) {
         keyword
       )}&include_adult=true&region=IT`
     ).then((data) => data?.results);
+  }
+
+  if (typeQuery === "multi") {
+    const resourcesAll = [
+      {
+        name: "movie",
+        api: await fetchPromise(`${getUrlMoviesWithCustomParams({})}&page=1`),
+      },
+      {
+        name: "tv",
+        api: await fetchPromise(`${getUrlSerieTvWithCustomParams({})}&page=1`),
+      },
+    ];
+
+    const aggregationResources = await Promise.all(
+      resourcesAll.map((r) => r.api)
+    );
+
+    const resources = Object.fromEntries(
+      aggregationResources.map((resource, index) => [
+        resourcesAll[index].name,
+        resource?.results || [],
+      ])
+    );
+
+    const result = [...resources?.movie, ...resources?.tv].sort(
+      (a, b) => b.popularity - a.popularity
+    );
+
+    return result;
   }
 
   if (typeQuery === "movie") {
