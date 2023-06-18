@@ -33,24 +33,34 @@ export async function fetchRatingMovieById(id, originalTitle) {
   const url = `https://flickmetrix.com/api2/values/getFilms?amazonRegion=us&cast=&comboScoreMax=100&comboScoreMin=0&countryCode=us&criticRatingMax=100&criticRatingMin=0&criticReviewsMax=1000&criticReviewsMin=0&currentPage=0&deviceID=1&director=&format=movies&genreAND=false&imdbRatingMax=10&imdbRatingMin=0&imdbVotesMax=2800000&imdbVotesMin=0&inCinemas=true&includeDismissed=true&includeSeen=true&includeWantToWatch=true&isCastSearch=false&isDirectorSearch=false&isPersonSearch=false&language=all&letterboxdScoreMax=100&letterboxdScoreMin=0&letterboxdVotesMax=1200000&letterboxdVotesMin=0&metacriticRatingMax=100&metacriticRatingMin=0&metacriticReviewsMax=100&metacriticReviewsMin=0&onAmazonPrime=false&onAmazonVideo=false&onDVD=false&onNetflix=false&pageSize=20&path=/&person=&plot=&queryType=GetFilmsToSieve&searchTerm=${originalTitle}&sharedUser=&sortOrder=comboScoreDesc&title=&token=&watchedRating=0&writer=&yearMax=2023&yearMin=1900`;
   let responseJson = null;
 
-  try {
-    const encodeURL = buildCorsFreeUrl(url);
+  const proxyUrls = [
+    "https://proxy.cors.sh/",
+    "https://api.allorigins.win/get?url=",
+    "https://thingproxy.freeboard.io/fetch/",
+  ];
 
-    const responseRating = await fetchPromise(encodeURL);
+  for (const proxyUrl of proxyUrls) {
+    try {
+      const responseRating = await fetchPromise(
+        proxyUrl + encodeURIComponent(url)
+      );
 
-    if (!responseRating) return null;
+      if (responseRating) {
+        const json = responseRating?.contents
+          ? await JSON.parse(JSON.parse(responseRating.contents))
+          : await JSON.parse(responseRating);
+        responseJson = json;
 
-    responseJson = await JSON.parse(responseRating);
-  } catch (e) {
-    const encodeURL = `https://api.allorigins.win/get?url=${encodeURIComponent(
-      url
-    )}`;
+        break;
+      }
+    } catch (e) {
+      // Log the error and try the next proxy
+      console.error(e);
+    }
+  }
 
-    const responseRating = await fetchPromise(encodeURL);
-
-    if (!responseRating) return null;
-
-    responseJson = await JSON.parse(JSON.parse(responseRating.contents));
+  if (responseJson === null) {
+    return null;
   }
 
   try {
