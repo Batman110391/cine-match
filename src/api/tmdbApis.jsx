@@ -34,10 +34,10 @@ export async function fetchRatingMovieById(id, originalTitle) {
   let responseJson = null;
 
   const proxyUrls = [
-    "https://proxy.cors.sh/",
+    "https://cinematicmatch.netlify.app/.netlify/functions/cors/",
     "https://api.allorigins.win/get?url=",
     "https://thingproxy.freeboard.io/fetch/",
-    "https://cinematicmatch.netlify.app/.netlify/functions/cors/",
+    "https://proxy.cors.sh/",
     "https://cinematicmatch.netlify.app/.netlify/functions/cors-binary",
   ];
 

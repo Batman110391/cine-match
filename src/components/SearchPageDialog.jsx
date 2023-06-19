@@ -111,10 +111,6 @@ const SEARCH_TYPE = [
   },
 ];
 
-const Transition = React.forwardRef(function Transition(props, ref) {
-  return <Grow in={true} ref={ref} {...props} />;
-});
-
 export default function SearchPageDialog({ open, setOpen }) {
   const { openDialogMovieDetail, openDialogPersonDetail } = React.useContext(
     DialogMovieDetailContext
@@ -296,7 +292,12 @@ export default function SearchPageDialog({ open, setOpen }) {
                         <ListItemButton
                           alignItems="flex-start"
                           sx={{ gap: 2 }}
-                          onClick={() => redirectMovie(curMovie?.id, typeQuery)}
+                          onClick={() =>
+                            redirectMovie(
+                              curMovie?.id,
+                              isSerieTv ? "tv" : "movie"
+                            )
+                          }
                           key={i + "movieSearchs"}
                         >
                           <ListItemAvatar>
