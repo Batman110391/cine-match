@@ -2,7 +2,6 @@ import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import _ from "lodash";
 import { fetchPromise } from "../utils/fetchPromise";
-import { uniqueArray } from "../utils/uniqueArray";
 import { KEYWORDS_SEARCH_MOVIE } from "../utils/constant";
 dayjs.extend(isBetween);
 
@@ -20,10 +19,6 @@ export const DATA_TOMORROW = dayjs(CURRENT_DATE_FORMATTING)
 export const DATE_SIX_MONTHS_LATER = dayjs(CURRENT_DATE_FORMATTING)
   .add(2, "month")
   .format("YYYY-MM-DD");
-
-function buildCorsFreeUrl(url) {
-  return `https://proxy.cors.sh/${url}`;
-}
 
 export async function fetchRatingMovieById(id, originalTitle) {
   if (!originalTitle || !id) {
@@ -106,7 +101,7 @@ const getUrlMoviesWithCustomParams = ({
   with_release_type = null,
   with_original_language = null,
   with_keywords = [],
-  region = null,
+  region = "IT",
   watch_region = null,
   vote_count = null,
 }) => {
@@ -124,21 +119,18 @@ const getUrlMoviesWithCustomParams = ({
 
   const url = new URL("https://api.themoviedb.org/3/discover/movie");
   url.searchParams.set("api_key", API_KEY);
+  url.searchParams.set("include_adult", false);
+  url.searchParams.set("include_video", false);
   url.searchParams.set("language", LANGUAGE);
   url.searchParams.set("certification_country", "IT");
-  url.searchParams.set("ott_region", "IT");
-  url.searchParams.set("release_date.gte", from);
-  url.searchParams.set("release_date.lte", to);
-  url.searchParams.set("show_me", "0");
+  //url.searchParams.set("ott_region", "IT");
+  url.searchParams.set("primary_release_date.gte", from);
+  url.searchParams.set("primary_release_date.lte", to);
   url.searchParams.set("sort_by", order_by);
-  url.searchParams.set("vote_average.gte", "0");
-  url.searchParams.set("vote_average.lte", "10");
   url.searchParams.set(
     "vote_count.gte",
     vote_count ? vote_count : order_by === "vote_average.desc" ? "300" : "0"
   );
-  url.searchParams.set("with_runtime.gte", "0");
-  url.searchParams.set("with_runtime.lte", "400");
 
   if (genres) {
     url.searchParams.set("with_genres", genres);
@@ -196,20 +188,16 @@ const getUrlSerieTvWithCustomParams = ({
   const url = new URL("https://api.themoviedb.org/3/discover/tv");
   url.searchParams.set("api_key", API_KEY);
   url.searchParams.set("language", LANGUAGE);
-  url.searchParams.set("air_date.gte", from);
-  url.searchParams.set("air_date.lte", to);
+  url.searchParams.set("include_adult", false);
+  url.searchParams.set("first_air_date.gte", from);
+  url.searchParams.set("first_air_date.lte", to);
   url.searchParams.set("certification_country", "IT");
   url.searchParams.set("ott_region", "IT");
-  url.searchParams.set("show_me", "0");
   url.searchParams.set("sort_by", order_by);
-  url.searchParams.set("vote_average.gte", "0");
-  url.searchParams.set("vote_average.lte", "10");
   url.searchParams.set(
     "vote_count.gte",
     order_by === "vote_average.desc" ? "300" : "0"
   );
-  url.searchParams.set("with_runtime.gte", "0");
-  url.searchParams.set("with_runtime.lte", "400");
   url.searchParams.set(
     "with_watch_monetization_types",
     "flatrate|free|ads|rent|buy"
