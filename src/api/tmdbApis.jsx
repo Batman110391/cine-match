@@ -372,6 +372,12 @@ export const genresList = [
   },
 ];
 
+export async function fetchTrending(type) {
+  return fetchPromise(
+    `https://api.themoviedb.org/3/trending/${type}/day?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+  );
+}
+
 export function fetchGenres(type) {
   if (type === "tv") {
     return new Promise((resolve) => resolve(genresListTv));
@@ -421,11 +427,11 @@ export async function fetchMoviesDiscover(page = 1) {
   const resourcesAll = [
     {
       name: "trending_movie",
-      api: fetchPromise(`${getUrlMoviesWithCustomParams({})}&page=${page}`),
+      api: fetchTrending("movie"),
     },
     {
       name: "trending_tv",
-      api: fetchPromise(`${getUrlSerieTvWithCustomParams({})}&page=${page}`),
+      api: fetchTrending("tv"),
     },
     {
       name: "incoming_movie",
