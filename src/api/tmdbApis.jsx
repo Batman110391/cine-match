@@ -20,32 +20,70 @@ export const DATE_SIX_MONTHS_LATER = dayjs(CURRENT_DATE_FORMATTING)
   .add(2, "month")
   .format("YYYY-MM-DD");
 
-export async function fetchRatingMovieById(id, originalTitle) {
-  if (!originalTitle || !id) {
-    return null;
+async function convertJson(obj) {
+  let json = null;
+
+  let nonJson = true;
+
+  while (nonJson) {
+    try {
+      json = JSON.parse(obj);
+      if (typeof json === "object" || typeof json === "array") {
+        nonJson = false;
+      } else {
+        obj = json;
+      }
+    } catch (e) {
+      json = obj;
+      nonJson = false;
+    }
   }
 
-  const url = `https://flickmetrix.com/api2/values/getFilms?amazonRegion=us&cast=&comboScoreMax=100&comboScoreMin=0&countryCode=us&criticRatingMax=100&criticRatingMin=0&criticReviewsMax=1000&criticReviewsMin=0&currentPage=0&deviceID=1&director=&format=movies&genreAND=false&imdbRatingMax=10&imdbRatingMin=0&imdbVotesMax=2800000&imdbVotesMin=0&inCinemas=true&includeDismissed=true&includeSeen=true&includeWantToWatch=true&isCastSearch=false&isDirectorSearch=false&isPersonSearch=false&language=all&letterboxdScoreMax=100&letterboxdScoreMin=0&letterboxdVotesMax=1200000&letterboxdVotesMin=0&metacriticRatingMax=100&metacriticRatingMin=0&metacriticReviewsMax=100&metacriticReviewsMin=0&onAmazonPrime=false&onAmazonVideo=false&onDVD=false&onNetflix=false&pageSize=20&path=/&person=&plot=&queryType=GetFilmsToSieve&searchTerm=${originalTitle}&sharedUser=&sortOrder=comboScoreDesc&title=&token=&watchedRating=0&writer=&yearMax=2023&yearMin=1900`;
+  return json;
+}
+
+async function useProxy(url, customProxy) {
   let responseJson = null;
 
+  const urlNetlifyProxy1 =
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:8888/.netlify/functions/cors/"
+      : "https://cinematicmatch.netlify.app/.netlify/functions/cors/";
+
+  const urlNetlifyProxy2 =
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:8888/.netlify/functions/cors-binary/"
+      : "https://cinematicmatch.netlify.app/.netlify/functions/cors-binary/";
+
   const proxyUrls = [
-    "https://cinematicmatch.netlify.app/.netlify/functions/cors/",
     "https://api.allorigins.win/get?url=",
     "https://thingproxy.freeboard.io/fetch/",
     "https://proxy.cors.sh/",
-    "https://cinematicmatch.netlify.app/.netlify/functions/cors-binary",
+    urlNetlifyProxy1,
+    urlNetlifyProxy2,
+    "https://cors-proxy-share-chi.vercel.app/api?url=",
+    "https://cors-proxy-share-2.vercel.app/api?url=",
+    "https://cors-proxy-share-3.vercel.app/api?url=",
   ];
 
-  for (const proxyUrl of proxyUrls) {
-    try {
-      const responseRating = await fetchPromise(
-        proxyUrl + encodeURIComponent(url)
-      );
+  const myServerProxy = [
+    "https://cors-proxy-share-chi.vercel.app/api?url=",
+    "https://cors-proxy-share-2.vercel.app/api?url=",
+    "https://cors-proxy-share-3.vercel.app/api?url=",
+    urlNetlifyProxy1,
+    urlNetlifyProxy2,
+  ];
 
-      if (responseRating) {
-        const json = responseRating?.contents
-          ? await JSON.parse(JSON.parse(responseRating.contents))
-          : await JSON.parse(responseRating);
+  const proxies = customProxy ? myServerProxy : proxyUrls;
+
+  for (const proxyUrl of proxies) {
+    try {
+      const resp = await fetchPromise(proxyUrl + encodeURIComponent(url));
+
+      if (resp) {
+        const json = resp?.contents
+          ? await convertJson(resp.contents)
+          : await convertJson(resp);
         responseJson = json;
 
         break;
@@ -55,6 +93,17 @@ export async function fetchRatingMovieById(id, originalTitle) {
       console.error(e);
     }
   }
+
+  return responseJson;
+}
+
+export async function fetchRatingMovieById(id, originalTitle) {
+  if (!originalTitle || !id) {
+    return null;
+  }
+
+  const url = `https://flickmetrix.com/api2/values/getFilms?amazonRegion=us&cast=&comboScoreMax=100&comboScoreMin=0&countryCode=us&criticRatingMax=100&criticRatingMin=0&criticReviewsMax=1000&criticReviewsMin=0&currentPage=0&deviceID=1&director=&format=movies&genreAND=false&imdbRatingMax=10&imdbRatingMin=0&imdbVotesMax=2800000&imdbVotesMin=0&inCinemas=true&includeDismissed=true&includeSeen=true&includeWantToWatch=true&isCastSearch=false&isDirectorSearch=false&isPersonSearch=false&language=all&letterboxdScoreMax=100&letterboxdScoreMin=0&letterboxdVotesMax=1200000&letterboxdVotesMin=0&metacriticRatingMax=100&metacriticRatingMin=0&metacriticReviewsMax=100&metacriticReviewsMin=0&onAmazonPrime=false&onAmazonVideo=false&onDVD=false&onNetflix=false&pageSize=20&path=/&person=&plot=&queryType=GetFilmsToSieve&searchTerm=${originalTitle}&sharedUser=&sortOrder=comboScoreDesc&title=&token=&watchedRating=0&writer=&yearMax=2023&yearMin=1900`;
+  const responseJson = await useProxy(url);
 
   if (responseJson === null) {
     return null;
@@ -371,6 +420,87 @@ export const genresList = [
     bg: "/images/genres/western.jpg",
   },
 ];
+
+export async function createFromattingMoviesData(data) {
+  const allPromises = data
+    .map((d) => {
+      const exist = d?.movie_data?.movie_title && d?.movie_data?.year_released;
+
+      if (exist) {
+        return fetchPromise(
+          `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&${CURRENT_LANGUAGE}&query=${encodeURI(
+            d?.movie_data?.movie_title
+          )}&primary_release_year=${d?.movie_data?.year_released}&page=1`
+        );
+      } else {
+        return null;
+      }
+    })
+    .filter((r) => Boolean(r));
+
+  const aggregationResources = await Promise.all(allPromises);
+
+  const results = aggregationResources
+    .map((r) => {
+      return r?.results?.[0] || null;
+    })
+    .filter((r) => Boolean(r));
+
+  return results;
+}
+export const poll = async ({ username, interval, maxAttempts }) => {
+  let attempts = 0;
+
+  const uriResult = await fetchLetterboxdRaccomendations(username);
+
+  console.log("uriResult", uriResult);
+
+  const executePoll = async (resolve, reject) => {
+    const result = await useProxy(uriResult, true);
+    attempts++;
+
+    const data = await convertJson(result);
+
+    console.log(attempts, data);
+
+    const notExistUserData =
+      data?.execution_data?.user_status === "user_not_found";
+
+    if (notExistUserData) {
+      return resolve(false);
+    }
+
+    const finished =
+      data?.statuses?.redis_build_model_job_status === "finished" &&
+      data?.statuses?.redis_get_user_data_job_status === "finished";
+
+    if (finished) {
+      return resolve(data);
+    } else if (maxAttempts && attempts === maxAttempts) {
+      return reject(new Error("Exceeded max attempts"));
+    } else {
+      setTimeout(executePoll, interval, resolve, reject);
+    }
+  };
+
+  return new Promise(executePoll);
+};
+
+export async function fetchLetterboxdRaccomendations(username) {
+  const uri = `https://letterboxd-recommendations.herokuapp.com/get_recs?username=${username}&popularity_filter=-1&training_data_size=40000&data_opt_in=false`;
+
+  const responseJson = await useProxy(uri, true);
+
+  if (!responseJson) {
+    return null;
+  }
+
+  const { redis_build_model_job_id, redis_get_user_data_job_id } = responseJson;
+
+  const uriResult = `https://letterboxd-recommendations.herokuapp.com/results?redis_get_user_data_job_id=${redis_get_user_data_job_id}&redis_build_model_job_id=${redis_build_model_job_id}`;
+
+  return uriResult;
+}
 
 export async function fetchTrending(type) {
   return fetchPromise(

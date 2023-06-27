@@ -10,6 +10,13 @@ import {
   MOVIE_PAGE_CARD_WIDTH_MOBILE,
 } from "../utils/constant";
 
+const transition = {
+  type: "spring",
+  damping: 15,
+  mass: 0.75,
+  stiffness: 100,
+};
+
 export default function RenderRow({
   itemData,
   typeView,
@@ -20,15 +27,7 @@ export default function RenderRow({
   if (typeView === "detail") {
     return (
       <Grid container sx={{ overflow: "hidden" }} gap={2}>
-        <AnimatePresence
-          mode={"popLayout"}
-          prop={{
-            popDuration: 0.2,
-            popSpringMass: 0.1,
-            popSpringStiffness: 20,
-            popSpringDamping: 20,
-          }}
-        >
+        <AnimatePresence>
           {itemData.map((movie, i) => (
             <Grid
               component={motion.div}
@@ -42,7 +41,7 @@ export default function RenderRow({
                 duration: 0.1,
               }}
               exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: "spring" }}
+              transition={transition}
               sx={{
                 paddingY: isDesktop ? 1.5 : 1,
                 paddingX: 1.5,
@@ -81,7 +80,7 @@ export default function RenderRow({
           paddingX: isDesktop ? 1 : 0.5,
         }}
       >
-        <AnimatePresence mode={"popLayout"}>
+        <AnimatePresence>
           {itemData.map((movie, i) => (
             <Grid
               component={motion.div}
@@ -98,7 +97,7 @@ export default function RenderRow({
                 duration: 0,
               }}
               exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: "spring" }}
+              transition={transition}
               sx={{
                 paddingY: isDesktop ? 1.5 : 1,
                 paddingX: isDesktop ? 1 : 0.5,

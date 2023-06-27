@@ -7,6 +7,7 @@ import NavigationMobile from "./NavigationMobile";
 import LiveTvIcon from "@mui/icons-material/LiveTv";
 import MovieIcon from "@mui/icons-material/Movie";
 import SearchIcon from "@mui/icons-material/Search";
+import Letterboxd from "./icons/Letterboxd";
 
 export const ICON_ROUTE = [
   {
@@ -23,6 +24,11 @@ export const ICON_ROUTE = [
     name: "Serie TV",
     icon: <LiveTvIcon />,
     path: "/showtv",
+  },
+  {
+    name: "Letterboxd Raccomandati",
+    icon: <Letterboxd />,
+    path: "/letterboxdraccomendations",
   },
 ];
 

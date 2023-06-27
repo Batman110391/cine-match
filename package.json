@@ -16,6 +16,7 @@
     "@mui/x-data-grid": "^6.5.0",
     "@mui/x-date-pickers": "^5.0.0",
     "@reduxjs/toolkit": "^1.9.3",
+    "@supabase/supabase-js": "^2.26.0",
     "dayjs": "^1.11.7",
     "framer-motion": "7.8.1",
     "lodash": "^4.17.21",
@@ -32,6 +33,7 @@
     "react-redux": "^8.0.5",
     "react-router-dom": "6.5.0",
     "react-share": "^4.4.1",
+    "react-virtuoso": "^4.3.11",
     "react-window": "^1.8.9",
     "swiper": "9.0.0"
   },
