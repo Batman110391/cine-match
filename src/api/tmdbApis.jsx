@@ -495,8 +495,6 @@ export const poll = async ({ username, interval, maxAttempts }) => {
 
     const data = await convertJson(result);
 
-    console.log(attempts, data);
-
     const notExistUserData =
       data?.execution_data?.user_status === "user_not_found";
 

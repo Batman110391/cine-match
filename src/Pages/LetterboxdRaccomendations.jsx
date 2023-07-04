@@ -4,6 +4,7 @@ import {
   Button,
   Divider,
   LinearProgress,
+  Skeleton,
   TextField,
   Typography,
   useMediaQuery,
@@ -32,7 +33,7 @@ const Row = React.memo(({ index, data }) => {
 
   const movie = movies[index];
   return (
-    <Box sx={{ py: 2 }}>
+    <Box sx={{ py: 2, display: "flex", justifyContent: "center" }}>
       <MovieCardDetail
         movie={movie}
         w={isDesktop ? MOVIE_PAGE_CARD_WIDTH : MOVIE_PAGE_CARD_WIDTH_MOBILE}
@@ -63,12 +64,10 @@ export default function LetterboxdRaccomendations() {
   React.useEffect(() => {
     (async () => {
       const data = await getDataByUsers("default");
-
       if (data.length > 0) {
         const parseJsonData = JSON.parse(data);
         setResult(parseJsonData);
       }
-
       setLoadingModel(false);
     })();
   }, []);
@@ -89,6 +88,7 @@ export default function LetterboxdRaccomendations() {
     const objectJson = {
       username: formattingUsername,
       movies: JSON.stringify(movies),
+      created_at: new Date(),
     };
 
     const { error } = await supabase.from("letterboxd-user").upsert(objectJson);
@@ -147,10 +147,6 @@ export default function LetterboxdRaccomendations() {
           // Replace task list with error message
           console.log("error", error);
           setLoadingModel(false);
-        })
-        .finally(() => {
-          // Re-enable submit button
-          console.log("finally");
         });
     }
   };
@@ -214,6 +210,51 @@ export default function LetterboxdRaccomendations() {
       {loadingModel && (
         <Box sx={{ width: "100%" }}>
           <LinearProgress />
+          {username && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 2,
+                mt: 4,
+              }}
+            >
+              <Typography variant="h6">
+                Caricamento modello dati per {username}
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: 0.5,
+                }}
+              >
+                <Skeleton
+                  variant="circular"
+                  animation="wave"
+                  width={8}
+                  height={8}
+                  sx={{ mt: 1 }}
+                />
+                <Skeleton
+                  variant="circular"
+                  animation="wave"
+                  width={8}
+                  height={8}
+                  sx={{ mt: 1 }}
+                />
+                <Skeleton
+                  variant="circular"
+                  animation="wave"
+                  width={8}
+                  height={8}
+                  sx={{ mt: 1 }}
+                />
+              </Box>
+            </Box>
+          )}
         </Box>
       )}
       {!loadingModel && result && result?.length > 0 ? (
