@@ -26,8 +26,8 @@ export const ICON_ROUTE = [
     path: "/showtv",
   },
   {
-    name: "Letterboxd Raccomandati",
-    icon: <Letterboxd />,
+    name: "Consigliati",
+    icon: <Letterboxd noMargin />,
     path: "/letterboxdraccomendations",
   },
 ];

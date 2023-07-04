@@ -10,6 +10,6 @@ function SvgLetterboxdIcon(props) {
   );
 }
 
-export default function Letterboxd() {
-  return <SvgLetterboxdIcon sx={{ color: orange[600], m: 1 }} />;
+export default function Letterboxd({ noMargin }) {
+  return <SvgLetterboxdIcon sx={{ color: orange[600], m: noMargin ? 0 : 1 }} />;
 }

@@ -14,6 +14,7 @@ export default function MovieCardDetail({
   h = 275,
   mediaType,
   onClick,
+  voteAverage,
 }) {
   const theme = useTheme();
 
@@ -22,6 +23,8 @@ export default function MovieCardDetail({
 
   const percentRating =
     movie?.vote_average && (movie?.vote_average.toFixed(1) * 100) / 10;
+
+  const predictRating = voteAverage && (voteAverage.toFixed(1) * 100) / 10;
 
   const currentGenresList = mediaType === "movie" ? genresList : genresListTv;
 
@@ -129,7 +132,7 @@ export default function MovieCardDetail({
       <Grid item xs={2}>
         <Stack flexDirection={"column"} gap={3} alignItems={"center"}>
           <CircularProgressWithLabel
-            to={percentRating}
+            to={predictRating || percentRating}
             size={useMediaQuery(theme.breakpoints.up("sm")) ? 55 : 35}
             labelSize={11}
             durationAnimate={0}

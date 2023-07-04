@@ -3,6 +3,7 @@ import isBetween from "dayjs/plugin/isBetween";
 import _ from "lodash";
 import { fetchPromise } from "../utils/fetchPromise";
 import { KEYWORDS_SEARCH_MOVIE } from "../utils/constant";
+import { uniqueArray } from "../utils/uniqueArray";
 dayjs.extend(isBetween);
 
 const API_KEY = import.meta.env.VITE_API_KEY;
@@ -422,38 +423,71 @@ export const genresList = [
 ];
 
 export async function createFromattingMoviesData(data) {
-  const allPromises = data
-    .map((d) => {
+  const batchSize = 50; // Numero di chiamate da eseguire contemporaneamente in ogni batch
+  const timeout = 1000; // Timeout in millisecondi tra i batch
+
+  const results = [];
+
+  for (let i = 0; i < data.length; i += batchSize) {
+    const batch = data.slice(i, i + batchSize);
+
+    const batchPromises = batch.map((d) => {
       const exist = d?.movie_data?.movie_title && d?.movie_data?.year_released;
 
       if (exist) {
         return fetchPromise(
           `https://api.themoviedb.org/3/search/movie?api_key=${API_KEY}&${CURRENT_LANGUAGE}&query=${encodeURI(
             d?.movie_data?.movie_title
-          )}&primary_release_year=${d?.movie_data?.year_released}&page=1`
-        );
+          )}&primary_release_year=${
+            d?.movie_data?.year_released
+          }&include_adult=true&page=1`
+        ).catch((error) => {
+          console.error(`Errore nella chiamata API: ${error}`);
+          return null; // Escludi la chiamata in caso di errore
+        });
       } else {
         return null;
       }
-    })
-    .filter((r) => Boolean(r));
+    });
 
-  const aggregationResources = await Promise.all(allPromises);
+    const batchResults = await Promise.allSettled(batchPromises);
 
-  const results = aggregationResources
-    .map((r) => {
-      return r?.results?.[0] || null;
-    })
-    .filter((r) => Boolean(r));
+    const orderedResults = batchResults
+      .map((result, index) => {
+        const movieData = batch[index]?.movie_data;
+        const predicted_rating = batch[index]?.predicted_rating;
+        if (
+          result.status === "fulfilled" &&
+          result.value &&
+          result.value.results &&
+          result.value.results[0]
+        ) {
+          return {
+            ...result?.value?.results?.[0],
+            movie_data: movieData,
+            predicted_rating,
+          };
+        } else {
+          return null;
+        }
+      })
+      .filter(Boolean);
 
-  return results;
+    results.push(...orderedResults);
+
+    await new Promise((resolve) => setTimeout(resolve, timeout));
+  }
+
+  const filteredResults = results.flatMap((r) => r).filter(Boolean);
+
+  const unique = uniqueArray(filteredResults);
+
+  return unique;
 }
 export const poll = async ({ username, interval, maxAttempts }) => {
   let attempts = 0;
 
   const uriResult = await fetchLetterboxdRaccomendations(username);
-
-  console.log("uriResult", uriResult);
 
   const executePoll = async (resolve, reject) => {
     const result = await useProxy(uriResult, true);
@@ -475,7 +509,7 @@ export const poll = async ({ username, interval, maxAttempts }) => {
       data?.statuses?.redis_get_user_data_job_status === "finished";
 
     if (finished) {
-      return resolve(data);
+      return resolve(data?.result);
     } else if (maxAttempts && attempts === maxAttempts) {
       return reject(new Error("Exceeded max attempts"));
     } else {
@@ -884,4 +918,25 @@ export async function fetchKeywords(page, querySearch) {
 
     return keywords;
   });
+}
+
+export function filterLetterboxdMovies(data, valueYear, genreId) {
+  try {
+    const newResultByYear = data.filter((movie) => {
+      const yearReleased = parseInt(movie?.release_date?.split("-")?.[0]);
+
+      return yearReleased >= valueYear[0] && yearReleased <= valueYear[1];
+    });
+
+    const newResultByGenre =
+      Array.isArray(genreId) && genreId.length > 0
+        ? newResultByYear.filter((movie) => {
+            return movie.genre_ids.some((id) => genreId.includes(id));
+          })
+        : newResultByYear;
+
+    return newResultByGenre;
+  } catch (err) {
+    return data;
+  }
 }
