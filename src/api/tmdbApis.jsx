@@ -4,6 +4,7 @@ import _ from "lodash";
 import { fetchPromise } from "../utils/fetchPromise";
 import { KEYWORDS_SEARCH_MOVIE } from "../utils/constant";
 import { uniqueArray } from "../utils/uniqueArray";
+import { supabase } from "../supabaseClient";
 dayjs.extend(isBetween);
 
 const API_KEY = import.meta.env.VITE_API_KEY;
@@ -103,35 +104,34 @@ export async function fetchRatingMovieById(id, originalTitle) {
     return null;
   }
 
-  const url = `https://flickmetrix.com/api2/values/getFilms?amazonRegion=us&cast=&comboScoreMax=100&comboScoreMin=0&countryCode=us&criticRatingMax=100&criticRatingMin=0&criticReviewsMax=1000&criticReviewsMin=0&currentPage=0&deviceID=1&director=&format=movies&genreAND=false&imdbRatingMax=10&imdbRatingMin=0&imdbVotesMax=2800000&imdbVotesMin=0&inCinemas=true&includeDismissed=true&includeSeen=true&includeWantToWatch=true&isCastSearch=false&isDirectorSearch=false&isPersonSearch=false&language=all&letterboxdScoreMax=100&letterboxdScoreMin=0&letterboxdVotesMax=1200000&letterboxdVotesMin=0&metacriticRatingMax=100&metacriticRatingMin=0&metacriticReviewsMax=100&metacriticReviewsMin=0&onAmazonPrime=false&onAmazonVideo=false&onDVD=false&onNetflix=false&pageSize=20&path=/&person=&plot=&queryType=GetFilmsToSieve&searchTerm=${originalTitle}&sharedUser=&sortOrder=comboScoreDesc&title=&token=&watchedRating=0&writer=&yearMax=2023&yearMin=1900`;
-  const responseJson = await useProxy(url);
-
-  if (responseJson === null) {
-    return null;
-  }
-
   try {
     const { imdb_id } = await fetchPromise(
       `https://api.themoviedb.org/3/movie/${id}/external_ids?api_key=${API_KEY}`
     );
 
-    const currentMovieRating = responseJson?.find(
-      (obj) => obj.imdbID === imdb_id
-    );
+    const { data, error } = await supabase
+      .from("flickmetrix-movies")
+      .select("detail")
+      .eq("imdbID", imdb_id);
+
+    if (error) {
+      return null;
+    }
 
     const convertPercent = (number) => (parseFloat(number) * 10) / 100;
 
     return {
+      awards: data?.[0]?.detail?.Awards,
       ratings: [
         {
           source: "Imdb",
-          value: currentMovieRating?.imdbRating || null,
-          count: currentMovieRating?.imdbVotes || 0,
+          value: data?.[0]?.detail?.imdbRating || null,
+          count: data?.[0]?.detail?.imdbVotes || 0,
         },
         {
           source: "Letterboxd",
-          value: convertPercent(currentMovieRating?.LetterboxdScore) || null,
-          count: currentMovieRating?.letterboxdVotes || 0,
+          value: convertPercent(data?.[0]?.detail?.LetterboxdScore) || null,
+          count: data?.[0]?.detail?.letterboxdVotes || 0,
         },
       ],
     };
@@ -937,4 +937,138 @@ export function filterLetterboxdMovies(data, valueYear, genreId) {
   } catch (err) {
     return data;
   }
+}
+
+export async function updateMovies() {
+  const currentYear = new Date().getFullYear();
+
+  try {
+    const result = await fetchAllFlickMetrixMovies(currentYear);
+
+    const moviesTable = supabase.from("flickmetrix-movies");
+
+    if (Array.isArray(result)) {
+      const createObjectInsert = result
+        .map((movie) => {
+          if (!movie?.ID || !movie.imdbID) return null;
+          return {
+            id: movie?.ID,
+            imdbID: movie?.imdbID,
+            year: movie?.Year,
+            title: movie.Title,
+            ratingLetterboxd: movie?.LetterboxdScore,
+            ratingImdb: movie?.imdbRating,
+            detail: movie,
+          };
+        })
+        .filter(Boolean);
+
+      const { error } = await moviesTable.upsert(createObjectInsert, {
+        ignoreDuplicates: true,
+      });
+      if (error) {
+        console.error(error);
+      } else {
+        console.log("Data saved successfully!");
+      }
+    } else {
+      console.log("No movies found!");
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+async function fetchAllFlickMetrixMovies(year) {
+  const pageSize = 1000; // defaults to 20
+  let movies = [];
+  let page = 0;
+
+  do {
+    try {
+      console.warn(`flickmetrix fetching page ${page}`);
+      const res = await fetchFlickMetrixMovies({ page, pageSize, year });
+      console.warn(`flickmetrix received page ${page} => ${res.length} movies`);
+      if (!res.length) {
+        break;
+      }
+
+      movies = movies.concat(res);
+    } catch (err) {
+      console.error("flickmetrix error", err.toString());
+      break;
+    }
+
+    ++page;
+  } while (true);
+
+  return movies;
+}
+
+async function fetchFlickMetrixMovies({ page = 0, pageSize = 20, year }) {
+  const currentPage = page;
+
+  const searchParams = new URLSearchParams({
+    amazonRegion: "us",
+    cast: "",
+    comboScoreMax: "100",
+    comboScoreMin: "0",
+    countryCode: "it",
+    criticRatingMax: "100",
+    criticRatingMin: "0",
+    criticReviewsMax: "100000",
+    criticReviewsMin: "0",
+    currentPage: `${currentPage}`,
+    deviceID: "1",
+    director: "",
+    format: "movies",
+    genreAND: "false",
+    imdbRatingMax: "10",
+    imdbRatingMin: "0",
+    imdbVotesMax: "10000000",
+    imdbVotesMin: "0",
+    inCinemas: "true",
+    includeDismissed: "false",
+    includeSeen: "false",
+    includeWantToWatch: "true",
+    isCastSearch: "false",
+    isDirectorSearch: "false",
+    isPersonSearch: "false",
+    language: "all",
+    letterboxdScoreMax: "100",
+    letterboxdScoreMin: "0",
+    letterboxdVotesMax: "1200000",
+    letterboxdVotesMin: "0",
+    metacriticRatingMax: "100",
+    metacriticRatingMin: "0",
+    metacriticReviewsMax: "100",
+    metacriticReviewsMin: "0",
+    onAmazonPrime: "false",
+    onAmazonVideo: "false",
+    onDVD: "false",
+    onNetflix: "false",
+    pageSize: `${pageSize}`,
+    path: "/",
+    person: "",
+    plot: "",
+    queryType: "GetFilmsToSieve",
+    searchTerm: "",
+    sharedUser: "",
+    sortOrder: "comboScoreDesc",
+    title: "",
+    token: "",
+    watchedRating: "0",
+    writer: "",
+    yearMax: year,
+    yearMin: year,
+  });
+
+  const url = `https://flickmetrix.com/api2/values/getFilms?${searchParams.toString()}`;
+  const res = await useProxy(url, true);
+
+  if (res) {
+    return res;
+  }
+
+  return [];
 }

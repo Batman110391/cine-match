@@ -8,7 +8,6 @@ exports.handler = async (event, context) => {
   for (let i in event.queryStringParameters) {
     url.searchParams.append(i, event.queryStringParameters[i]);
   }
-  console.log(url.href);
   var cookie_string = event.headers.cookie || "";
   var useragent = event.headers["user-agent"] || "";
 

@@ -93,7 +93,9 @@ export default function LetterboxdRaccomendations() {
 
     const { error } = await supabase.from("letterboxd-user").upsert(objectJson);
 
-    console.log(error);
+    if (error) {
+      console.error(error);
+    }
   };
 
   const getDataByUsers = async (defaultUsername) => {
@@ -104,6 +106,10 @@ export default function LetterboxdRaccomendations() {
 
     if (error) {
       return null;
+    }
+
+    if (defaultUsername === "default") {
+      return data?.[0]?.movies || [];
     }
 
     const currentDate = Date.now();
@@ -145,7 +151,7 @@ export default function LetterboxdRaccomendations() {
         })
         .catch((error) => {
           // Replace task list with error message
-          console.log("error", error);
+          console.error("error", error);
           setLoadingModel(false);
         });
     }

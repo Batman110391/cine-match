@@ -8,6 +8,8 @@ import { routes } from "./routes";
 import { setQuery } from "./store/movieQuery";
 import ErrorBoundary from "./utils/ErrorBoundary";
 import { useSessionStorage } from "./utils/useSessionStorage";
+import { updateMovies } from "./api/tmdbApis";
+import { supabase } from "./supabaseClient";
 
 export default function App() {
   const { pathname } = useLocation();
@@ -23,10 +25,71 @@ export default function App() {
     initialStateStore
   );
 
+  const fetchLastExecutionDate = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("execution-dates")
+        .select("date")
+        .eq("id", 1);
+
+      if (error) {
+        console.error(
+          "Errore durante il recupero della data dell'ultima esecuzione:",
+          error
+        );
+        return;
+      }
+
+      if (data.length > 0) {
+        const currentDate = Date.now();
+        const executionAt = new Date(data[0].date).getTime();
+        const differenceInDays = Math.floor(
+          (currentDate - executionAt) / (24 * 60 * 60 * 1000)
+        );
+
+        if (differenceInDays > 1) {
+          await updateMovies();
+          const { error } = await supabase
+            .from("execution-dates")
+            .upsert([{ id: 1, date: currentDate }]);
+
+          if (error) {
+            console.error(
+              "Errore durante l'aggiornamento della data dell'ultima esecuzione:",
+              error
+            );
+            return;
+          }
+        }
+      } else {
+        await updateMovies();
+        const currentDate = Date.now();
+        const { error } = await supabase
+          .from("execution-dates")
+          .upsert([{ id: 1, date: currentDate }]);
+
+        if (error) {
+          console.error(
+            "Errore durante l'aggiornamento della data dell'ultima esecuzione:",
+            error
+          );
+          return;
+        }
+      }
+    } catch (error) {
+      console.error(
+        "Errore durante il recupero della data dell'ultima esecuzione:",
+        error
+      );
+    }
+  };
+
   useEffect(() => {
     if (configCineMatch) {
       dispatch(setQuery(configCineMatch));
     }
+
+    fetchLastExecutionDate();
 
     setInitialLoading(false);
   }, []);
