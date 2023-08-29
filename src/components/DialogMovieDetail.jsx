@@ -41,6 +41,7 @@ import SpeedDialShare from "./SpeedDialShare";
 import SubHeader from "./SubHeader";
 import Tmdb from "./icons/Tmdb";
 import RatingsWorld from "./RatingsWorld";
+import ListNewsMovie from "./ListNewsMovie";
 
 const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
@@ -478,6 +479,15 @@ export default function DialogMovieDetail({
                       />
                     </SubHeader>
                   </Grid>
+                  {detail?.news &&
+                    Array.isArray(detail?.news) &&
+                    detail?.news?.length > 0 && (
+                      <Grid item xs={12}>
+                        <SubHeader title={"News"}>
+                          <ListNewsMovie news={detail?.news} />
+                        </SubHeader>
+                      </Grid>
+                    )}
                   {detail?.images?.backdrops &&
                     detail?.images?.backdrops?.filter((ele) => !ele?.iso_639_1)
                       .length > 0 && (

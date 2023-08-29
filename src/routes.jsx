@@ -3,6 +3,7 @@ import React from "react";
 import SearchPage from "./Pages/SearchPage";
 import MoviesAndTvPages from "./Pages/MoviesAndTvPages";
 import LetterboxdRaccomendations from "./Pages/LetterboxdRaccomendations";
+import NewsMovie from "./Pages/NewsMovie";
 
 export const routes = [
   {
@@ -30,5 +31,11 @@ export const routes = [
     key: "letterboxdraccomendations",
     route: "/letterboxdraccomendations",
     component: <LetterboxdRaccomendations />,
+  },
+  {
+    name: "NewsMovie",
+    key: "newsmovie",
+    route: "/newsmovie/:newsID?/:type?",
+    component: <NewsMovie />,
   },
 ];

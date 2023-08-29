@@ -8,6 +8,7 @@ import LiveTvIcon from "@mui/icons-material/LiveTv";
 import MovieIcon from "@mui/icons-material/Movie";
 import SearchIcon from "@mui/icons-material/Search";
 import Letterboxd from "./icons/Letterboxd";
+import NewspaperIcon from "@mui/icons-material/Newspaper";
 
 export const ICON_ROUTE = [
   {
@@ -25,11 +26,16 @@ export const ICON_ROUTE = [
     icon: <LiveTvIcon />,
     path: "/showtv",
   },
-  {
-    name: "Consigliati",
-    icon: <Letterboxd noMargin />,
-    path: "/letterboxdraccomendations",
-  },
+  // {
+  //   name: "News",
+  //   icon: <NewspaperIcon />,
+  //   path: "/newsmovie",
+  // },
+  // {
+  //   name: "Consigliati",
+  //   icon: <Letterboxd noMargin />,
+  //   path: "/letterboxdraccomendations",
+  // },
 ];
 
 export default function Navigation({ children }) {

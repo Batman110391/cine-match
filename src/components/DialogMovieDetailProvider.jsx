@@ -1,6 +1,7 @@
 import React from "react";
 import DialogMovieDetail from "./DialogMovieDetail";
 import DialogPersonDetail from "./DialogPersonDetail";
+import DialogNewsDetail from "./DialogNewsDetail";
 
 export const DialogMovieDetailContext = React.createContext({});
 
@@ -19,6 +20,9 @@ export default function DialogMovieDetailProvider({ children }) {
   const [openPersonDialogSub, setOpenPersonDialogSub] = React.useState(false);
   const [personIDSub, setPersonIDSub] = React.useState(null);
 
+  const [openNewsDialog, setOpenNewsDialog] = React.useState(false);
+  const [newsID, setNewsID] = React.useState(null);
+
   const contextValue = React.useMemo(
     () => ({
       openDialogMovieDetail(movieID, type) {
@@ -29,6 +33,10 @@ export default function DialogMovieDetailProvider({ children }) {
       openDialogPersonDetail(personID) {
         setOpenPersonDialog(true);
         setPersonID(personID);
+      },
+      openDialogNewsDetail(newsID) {
+        setOpenNewsDialog(true);
+        setNewsID(newsID);
       },
     }),
     []
@@ -72,6 +80,11 @@ export default function DialogMovieDetailProvider({ children }) {
     setPersonIDSub(personID);
   };
 
+  const handleCloseDialog = () => {
+    setOpenNewsDialog(false);
+    setNewsID(null);
+  };
+
   return (
     <React.Fragment>
       <DialogMovieDetailContext.Provider value={contextValue}>
@@ -113,6 +126,14 @@ export default function DialogMovieDetailProvider({ children }) {
           handleClose={handleClosePersonDialogSub}
           personID={personIDSub}
           subItemClick={handleClickSubItem}
+        />
+      )}
+
+      {newsID && (
+        <DialogNewsDetail
+          open={openNewsDialog}
+          onClose={handleCloseDialog}
+          newsID={newsID}
         />
       )}
     </React.Fragment>

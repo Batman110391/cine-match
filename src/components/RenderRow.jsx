@@ -9,6 +9,7 @@ import {
   MOVIE_PAGE_CARD_WIDTH,
   MOVIE_PAGE_CARD_WIDTH_MOBILE,
 } from "../utils/constant";
+import NewsCard from "./NewsCard";
 
 const transition = {
   type: "spring",
@@ -24,7 +25,44 @@ export default function RenderRow({
   isDesktop,
   mediaType,
 }) {
-  if (typeView === "detail") {
+  if (typeView === "news") {
+    return (
+      <Grid container sx={{ overflow: "hidden" }} gap={2}>
+        <AnimatePresence>
+          {itemData.map((news, i) => (
+            <Grid
+              component={motion.div}
+              key={news.articleID}
+              xs={12}
+              layout={"preserve-aspect"}
+              animate={{ scale: 1, opacity: 1 }}
+              initial={{
+                scale: 0.9,
+                opacity: 0,
+                duration: 0.1,
+              }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={transition}
+              sx={{
+                paddingY: isDesktop ? 1.5 : 1,
+                paddingX: 1.5,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <NewsCard
+                news={news}
+                w={isDesktop ? 250 : 125}
+                h={isDesktop ? 180 : 155}
+                onClick={() => handleClickItem(news.ID)}
+              />
+            </Grid>
+          ))}
+        </AnimatePresence>
+      </Grid>
+    );
+  } else if (typeView === "detail") {
     return (
       <Grid container sx={{ overflow: "hidden" }} gap={2}>
         <AnimatePresence>

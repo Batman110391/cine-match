@@ -422,6 +422,69 @@ export const genresList = [
   },
 ];
 
+export async function fetchNewsMovie(page, searchInput) {
+  const range = { start: (page - 1) * 50, end: page * 50 - 1 };
+
+  if (searchInput) {
+    const formattingSearchInput = searchInput
+      ?.split(" ")
+      ?.map((ele) => `%${ele}%`)
+      ?.join(" ");
+
+    const { data, error } = await supabase
+      .from("articles")
+      .select("*")
+      .ilike("articleTitle", formattingSearchInput)
+      .range(range.start, range.end);
+
+    if (error) {
+      return null;
+    }
+
+    const hasNext = data.length >= 50;
+
+    const news = {
+      results: data,
+      nextPage: hasNext ? page + 1 : undefined,
+      previousPage: page > 1 ? page - 1 : undefined,
+    };
+
+    return news || [];
+  }
+
+  const { data, error } = await supabase
+    .from("articles")
+    .select("*")
+    .range(range.start, range.end);
+
+  if (error) {
+    return null;
+  }
+
+  const hasNext = data.length >= 50;
+
+  const news = {
+    results: data,
+    nextPage: hasNext ? page + 1 : undefined,
+    previousPage: page > 1 ? page - 1 : undefined,
+  };
+
+  return news || [];
+}
+
+export async function fetchDetailNewsById(newsID) {
+  const { data, error } = await supabase
+    .from("articles")
+    .select("*")
+    .eq("ID", newsID);
+
+  if (error) {
+    return null;
+  }
+
+  return data?.[0];
+}
+
 export async function createFromattingMoviesData(data) {
   const batchSize = 50; // Numero di chiamate da eseguire contemporaneamente in ogni batch
   const timeout = 1000; // Timeout in millisecondi tra i batch
@@ -839,10 +902,14 @@ export async function fetchDetailMovieById(id, type, originalTitle) {
         resource,
       ])
     );
+    const news = data?.original_title
+      ? await fetchNewsMovie(1, data?.original_title)
+      : null;
 
     if (resources.videos?.results?.length > 0) {
       return {
         ...data,
+        news: news ? news?.results : null,
         credits: resources.credits,
         videos: resources.videos,
         images: resources.images,

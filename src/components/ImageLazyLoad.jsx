@@ -1,21 +1,32 @@
 import React from "react";
 
-function srcset(image, resolution) {
+function srcset(image, resolution, px, quality) {
+  if (typeof resolution === "function") {
+    return {
+      src: resolution(image, px, quality),
+    };
+  }
+
   return {
     src: `http://image.tmdb.org/t/p/${resolution}/${image}`,
   };
 }
 
 export default function ImageLazyLoad({
-  url,
+  url = "",
   w,
   h,
   resolution,
+  px,
+  quality,
   styles,
+  defaultDomain = "http://image.tmdb.org/t/p/w92/",
   ...rest
 }) {
+  const defaultSrc = defaultDomain + url;
+
   const [defaultLoadingImage, setDefaultLoadingImage] = React.useState({
-    backgroundImage: `url(http://image.tmdb.org/t/p/w92/${url})`,
+    backgroundImage: `url(${defaultSrc})`,
     backgroundRepeat: "no-repeat",
     backgroundSize: "cover",
     filter: "blur(10px)",
@@ -27,7 +38,7 @@ export default function ImageLazyLoad({
 
   const handleImageLoad = () => {
     setDefaultLoadingImage({
-      backgroundImage: `url(http://image.tmdb.org/t/p/w92/${url})`,
+      backgroundImage: `url(${defaultSrc})`,
       backgroundRepeat: "no-repeat",
       backgroundSize: "cover",
       opacity: 1,
@@ -48,8 +59,8 @@ export default function ImageLazyLoad({
           objectFit: "cover",
           ...styles,
         }}
-        {...srcset(url, resolution)}
-        alt={`image-${url}`}
+        {...srcset(url || defaultSrc, resolution, px, quality)}
+        alt={`image-${url || defaultSrc}`}
         onLoad={handleImageLoad}
         loading="lazy"
         {...rest}

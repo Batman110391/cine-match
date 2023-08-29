@@ -15,7 +15,8 @@ export default function SpeedDialShare({ movieID, type, title }) {
   const whatsAppButtonRef = React.useRef(null);
   const emailShareButtonRef = React.useRef(null);
 
-  const currentPath = type === "movie" ? "movies" : "showtv";
+  const currentPath =
+    type === "movie" ? "movies" : type === "news" ? "newsmovie" : "showtv";
 
   const currentUrl = `${window.location.origin}/${currentPath}/${movieID}/${type}`;
   const titleShare = `Cinematch: ${title}`;
