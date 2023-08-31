@@ -902,9 +902,10 @@ export async function fetchDetailMovieById(id, type, originalTitle) {
         resource,
       ])
     );
-    const news = data?.original_title
-      ? await fetchNewsMovie(1, data?.original_title)
-      : null;
+    // const news = data?.original_title
+    //   ? await fetchNewsMovie(1, data?.original_title)
+    //   : null;
+    const news = null;
 
     if (resources.videos?.results?.length > 0) {
       return {
