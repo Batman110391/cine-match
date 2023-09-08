@@ -41,8 +41,11 @@ export default function App() {
       }
 
       if (data.length > 0) {
+        const timestampStr = data[0].date;
+        const timestamp = parseInt(timestampStr, 10);
+
         const currentDate = Date.now();
-        const executionAt = new Date(data[0].date).getTime();
+        const executionAt = new Date(timestamp).getTime();
         const differenceInDays = Math.floor(
           (currentDate - executionAt) / (24 * 60 * 60 * 1000)
         );
