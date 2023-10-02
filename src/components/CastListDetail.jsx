@@ -138,6 +138,7 @@ export default function CastListDetail({
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
+              cursor: "pointer",
             }}
             onClick={handleClickViewAll}
           >

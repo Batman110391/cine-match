@@ -1,13 +1,16 @@
 import { useTheme } from "@emotion/react";
 import CloseIcon from "@mui/icons-material/Close";
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
-import { Skeleton, useMediaQuery } from "@mui/material";
+import { Box, Skeleton, Typography, useMediaQuery } from "@mui/material";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import IconButton from "@mui/material/IconButton";
 import ImageList from "@mui/material/ImageList";
 import ImageListItem from "@mui/material/ImageListItem";
 import * as React from "react";
+import KeyboardDoubleArrowDownIcon from "@mui/icons-material/KeyboardDoubleArrowDown";
+import KeyboardDoubleArrowUp from "@mui/icons-material/KeyboardDoubleArrowUp";
+import { MAX_IMAGE_VISUALIZATION } from "../utils/constant";
 
 function srcset(image) {
   return {
@@ -18,10 +21,11 @@ function srcset(image) {
 export default function ListImagesMovie({ images }) {
   const theme = useTheme();
 
-  const itemData = images?.filter((ele) => !ele?.iso_639_1);
-
   const [loadedImages, setLoadedImages] = React.useState([]);
   const [selectedImage, setSelectedImage] = React.useState(null);
+  const [maxImageRow, setMaxImageRow] = React.useState(MAX_IMAGE_VISUALIZATION);
+
+  const itemData = images?.filter((ele) => !ele?.iso_639_1);
 
   const handleImageLoad = (index) => {
     setLoadedImages((prevLoadedImages) => [...prevLoadedImages, index]);
@@ -39,20 +43,30 @@ export default function ListImagesMovie({ images }) {
     setSelectedImage(null);
   };
 
+  const handleClickViewAll = () => {
+    setMaxImageRow(itemData.length);
+  };
+
+  const handleClickHiddenView = () => {
+    setMaxImageRow(MAX_IMAGE_VISUALIZATION);
+  };
+
+  const filterImageVisualizations = itemData?.slice(0, maxImageRow) || [];
+
   return (
     <>
       <ImageList
         variant="quilted"
         sx={{
           width: "100%",
-          height: 450,
+          height: "100%",
           transform: "translateZ(0)",
         }}
         rowHeight={200}
         cols={useMediaQuery(theme.breakpoints.up("sm")) ? 4 : 1}
         gap={4}
       >
-        {itemData.map((item, i) => {
+        {filterImageVisualizations.map((item, i) => {
           const featured = i === 0 || i % 3 === 0;
           const cols = featured ? 2 : 1;
           const rows = featured ? 2 : 1;
@@ -78,6 +92,44 @@ export default function ListImagesMovie({ images }) {
           );
         })}
       </ImageList>
+      {itemData.length > MAX_IMAGE_VISUALIZATION &&
+      filterImageVisualizations.length !== itemData.length ? (
+        <Box
+          sx={{
+            paddingTop: 2,
+            gap: 1.5,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            cursor: "pointer",
+          }}
+          onClick={handleClickViewAll}
+        >
+          <Typography sx={{ fontSize: "0.6rem" }} variant={"button"}>
+            {"Visualizza altro"}
+          </Typography>
+
+          <KeyboardDoubleArrowDownIcon fontSize="small" />
+        </Box>
+      ) : itemData.length > MAX_IMAGE_VISUALIZATION ? (
+        <Box
+          sx={{
+            paddingTop: 2,
+            gap: 1.5,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            cursor: "pointer",
+          }}
+          onClick={handleClickHiddenView}
+        >
+          <Typography sx={{ fontSize: "0.6rem" }} variant={"button"}>
+            {"Visualizza meno"}
+          </Typography>
+
+          <KeyboardDoubleArrowUp fontSize="small" />
+        </Box>
+      ) : null}
       <Dialog open={selectedImage !== null} onClose={handleClose}>
         <IconButton
           sx={{

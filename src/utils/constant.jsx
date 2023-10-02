@@ -29,6 +29,8 @@ export const MINI_MOVIE_CARD_HEIGTH = 85;
 
 export const MAX_CAST_VISUALIZATION = 4;
 
+export const MAX_IMAGE_VISUALIZATION = 6;
+
 export const KEYWORDS_SEARCH_MOVIE = [
   {
     label: "Film Fantascientifici",

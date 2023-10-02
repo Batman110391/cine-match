@@ -188,6 +188,7 @@ const getUrlMoviesWithCustomParams = ({
 
   if (providers) {
     url.searchParams.set("with_ott_providers", providers);
+    url.searchParams.set("watch_region", "IT");
   }
 
   if (with_release_type) {

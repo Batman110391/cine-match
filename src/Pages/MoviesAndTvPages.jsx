@@ -99,11 +99,11 @@ export default function MoviesAndTvPages({ typeSearch }) {
       const { clientHeight, scrollHeight } = scrollContainerRef.current;
       const isScrollable = scrollHeight > clientHeight;
 
-      if (!isScrollable && hasNextPage && !status === "loading") {
+      if (!isScrollable && hasNextPage && status !== "loading") {
         fetchNextPageCallback();
       }
     }
-  }, [scrollContainerRef.current, hasNextPage, fetchNextPageCallback]);
+  }, [scrollContainerRef.current, hasNextPage, fetchNextPageCallback, status]);
 
   if (status === "loading") return <LoadingPage />;
   if (status === "error") return <h1>{JSON.stringify(error)}</h1>;
