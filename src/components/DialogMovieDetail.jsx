@@ -164,7 +164,7 @@ export default function DialogMovieDetail({
                   <YouTubePlayer
                     controls={true}
                     loop
-                    muted={false}
+                    muted={true}
                     playing={true}
                     width="100%"
                     height="100%"

@@ -1141,3 +1141,41 @@ async function fetchFlickMetrixMovies({ page = 0, pageSize = 20, year }) {
 
   return [];
 }
+
+export async function fetchTrailersMovies() {
+  const baseUrl = "https://api.themoviedb.org/3";
+  const trendingMoviesUrl = `${baseUrl}/trending/movie/day?api_key=${API_KEY}&${CURRENT_LANGUAGE}`;
+
+  try {
+    const response = await fetchPromise(trendingMoviesUrl);
+    const trendingMovies = response.results;
+
+    const trailerPromises = trendingMovies?.map(async (movie) => {
+      const videosUrl = `${baseUrl}/movie/${movie.id}/videos?api_key=${API_KEY}&${CURRENT_LANGUAGE}`;
+      const videoResponse = await fetchPromise(videosUrl);
+      const trailers = videoResponse.results;
+
+      const italianTrailers = trailers.filter(
+        (trailer) => trailer.iso_639_1 === "it"
+      );
+
+      if (italianTrailers.length > 0) {
+        return {
+          movie,
+          ytID: italianTrailers?.[0]?.key,
+        };
+      } else {
+        return null;
+      }
+    });
+    const trailerResults = await Promise.all(trailerPromises);
+
+    const moviesWithItalianTrailers = trailerResults.filter(
+      (result) => result !== null
+    );
+
+    return moviesWithItalianTrailers;
+  } catch (error) {
+    console.error("Errore nella richiesta:", error);
+  }
+}

@@ -4,6 +4,7 @@ import SearchPage from "./Pages/SearchPage";
 import MoviesAndTvPages from "./Pages/MoviesAndTvPages";
 import LetterboxdRaccomendations from "./Pages/LetterboxdRaccomendations";
 import NewsMovie from "./Pages/NewsMovie";
+import TrailersMoviesPage from "./Pages/TrailersMoviesPage";
 
 export const routes = [
   {
@@ -25,6 +26,12 @@ export const routes = [
     route: "/showtv/:movieID?/:type?",
     exact: false,
     component: <MoviesAndTvPages typeSearch={"tv"} />,
+  },
+  {
+    name: "trailerMovies",
+    key: "trailermovies",
+    route: "/trailerMovies",
+    component: <TrailersMoviesPage />,
   },
   {
     name: "LetterboxdRaccomendations",
