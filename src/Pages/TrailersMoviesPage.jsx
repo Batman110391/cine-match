@@ -1,31 +1,46 @@
 import { useTheme } from "@emotion/react";
-import React, { useRef, useState } from "react";
+import {
+  Box,
+  IconButton,
+  Slider,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
+import React, {
+  Fragment,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import YouTubePlayer from "react-player/youtube";
-import { useInfiniteQuery, useQuery } from "react-query";
+import { useInfiniteQuery } from "react-query";
 import { Mousewheel, Virtual } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { fetchTrailersMovies } from "../api/tmdbApis";
-import { Box, IconButton, Slider, useMediaQuery } from "@mui/material";
 import LoadingPage from "../components/LoadingPage";
 
-// Import Swiper styles
 import "swiper/css";
 import "swiper/css/virtual";
-//import "swiper/css/mousewheel";
 
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
-import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setQuery } from "../store/movieQuery";
 
 export default function TrailersMoviesPage() {
   const videoRefs = useRef([]);
   const theme = useTheme();
+  const dispatch = useDispatch();
 
   const [currentVideoPos, setCurrentVideoPos] = useState(0);
   const [muted, setMuted] = useState(true);
   const [isPause, setIsPause] = useState(false);
-  const [firstRender, setFirstRender] = useState(true);
+
+  const currentPage = useSelector(
+    (state) => state.movieQuery.showTrailerCurrentPage
+  );
 
   const {
     status,
@@ -38,7 +53,10 @@ export default function TrailersMoviesPage() {
   } = useInfiniteQuery({
     queryKey: ["trailerMovies"],
     getNextPageParam: (prevData) => prevData.nextPage,
-    queryFn: ({ pageParam = 1 }) => fetchTrailersMovies(pageParam),
+    queryFn: ({ pageParam = currentPage + 1 }) => {
+      dispatch(setQuery({ showTrailerCurrentPage: pageParam }));
+      return fetchTrailersMovies(pageParam);
+    },
   });
 
   const trailers = data?.pages
@@ -53,13 +71,10 @@ export default function TrailersMoviesPage() {
     }, {});
 
   const optionsMobileSwiper = {
-    // resistance: false,
-    // resistanceRatio: 6,
     modules: [Virtual],
   };
 
   const optionsDesktopSwiper = {
-    cssMode: true,
     mousewheel: true,
     modules: [Mousewheel, Virtual],
   };
@@ -70,7 +85,6 @@ export default function TrailersMoviesPage() {
     // if (videoRefs.current.length === trailers?.results?.length) {
     //   setFirstRender(false);
     // }
-
     if (index !== currentVideoPos) {
       ref.seekTo(0.5, "second");
     }
@@ -82,16 +96,18 @@ export default function TrailersMoviesPage() {
     // videoRefs.current[prevVideo].seekTo(0.5, "second");
     const currentVideoPos = info.activeIndex;
 
+    setCurrentVideoPos(currentVideoPos);
+    setIsPause(false);
+
     if (trailers?.results?.length - currentVideoPos <= 5 && hasNextPage) {
       fetchNextPage();
     }
-
-    setCurrentVideoPos(currentVideoPos);
-    setIsPause(false);
   };
 
   if (status === "loading") return <LoadingPage />;
   if (status === "error") return <h1>{JSON.stringify(error)}</h1>;
+
+  console.log("trailers", trailers?.results);
 
   return (
     <Box
@@ -99,7 +115,8 @@ export default function TrailersMoviesPage() {
         height: "100%",
         width: "100%",
         position: "relative",
-        paddingBottom: isDesktop ? "40px" : 0,
+        paddingBottom: isDesktop ? "25px" : 0,
+        paddingTop: isDesktop ? "5px" : 0,
       }}
     >
       <Swiper
@@ -108,10 +125,12 @@ export default function TrailersMoviesPage() {
           height: "100%",
         }}
         direction={"vertical"}
-        spaceBetween={3}
+        spaceBetween={5}
         {...(isDesktop ? optionsDesktopSwiper : optionsMobileSwiper)}
         onSlideChange={handleSlideChange}
-        noSwipingClass=".slider-custom-player"
+        noSwipingClass={isDesktop ? "slider-custom-player" : null}
+        resistance={false}
+        resistanceRatio={9}
         virtual={{
           //enabled: true,
           addSlidesBefore: 5,
@@ -130,15 +149,20 @@ export default function TrailersMoviesPage() {
                 <VideoWrapper
                   key={index}
                   ytID={video.ytID}
-                  autoPlay={false}
+                  movie={video.movie}
                   muted={muted}
                   index={index}
-                  isCurrentVideo={index === currentVideoPos}
+                  play={
+                    index === currentVideoPos ||
+                    index - 1 === currentVideoPos ||
+                    index + 1 === currentVideoPos
+                  }
                   setMuted={setMuted}
                   setVideoRef={handleVideoRef(index)}
                   isDesktop={isDesktop}
                   isPause={isPause}
                   setIsPause={setIsPause}
+                  currentVideoPos={currentVideoPos}
                 />
               </SwiperSlide>
             );
@@ -150,21 +174,23 @@ export default function TrailersMoviesPage() {
 
 function VideoWrapper({
   ytID,
-  autoPlay,
+  movie,
   muted,
   index,
-  isCurrentVideo,
+  play,
   setMuted,
   setVideoRef,
   isDesktop,
   setIsPause,
   isPause,
+  currentVideoPos,
 }) {
   const ytRef = useRef(null);
   const [stateProgress, setStateProgress] = useState({
     duration: 0,
     playedSeconds: 0,
   });
+  const [isReady, setIsReady] = useState(false);
 
   const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
@@ -176,12 +202,15 @@ function VideoWrapper({
   };
 
   const seekHandler = (value) => {
-    console.log("valuew", value);
     setStateProgress({
       ...stateProgress,
       playedSeconds: value,
     });
     ytRef.current.seekTo(value, "second");
+  };
+
+  const handleReadyPlayer = () => {
+    setIsReady(true);
   };
 
   return (
@@ -201,6 +230,19 @@ function VideoWrapper({
         },
       }}
     >
+      <Typography
+        variant="h6"
+        sx={{
+          position: "absolute",
+          zIndex: 1001,
+          top: 0,
+          left: 5,
+          p: 0,
+          m: 0,
+        }}
+      >
+        {movie?.title}
+      </Typography>
       <YouTubePlayer
         ref={(ref) => {
           ytRef.current = ref;
@@ -211,19 +253,15 @@ function VideoWrapper({
         controls={false}
         loop
         muted={muted}
-        playing={isCurrentVideo ? true : autoPlay}
+        playing={play}
         width="100%"
         height="100%"
         playsinline
         url={`${YOUTUBE_URL}${ytID || "L3oOldViIgY"}`}
-        config={{
-          youtube: {
-            playerVars: { modestbranding: 1 },
-          },
-        }}
         style={{
           pointerEvents: "none",
         }}
+        onReady={handleReadyPlayer}
         onProgress={handleProgress}
         onDuration={handleDuration}
       />
@@ -237,6 +275,7 @@ function VideoWrapper({
         isDesktop={isDesktop}
         stateProgress={stateProgress}
         seekHandler={seekHandler}
+        isReady={isReady}
       />
     </Box>
   );
@@ -251,6 +290,7 @@ function Controller({
   isDesktop,
   stateProgress,
   seekHandler,
+  isReady,
 }) {
   const handleClick = () => {
     if (videoRef.current) {
@@ -258,7 +298,6 @@ function Controller({
 
       if (!isPause) {
         currentPlayer.pauseVideo();
-        currentPlayer.hideVideoInfo();
         setIsPause(true);
       } else {
         currentPlayer.playVideo();
@@ -319,10 +358,11 @@ function Controller({
       >
         <Slider
           className="slider-custom-player"
+          disabled={!isReady}
           size="small"
           value={stateProgress.playedSeconds}
-          min={0}
-          // step={1}
+          min={0.5}
+          step={0.00000001}
           max={stateProgress.duration || 100}
           onChange={(_, value) => seekHandler(value)}
           sx={{
@@ -353,6 +393,7 @@ function Controller({
         />
         {muted ? (
           <IconButton
+            disabled={!isReady}
             sx={{ padding: 0, alignItems: "end" }}
             onClick={() => setMuted(false)}
           >
@@ -363,6 +404,7 @@ function Controller({
           </IconButton>
         ) : (
           <IconButton
+            disabled={!isReady}
             sx={{ padding: 0, alignItems: "end" }}
             onClick={() => setMuted(true)}
           >

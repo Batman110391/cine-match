@@ -22,6 +22,7 @@ export const initialState = {
     with_original_language: null,
     with_keywords: [],
   },
+  showTrailerCurrentPage: 1,
   currentRoute: 0,
 };
 

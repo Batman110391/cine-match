@@ -1148,7 +1148,6 @@ export async function fetchTrailersMovies(page) {
 
   try {
     const response = await fetchPromise(trendingMoviesUrl);
-    7;
 
     const hasNext = page <= response.total_pages;
 
@@ -1157,7 +1156,7 @@ export async function fetchTrailersMovies(page) {
     if (!trendingMovies.length > 0) {
       return {
         results: [],
-        nextPage: hasNext ? page + 1 : undefined,
+        nextPage: hasNext ? page + 1 : 1,
         previousPage: page > 1 ? page - 1 : undefined,
       };
     }
@@ -1172,10 +1171,19 @@ export async function fetchTrailersMovies(page) {
       );
 
       if (italianTrailers.length > 0) {
-        return {
-          movie,
-          ytID: italianTrailers?.[0]?.key,
-        };
+        if (italianTrailers?.[0]?.key) {
+          const exist = await ytExists(italianTrailers?.[0]?.key);
+          if (exist) {
+            return {
+              movie,
+              ytID: italianTrailers?.[0]?.key,
+            };
+          } else {
+            return null;
+          }
+        }
+
+        return null;
       } else {
         return null;
       }
@@ -1196,5 +1204,22 @@ export async function fetchTrailersMovies(page) {
     };
   } catch (error) {
     console.error("Errore nella richiesta:", error);
+  }
+}
+
+async function ytExists(videoID) {
+  const theURL = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoID}&format=json`;
+
+  try {
+    const response = await fetch(theURL);
+    if (response.ok) {
+      await response.json();
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    console.error(error);
+    return false;
   }
 }
