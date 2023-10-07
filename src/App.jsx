@@ -115,7 +115,14 @@ export default function App() {
           path={route.route}
           element={
             <ErrorBoundary fallback={<div>Error...</div>}>
-              <Suspense fallback={<LoadingPage />}>{route.component}</Suspense>
+              <Suspense fallback={<LoadingPage />}>
+                <BoxLayout
+                  withNavigation={route.key === "trailermovies" ? false : true}
+                  sx={route.key === "trailermovies" ? { bgcolor: "black" } : {}}
+                >
+                  {route.component}{" "}
+                </BoxLayout>
+              </Suspense>
             </ErrorBoundary>
           }
         />
@@ -124,16 +131,14 @@ export default function App() {
 
   return (
     <AnimatePresence mode="wait">
-      <BoxLayout>
-        {initialLoading ? (
-          <LoadingPage />
-        ) : (
-          <Routes>
-            {getRoutes(routes)}
-            <Route path="*" element={<Navigate to="/home" />} />
-          </Routes>
-        )}
-      </BoxLayout>
+      {initialLoading ? (
+        <LoadingPage />
+      ) : (
+        <Routes>
+          {getRoutes(routes)}
+          <Route path="*" element={<Navigate to="/home" />} />
+        </Routes>
+      )}
     </AnimatePresence>
   );
 }

@@ -3,7 +3,14 @@ import { motion } from "framer-motion";
 import Box from "@mui/material/Box";
 import Navigation from "./Navigation";
 
-function BoxLayout({ withNavigation = true, children }) {
+function BoxLayout({ withNavigation = true, children, sx }) {
+  const styleBoxLayout = {
+    width: "100%",
+    height: "100%",
+    bgcolor: "background.default",
+    ...sx,
+  };
+
   if (withNavigation) {
     return (
       <Navigation>
@@ -32,11 +39,7 @@ function BoxLayout({ withNavigation = true, children }) {
       animate="visible"
       exit={{ opacity: 0, transition: { duration: 1 } }}
       variants={{ visible: { transition: { staggerChildren: 0.3 } } }}
-      sx={{
-        width: "100%",
-        height: "100%",
-        bgcolor: "background.default",
-      }}
+      sx={styleBoxLayout}
     >
       {children}
     </Box>

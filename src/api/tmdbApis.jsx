@@ -1142,13 +1142,25 @@ async function fetchFlickMetrixMovies({ page = 0, pageSize = 20, year }) {
   return [];
 }
 
-export async function fetchTrailersMovies() {
+export async function fetchTrailersMovies(page) {
   const baseUrl = "https://api.themoviedb.org/3";
-  const trendingMoviesUrl = `${baseUrl}/trending/movie/day?api_key=${API_KEY}&${CURRENT_LANGUAGE}`;
+  const trendingMoviesUrl = `${baseUrl}/trending/movie/day?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}`;
 
   try {
     const response = await fetchPromise(trendingMoviesUrl);
+    7;
+
+    const hasNext = page <= response.total_pages;
+
     const trendingMovies = response.results;
+
+    if (!trendingMovies.length > 0) {
+      return {
+        results: [],
+        nextPage: hasNext ? page + 1 : undefined,
+        previousPage: page > 1 ? page - 1 : undefined,
+      };
+    }
 
     const trailerPromises = trendingMovies?.map(async (movie) => {
       const videosUrl = `${baseUrl}/movie/${movie.id}/videos?api_key=${API_KEY}&${CURRENT_LANGUAGE}`;
@@ -1174,7 +1186,14 @@ export async function fetchTrailersMovies() {
       (result) => result !== null
     );
 
-    return moviesWithItalianTrailers;
+    if (!moviesWithItalianTrailers.length > 0) {
+      fetchTrailersMovies(page + 1);
+    }
+    return {
+      results: moviesWithItalianTrailers,
+      nextPage: hasNext ? page + 1 : undefined,
+      previousPage: page > 1 ? page - 1 : undefined,
+    };
   } catch (error) {
     console.error("Errore nella richiesta:", error);
   }
