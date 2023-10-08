@@ -1,4 +1,7 @@
+import React, { useState, useEffect, useRef } from "react";
 import { useTheme } from "@emotion/react";
+import ReactPlayer from "react-player/youtube";
+import { useInfiniteQuery } from "react-query";
 import {
   Box,
   IconButton,
@@ -6,37 +9,22 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import React, {
-  Fragment,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react";
-import YouTubePlayer from "react-player/youtube";
-import { useInfiniteQuery } from "react-query";
-import { Mousewheel, Virtual } from "swiper";
-import { Swiper, SwiperSlide } from "swiper/react";
 import { fetchTrailersMovies } from "../api/tmdbApis";
 import LoadingPage from "../components/LoadingPage";
-
-import "swiper/css";
-import "swiper/css/virtual";
-
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
 import { useDispatch, useSelector } from "react-redux";
 import { setQuery } from "../store/movieQuery";
 
+import "./TrailersMoviesPage.css";
+
 export default function TrailersMoviesPage() {
   const videoRefs = useRef([]);
   const theme = useTheme();
   const dispatch = useDispatch();
 
-  const [currentVideoPos, setCurrentVideoPos] = useState(0);
   const [muted, setMuted] = useState(true);
-  const [isPause, setIsPause] = useState(false);
 
   const currentPage = useSelector(
     (state) => state.movieQuery.showTrailerCurrentPage
@@ -70,45 +58,69 @@ export default function TrailersMoviesPage() {
       };
     }, {});
 
-  const optionsMobileSwiper = {
-    modules: [Virtual],
-  };
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: "0px",
+      threshold: 0.8, // Adjust this value to change the scroll trigger point
+    };
 
-  const optionsDesktopSwiper = {
-    mousewheel: true,
-    modules: [Mousewheel, Virtual],
+    // This function handles the intersection of videos
+    const handleIntersection = (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const videoElement = entry.target;
+          const dataIndex = videoElement.getAttribute("data-index");
+
+          const currentPlayer =
+            videoRefs.current[dataIndex]?.getInternalPlayer();
+          7;
+
+          if (currentPlayer) {
+            currentPlayer.playVideo();
+          }
+        } else {
+          const videoElement = entry.target;
+          const dataIndex = videoElement.getAttribute("data-index");
+
+          const currentPlayer =
+            videoRefs.current[dataIndex]?.getInternalPlayer();
+          if (currentPlayer) {
+            currentPlayer.pauseVideo();
+          }
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(
+      handleIntersection,
+      observerOptions
+    );
+
+    const videos = document.querySelectorAll(".player");
+
+    // We observe each video reference to trigger play/pause
+    videoRefs.current.forEach((_, index) => {
+      observer.observe(videos[index]);
+    });
+
+    // We disconnect the observer when the component is unmounted
+    return () => {
+      observer.disconnect();
+    };
+  }, [trailers]);
+
+  const handleVideoRef = (index) => (ref) => {
+    videoRefs.current[index] = ref;
   };
 
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
 
-  const handleVideoRef = (index) => (ref) => {
-    if (index !== currentVideoPos) {
-      ref.seekTo(0.5, "second");
-    }
-    videoRefs.current[index] = ref;
-  };
-
-  const handleSlideChange = (info) => {
-    const prevVideo = info.previousIndex;
-    videoRefs.current[prevVideo].seekTo(0.5, "second");
-    videoRefs.current[prevVideo].getInternalPlayer().pauseVideo();
-    const currentVideoPos = info.activeIndex;
-
-    setCurrentVideoPos(currentVideoPos);
-    setIsPause(false);
-
-    if (trailers?.results?.length - currentVideoPos <= 5 && hasNextPage) {
-      fetchNextPage();
-    }
-  };
-
-  if (status === "loading") return <LoadingPage />;
-  if (status === "error") return <h1>{JSON.stringify(error)}</h1>;
-
-  console.log("trailers", trailers?.results);
+  console.log("tr", trailers);
 
   return (
     <Box
+      className="container"
       sx={{
         height: "100%",
         width: "100%",
@@ -117,76 +129,43 @@ export default function TrailersMoviesPage() {
         paddingTop: isDesktop ? "5px" : 0,
       }}
     >
-      <Swiper
-        style={{
-          width: "100%",
-          height: "100%",
-        }}
-        direction={"vertical"}
-        spaceBetween={5}
-        {...(isDesktop ? optionsDesktopSwiper : optionsMobileSwiper)}
-        onSlideChange={handleSlideChange}
-        noSwipingClass={isDesktop ? "slider-custom-player" : null}
-        resistance={false}
-        resistanceRatio={9}
-        virtual={{
-          //enabled: true,
-          addSlidesBefore: 5,
-          addSlidesAfter: 5,
-        }}
-      >
-        {trailers &&
-          trailers?.results?.length > 0 &&
-          trailers?.results?.map((video, index) => {
-            return (
-              <SwiperSlide
-                key={video.ytID + index}
-                virtualIndex={index}
-                style={{ width: "100%", height: "100%" }}
-              >
-                <VideoWrapper
-                  key={index}
-                  ytID={video.ytID}
-                  movie={video.movie}
-                  muted={muted}
-                  index={index}
-                  play={index === currentVideoPos && !isPause}
-                  setMuted={setMuted}
-                  setVideoRef={handleVideoRef(index)}
-                  isDesktop={isDesktop}
-                  isPause={isPause}
-                  setIsPause={setIsPause}
-                  currentVideoPos={currentVideoPos}
-                />
-              </SwiperSlide>
-            );
-          })}
-      </Swiper>
+      {trailers?.results?.map((video, index) => (
+        <VideoCard
+          key={index}
+          ytID={video.ytID}
+          setVideoRef={handleVideoRef(index)}
+          autoplay={index === 0}
+          index={index}
+          muted={muted}
+          setMuted={setMuted}
+          isDesktop={isDesktop}
+        />
+      ))}
     </Box>
   );
 }
 
-function VideoWrapper({
-  ytID,
-  movie,
-  muted,
-  index,
-  play,
-  setMuted,
-  setVideoRef,
-  isDesktop,
-  setIsPause,
-  isPause,
-  currentVideoPos,
-}) {
-  const ytRef = useRef(null);
+const VideoCard = (props) => {
+  const { ytID, setVideoRef, autoplay, index, muted, setMuted, isDesktop } =
+    props;
+  const videoRef = useRef(null);
   const [stateProgress, setStateProgress] = useState({
     duration: 0,
     playedSeconds: 0,
   });
   const [isReady, setIsReady] = useState(false);
+  const [isPause, setIsPause] = useState(false);
 
-  const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
+  const onVideoPress = () => {
+    if (videoRef.current) {
+      const internalPlayer = videoRef.current.getInternalPlayer();
+      if (!isPause) {
+        internalPlayer.pauseVideo();
+      } else {
+        internalPlayer.playVideo();
+      }
+    }
+  };
 
   const handleProgress = ({ playedSeconds }) => {
     setStateProgress({ ...stateProgress, playedSeconds });
@@ -202,89 +181,61 @@ function VideoWrapper({
     });
     ytRef.current.seekTo(value, "second");
   };
-
   const handleReadyPlayer = () => {
     setIsReady(true);
   };
 
+  const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
+
   return (
-    <Box
-      sx={{
-        position: "relative",
-        overflow: "hidden",
-        width: "100%",
-        height: "100%",
-        "& iframe": {
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          width: "100%",
-          height: "300%",
-          transform: "translate(-50%, -50%)",
-        },
-      }}
-    >
-      <Typography
-        variant="h6"
-        sx={{
-          position: "absolute",
-          zIndex: 1001,
-          top: 0,
-          left: 5,
-          p: 0,
-          m: 0,
-        }}
-      >
-        {movie?.title}
-      </Typography>
-      <YouTubePlayer
+    <div className="player" data-index={index} onClick={onVideoPress}>
+      <ReactPlayer
         ref={(ref) => {
-          ytRef.current = ref;
+          videoRef.current = ref;
           if (ref) {
             setVideoRef(ref);
           }
         }}
-        controls={false}
-        loop
-        muted={muted}
-        playing={play}
-        width="100%"
-        height="100%"
         playsinline
         url={`${YOUTUBE_URL}${ytID || "L3oOldViIgY"}`}
         style={{
           pointerEvents: "none",
         }}
-        onReady={handleReadyPlayer}
+        width="100%"
+        height="100%"
+        controls={false}
+        playing={autoplay}
+        muted={muted}
+        loop
         onProgress={handleProgress}
         onDuration={handleDuration}
+        onReady={handleReadyPlayer}
+        onPause={() => setIsPause(true)}
+        onPlay={() => setIsPause(false)}
       />
-
-      <Controller
-        videoRef={ytRef}
-        muted={muted}
-        setMuted={setMuted}
-        setIsPause={setIsPause}
-        isPause={isPause}
-        isDesktop={isDesktop}
-        stateProgress={stateProgress}
-        seekHandler={seekHandler}
-        isReady={isReady}
-      />
-    </Box>
+      {/* <Controller
+          videoRef={videoRef}
+          muted={muted}
+          setMuted={setMuted}
+          isDesktop={isDesktop}
+          stateProgress={stateProgress}
+          seekHandler={seekHandler}
+          isReady={isReady}
+          isPause={isPause}
+        /> */}
+    </div>
   );
-}
+};
 
 function Controller({
   videoRef,
   muted,
   setMuted,
-  isPause,
-  setIsPause,
   isDesktop,
   stateProgress,
   seekHandler,
   isReady,
+  isPause,
 }) {
   const handleClick = () => {
     if (videoRef.current) {
@@ -292,10 +243,8 @@ function Controller({
 
       if (!isPause) {
         currentPlayer.pauseVideo();
-        setIsPause(true);
       } else {
         currentPlayer.playVideo();
-        setIsPause(false);
       }
     }
   };
