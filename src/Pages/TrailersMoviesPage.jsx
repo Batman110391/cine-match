@@ -82,9 +82,6 @@ export default function TrailersMoviesPage() {
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
 
   const handleVideoRef = (index) => (ref) => {
-    // if (videoRefs.current.length === trailers?.results?.length) {
-    //   setFirstRender(false);
-    // }
     if (index !== currentVideoPos) {
       ref.seekTo(0.5, "second");
     }
@@ -92,8 +89,9 @@ export default function TrailersMoviesPage() {
   };
 
   const handleSlideChange = (info) => {
-    // const prevVideo = info.previousIndex;
-    // videoRefs.current[prevVideo].seekTo(0.5, "second");
+    const prevVideo = info.previousIndex;
+    videoRefs.current[prevVideo].seekTo(0.5, "second");
+    videoRefs.current[prevVideo].getInternalPlayer().pauseVideo();
     const currentVideoPos = info.activeIndex;
 
     setCurrentVideoPos(currentVideoPos);
@@ -152,11 +150,7 @@ export default function TrailersMoviesPage() {
                   movie={video.movie}
                   muted={muted}
                   index={index}
-                  play={
-                    index === currentVideoPos ||
-                    index - 1 === currentVideoPos ||
-                    index + 1 === currentVideoPos
-                  }
+                  play={index === currentVideoPos && !isPause}
                   setMuted={setMuted}
                   setVideoRef={handleVideoRef(index)}
                   isDesktop={isDesktop}
