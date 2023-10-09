@@ -16,9 +16,10 @@ import React, {
 import YouTubePlayer from "react-player/youtube";
 import { useInfiniteQuery } from "react-query";
 import { Mousewheel, Virtual } from "swiper";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { Swiper, SwiperSlide, useSwiper } from "swiper/react";
 import { fetchTrailersMovies } from "../api/tmdbApis";
 import LoadingPage from "../components/LoadingPage";
+import { useInView } from "react-intersection-observer";
 
 import "swiper/css";
 import "swiper/css/virtual";
@@ -36,7 +37,8 @@ export default function TrailersMoviesPage() {
 
   const [currentVideoPos, setCurrentVideoPos] = useState(0);
   const [muted, setMuted] = useState(true);
-  const [isPause, setIsPause] = useState(false);
+  const [trailers, setTrailers] = useState(null);
+  const [stateVideoPlayer, setStateVideoPlayer] = useState([true]);
 
   const currentPage = useSelector(
     (state) => state.movieQuery.showTrailerCurrentPage
@@ -53,23 +55,30 @@ export default function TrailersMoviesPage() {
   } = useInfiniteQuery({
     queryKey: ["trailerMovies"],
     getNextPageParam: (prevData) => prevData.nextPage,
-    queryFn: ({ pageParam = currentPage + 1 }) => {
-      dispatch(setQuery({ showTrailerCurrentPage: pageParam }));
+    queryFn: ({ pageParam = 1 }) => {
+      //dispatch(setQuery({ showTrailerCurrentPage: pageParam }));
       return fetchTrailersMovies(pageParam);
     },
   });
 
-  const trailers = data?.pages
-    ?.flatMap((data) => data)
-    .reduce((prev, curr) => {
-      return {
-        ...curr,
-        results: prev?.results
-          ? prev.results.concat(curr.results)
-          : curr.results,
-      };
-    }, {});
+  // Quando i dati vengono caricati o aggiornati, li memorizziamo nello stato locale
+  if (status === "success" && data) {
+    const newTrailers = data.pages
+      ?.flatMap((data) => data)
+      .reduce((prev, curr) => {
+        return {
+          ...curr,
+          results: prev?.results
+            ? prev.results.concat(curr.results)
+            : curr.results,
+        };
+      }, {});
 
+    // Verifica se i nuovi dati sono diversi dai dati memorizzati nello stato
+    if (JSON.stringify(newTrailers) !== JSON.stringify(trailers)) {
+      setTrailers(newTrailers);
+    }
+  }
   const optionsMobileSwiper = {
     modules: [Virtual],
   };
@@ -82,30 +91,38 @@ export default function TrailersMoviesPage() {
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
 
   const handleVideoRef = (index) => (ref) => {
+    // if (!videoRefs?.current?.[index]) {
+    //   ref.seekTo(0.9, "second");
+    //   videoRefs.current[index] = ref;
+    // }
     if (index !== currentVideoPos) {
-      ref.seekTo(0.5, "second");
+      ref.seekTo(0.9, "second");
     }
     videoRefs.current[index] = ref;
   };
 
   const handleSlideChange = (info) => {
     const prevVideo = info.previousIndex;
-    videoRefs.current[prevVideo].seekTo(0.5, "second");
+    videoRefs.current[prevVideo].seekTo(0.9, "second");
     videoRefs.current[prevVideo].getInternalPlayer().pauseVideo();
     const currentVideoPos = info.activeIndex;
 
     setCurrentVideoPos(currentVideoPos);
-    setIsPause(false);
 
     if (trailers?.results?.length - currentVideoPos <= 5 && hasNextPage) {
       fetchNextPage();
     }
   };
 
+  const handleReadyPlayer = () => {
+    setStateVideoPlayer([...stateVideoPlayer, true]);
+  };
+
   if (status === "loading") return <LoadingPage />;
   if (status === "error") return <h1>{JSON.stringify(error)}</h1>;
 
-  console.log("trailers", trailers?.results);
+  // console.log("trailers", trailers?.results);
+  console.log("redy", stateVideoPlayer);
 
   return (
     <Box
@@ -127,10 +144,13 @@ export default function TrailersMoviesPage() {
         {...(isDesktop ? optionsDesktopSwiper : optionsMobileSwiper)}
         onSlideChange={handleSlideChange}
         noSwipingClass={isDesktop ? "slider-custom-player" : null}
-        resistance={false}
-        resistanceRatio={9}
+        // resistance={false}
+        // resistanceRatio={2}
+        threshold={0.5}
+        allowSlideNext={stateVideoPlayer?.[currentVideoPos + 1] || false}
         virtual={{
-          //enabled: true,
+          enabled: true,
+          slides: [trailers?.results || []],
           addSlidesBefore: 5,
           addSlidesAfter: 5,
         }}
@@ -150,13 +170,13 @@ export default function TrailersMoviesPage() {
                   movie={video.movie}
                   muted={muted}
                   index={index}
-                  play={index === currentVideoPos && !isPause}
                   setMuted={setMuted}
                   setVideoRef={handleVideoRef(index)}
                   isDesktop={isDesktop}
-                  isPause={isPause}
-                  setIsPause={setIsPause}
                   currentVideoPos={currentVideoPos}
+                  autoplay={index === currentVideoPos}
+                  isReady={stateVideoPlayer?.[index] || false}
+                  onReadyPlayer={handleReadyPlayer}
                 />
               </SwiperSlide>
             );
@@ -171,20 +191,25 @@ function VideoWrapper({
   movie,
   muted,
   index,
-  play,
   setMuted,
   setVideoRef,
   isDesktop,
-  setIsPause,
-  isPause,
   currentVideoPos,
+  autoplay,
+  isReady,
+  onReadyPlayer,
 }) {
+  // const { ref, inView, entry } = useInView({
+  //   /* Optional options */
+  //   threshold: 0.85,
+  // });
+
   const ytRef = useRef(null);
   const [stateProgress, setStateProgress] = useState({
     duration: 0,
     playedSeconds: 0,
   });
-  const [isReady, setIsReady] = useState(false);
+  // const [isReady, setIsReady] = useState(false);
 
   const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
@@ -203,12 +228,11 @@ function VideoWrapper({
     ytRef.current.seekTo(value, "second");
   };
 
-  const handleReadyPlayer = () => {
-    setIsReady(true);
-  };
+  // console.log("element", index, " -> in view :  ", inView);
 
   return (
     <Box
+      //ref={ref}
       sx={{
         position: "relative",
         overflow: "hidden",
@@ -220,7 +244,9 @@ function VideoWrapper({
           left: "50%",
           width: "100%",
           height: "300%",
-          transform: "translate(-50%, -50%)",
+          transform: isDesktop
+            ? "translate(-50%, -50%) rotateX(40deg)"
+            : "translate(-50%, -50%) scale3d(1.5, 1.5, 1.5)",
         },
       }}
     >
@@ -247,7 +273,7 @@ function VideoWrapper({
         controls={false}
         loop
         muted={muted}
-        playing={play}
+        playing={autoplay}
         width="100%"
         height="100%"
         playsinline
@@ -255,21 +281,25 @@ function VideoWrapper({
         style={{
           pointerEvents: "none",
         }}
-        onReady={handleReadyPlayer}
+        onReady={onReadyPlayer}
         onProgress={handleProgress}
         onDuration={handleDuration}
+        // onPause={() => setIsPause(true)}
+        // onPlay={() => setIsPause(false)}
       />
 
       <Controller
         videoRef={ytRef}
         muted={muted}
         setMuted={setMuted}
-        setIsPause={setIsPause}
-        isPause={isPause}
+        // setIsPause={setIsPause}
+        // isPause={isPause}
+        // playerInPause={playerInPause}
         isDesktop={isDesktop}
         stateProgress={stateProgress}
         seekHandler={seekHandler}
         isReady={isReady}
+        activePlayer={index === currentVideoPos}
       />
     </Box>
   );
@@ -279,23 +309,29 @@ function Controller({
   videoRef,
   muted,
   setMuted,
-  isPause,
-  setIsPause,
+  // setIsPause,,
   isDesktop,
   stateProgress,
   seekHandler,
   isReady,
+  activePlayer,
 }) {
+  const [isPause, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    setIsPaused(false);
+  }, [activePlayer]);
+
   const handleClick = () => {
     if (videoRef.current) {
       const currentPlayer = videoRef.current?.getInternalPlayer();
 
       if (!isPause) {
         currentPlayer.pauseVideo();
-        setIsPause(true);
+        setIsPaused(true);
       } else {
         currentPlayer.playVideo();
-        setIsPause(false);
+        setIsPaused(false);
       }
     }
   };
@@ -343,7 +379,7 @@ function Controller({
           bottom: 0,
           left: 0,
           right: 0,
-          height: isDesktop ? "40px" : "240px",
+          height: isDesktop ? "40px" : "40px",
           background: isDesktop ? "transparent" : "black",
           display: "flex",
           gap: "10px",
@@ -355,8 +391,8 @@ function Controller({
           disabled={!isReady}
           size="small"
           value={stateProgress.playedSeconds}
-          min={0.5}
-          step={0.00000001}
+          min={0.9}
+          step={0.1}
           max={stateProgress.duration || 100}
           onChange={(_, value) => seekHandler(value)}
           sx={{
