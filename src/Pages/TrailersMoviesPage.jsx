@@ -18,13 +18,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { setQuery } from "../store/movieQuery";
 
 import "./TrailersMoviesPage.css";
+import { memo } from "react";
 
 export default function TrailersMoviesPage() {
   const videoRefs = useRef([]);
   const theme = useTheme();
   const dispatch = useDispatch();
 
+  const [trailers, setTrailers] = useState(null);
+  const [stateVideoPlayer, setStateVideoPlayer] = useState({});
   const [muted, setMuted] = useState(true);
+  const [currentVideoPos, setCurrentVideoPos] = useState(0);
 
   const currentPage = useSelector(
     (state) => state.movieQuery.showTrailerCurrentPage
@@ -41,22 +45,30 @@ export default function TrailersMoviesPage() {
   } = useInfiniteQuery({
     queryKey: ["trailerMovies"],
     getNextPageParam: (prevData) => prevData.nextPage,
-    queryFn: ({ pageParam = currentPage + 1 }) => {
+    queryFn: ({ pageParam = 1 }) => {
       dispatch(setQuery({ showTrailerCurrentPage: pageParam }));
       return fetchTrailersMovies(pageParam);
     },
   });
 
-  const trailers = data?.pages
-    ?.flatMap((data) => data)
-    .reduce((prev, curr) => {
-      return {
-        ...curr,
-        results: prev?.results
-          ? prev.results.concat(curr.results)
-          : curr.results,
-      };
-    }, {});
+  // Quando i dati vengono caricati o aggiornati, li memorizziamo nello stato locale
+  if (status === "success" && data) {
+    const newTrailers = data.pages
+      ?.flatMap((data) => data)
+      .reduce((prev, curr) => {
+        return {
+          ...curr,
+          results: prev?.results
+            ? prev.results.concat(curr.results)
+            : curr.results,
+        };
+      }, {});
+
+    // Verifica se i nuovi dati sono diversi dai dati memorizzati nello stato
+    if (JSON.stringify(newTrailers) !== JSON.stringify(trailers)) {
+      setTrailers(newTrailers);
+    }
+  }
 
   useEffect(() => {
     const observerOptions = {
@@ -74,10 +86,17 @@ export default function TrailersMoviesPage() {
 
           const currentPlayer =
             videoRefs.current[dataIndex]?.getInternalPlayer();
-          7;
+
+          setCurrentVideoPos((state) => {
+            return parseInt(dataIndex);
+          });
 
           if (currentPlayer) {
             currentPlayer.playVideo();
+          }
+
+          if (trailers?.results?.length - dataIndex <= 5 && hasNextPage) {
+            fetchNextPage();
           }
         } else {
           const videoElement = entry.target;
@@ -85,7 +104,9 @@ export default function TrailersMoviesPage() {
 
           const currentPlayer =
             videoRefs.current[dataIndex]?.getInternalPlayer();
+
           if (currentPlayer) {
+            currentPlayer.seekTo(0.9, "second");
             currentPlayer.pauseVideo();
           }
         }
@@ -108,20 +129,37 @@ export default function TrailersMoviesPage() {
     return () => {
       observer.disconnect();
     };
-  }, [trailers]);
+  }, [trailers, currentVideoPos]);
 
   const handleVideoRef = (index) => (ref) => {
-    videoRefs.current[index] = ref;
+    //videoRefs.current[index] = ref;
+    if (!videoRefs?.current?.[index]) {
+      videoRefs.current[index] = ref;
+    }
+  };
+
+  const handleReadyPlayer = (index) => () => {
+    setStateVideoPlayer((state) => {
+      return {
+        ...state,
+        [`videoPlayer${index}`]: true,
+      };
+    });
   };
 
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
 
-  console.log("tr", trailers);
+  console.log("trailers", trailers?.results?.length);
+
+  const isReady =
+    stateVideoPlayer?.[`videoPlayer${currentVideoPos + 1}`] &&
+    status !== "loading";
 
   return (
     <Box
       className="container"
       sx={{
+        overflow: isReady ? "scroll" : "hidden",
         height: "100%",
         width: "100%",
         position: "relative",
@@ -134,26 +172,37 @@ export default function TrailersMoviesPage() {
           key={index}
           ytID={video.ytID}
           setVideoRef={handleVideoRef(index)}
-          autoplay={index === 0}
+          autoplay={true}
           index={index}
           muted={muted}
           setMuted={setMuted}
           isDesktop={isDesktop}
+          isReady={isReady}
+          onReadyPlayer={handleReadyPlayer}
         />
       ))}
     </Box>
   );
 }
 
-const VideoCard = (props) => {
-  const { ytID, setVideoRef, autoplay, index, muted, setMuted, isDesktop } =
-    props;
+const VideoCard = memo((props) => {
+  const {
+    ytID,
+    setVideoRef,
+    autoplay,
+    index,
+    muted,
+    isReady,
+    onReadyPlayer,
+    setMuted,
+    isDesktop,
+  } = props;
   const videoRef = useRef(null);
   const [stateProgress, setStateProgress] = useState({
     duration: 0,
     playedSeconds: 0,
   });
-  const [isReady, setIsReady] = useState(false);
+  //const [isReady, setIsReady] = useState(false);
   const [isPause, setIsPause] = useState(false);
 
   const onVideoPress = () => {
@@ -181,9 +230,6 @@ const VideoCard = (props) => {
     });
     ytRef.current.seekTo(value, "second");
   };
-  const handleReadyPlayer = () => {
-    setIsReady(true);
-  };
 
   const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
@@ -209,7 +255,7 @@ const VideoCard = (props) => {
         loop
         onProgress={handleProgress}
         onDuration={handleDuration}
-        onReady={handleReadyPlayer}
+        onReady={onReadyPlayer(index)}
         onPause={() => setIsPause(true)}
         onPlay={() => setIsPause(false)}
       />
@@ -225,7 +271,7 @@ const VideoCard = (props) => {
         /> */}
     </div>
   );
-};
+});
 
 function Controller({
   videoRef,
