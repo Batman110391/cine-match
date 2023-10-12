@@ -80,12 +80,14 @@ export default function TrailersMoviesPage() {
     }
   }
   const optionsMobileSwiper = {
-    modules: [Virtual],
+    //modules: [Virtual],
+    //touchMoveStopPropagation: true,
+    //nested: true,
   };
 
   const optionsDesktopSwiper = {
     mousewheel: true,
-    modules: [Mousewheel, Virtual],
+    modules: [Mousewheel],
   };
 
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
@@ -114,15 +116,55 @@ export default function TrailersMoviesPage() {
     }
   };
 
-  const handleReadyPlayer = () => {
-    setStateVideoPlayer([...stateVideoPlayer, true]);
+  const handleResumePlayer = (index) => () => {
+    setTimeout(() => {
+      setStateVideoPlayer([...stateVideoPlayer, true]);
+    }, 800);
   };
 
-  if (status === "loading") return <LoadingPage />;
+  const getStatus = (state, index) => {
+    switch (state) {
+      case -1:
+        console.log("Il video è in uno stato non avviato (unstarted)." + index);
+        break;
+      case 0:
+        console.log("Il video è terminato (ended)." + index);
+        break;
+      case 1:
+        console.log("Il video è in riproduzione (playing)." + index);
+        break;
+      case 2:
+        console.log("Il video è in pausa (paused)." + index);
+        break;
+      case 3:
+        console.log("Il video è in buffering (buffering)." + index);
+        break;
+      case 5:
+        console.log("Il video è cued (video cued)." + index);
+        break;
+      default:
+        console.log("Stato del video sconosciuto." + index);
+        break;
+    }
+  };
+
+  const handleReadyPlayer = (index) => () => {
+    //videoRefs.current[index].getInternalPlayer().pauseVideo();
+  };
+
+  const handleBeforeSlideChangeStart = (info) => {
+    // const currentVideoPos = info.activeIndex;
+    // setCurrentVideoPos((state) => currentVideoPos);
+    // if (trailers?.results?.length - currentVideoPos <= 5 && hasNextPage) {
+    //   fetchNextPage();
+    // }
+  };
+
+  // if (status === "loading") return <LoadingPage />;
   if (status === "error") return <h1>{JSON.stringify(error)}</h1>;
 
   // console.log("trailers", trailers?.results);
-  console.log("redy", stateVideoPlayer);
+  //console.log("redy", stateVideoPlayer);
 
   return (
     <Box
@@ -140,20 +182,27 @@ export default function TrailersMoviesPage() {
           height: "100%",
         }}
         direction={"vertical"}
-        spaceBetween={5}
+        spaceBetween={1}
         {...(isDesktop ? optionsDesktopSwiper : optionsMobileSwiper)}
-        onSlideChange={handleSlideChange}
         noSwipingClass={isDesktop ? "slider-custom-player" : null}
         // resistance={false}
         // resistanceRatio={2}
-        threshold={0.5}
-        allowSlideNext={stateVideoPlayer?.[currentVideoPos + 1] || false}
-        virtual={{
-          enabled: true,
-          slides: [trailers?.results || []],
-          addSlidesBefore: 5,
-          addSlidesAfter: 5,
-        }}
+        //threshold={8}
+        allowSlideNext={
+          (stateVideoPlayer?.[currentVideoPos + 1] && status !== "loading") ||
+          false
+        }
+        // virtual={{
+        //   enabled: true,
+        //   slides: [trailers?.results || []],
+        //   addSlidesBefore: 5,
+        //   addSlidesAfter: 5,
+        // }}
+        // observeSlideChildren
+        // preventInteractionOnTransition
+        onSlideChange={handleSlideChange}
+        //onBeforeSlideChangeStart={handleBeforeSlideChangeStart}
+        onBeforeTransitionStart={handleBeforeSlideChangeStart}
       >
         {trailers &&
           trailers?.results?.length > 0 &&
@@ -176,6 +225,7 @@ export default function TrailersMoviesPage() {
                   currentVideoPos={currentVideoPos}
                   autoplay={index === currentVideoPos}
                   isReady={stateVideoPlayer?.[index] || false}
+                  onResumePlayer={handleResumePlayer}
                   onReadyPlayer={handleReadyPlayer}
                 />
               </SwiperSlide>
@@ -197,6 +247,7 @@ function VideoWrapper({
   currentVideoPos,
   autoplay,
   isReady,
+  onResumePlayer,
   onReadyPlayer,
 }) {
   // const { ref, inView, entry } = useInView({
@@ -270,7 +321,7 @@ function VideoWrapper({
             setVideoRef(ref);
           }
         }}
-        controls={false}
+        controls={true}
         loop
         muted={muted}
         playing={autoplay}
@@ -281,9 +332,10 @@ function VideoWrapper({
         style={{
           pointerEvents: "none",
         }}
-        onReady={onReadyPlayer}
         onProgress={handleProgress}
         onDuration={handleDuration}
+        onPlay={onResumePlayer(index)}
+        onReady={onReadyPlayer(index)}
         // onPause={() => setIsPause(true)}
         // onPlay={() => setIsPause(false)}
       />
