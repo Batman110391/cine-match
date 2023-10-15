@@ -13,18 +13,14 @@
 
 .player {
   position: relative;
+  overflow: hidden;
   width: 100%;
   height: 100%;
   text-shadow: 0 0 4px rgba(0, 0, 0, 0.5);
   scroll-snap-align: start;
-  margin: 70px 0;
+  margin: 70px 0 500px 0;
 }
 
-/* .player iframe {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 100%;
-  height: 120%;
-  transform: translate(-50%, -50%);
-} */
+.lazyload-wrapper {
+  height: 100%;
+}

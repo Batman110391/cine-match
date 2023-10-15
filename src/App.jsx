@@ -8,7 +8,7 @@ import { routes } from "./routes";
 import { setQuery } from "./store/movieQuery";
 import ErrorBoundary from "./utils/ErrorBoundary";
 import { useSessionStorage } from "./utils/useSessionStorage";
-import { updateMovies } from "./api/tmdbApis";
+import { updateMovies, updateTrailers } from "./api/tmdbApis";
 import { supabase } from "./supabaseClient";
 
 export default function App() {
@@ -52,6 +52,7 @@ export default function App() {
 
         if (differenceInDays > 1) {
           await updateMovies();
+          //await updateTrailers();
           const { error } = await supabase
             .from("execution-dates")
             .upsert([{ id: 1, date: currentDate }]);
@@ -66,6 +67,7 @@ export default function App() {
         }
       } else {
         await updateMovies();
+        //await updateTrailers();
         const currentDate = Date.now();
         const { error } = await supabase
           .from("execution-dates")

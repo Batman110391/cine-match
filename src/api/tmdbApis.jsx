@@ -1142,9 +1142,68 @@ async function fetchFlickMetrixMovies({ page = 0, pageSize = 20, year }) {
   return [];
 }
 
-export async function fetchTrailersMovies(page) {
+export async function fetchTrailers() {
+  try {
+    const { data, error } = await supabase.from("trailer-movies").select("*");
+
+    if (error) {
+      console.error("Errore durante il recupero dei trailers:", error);
+      return new Error();
+    }
+
+    //const filterData = data.slice(0, 100);
+
+    return data;
+  } catch (error) {
+    console.error("Errore durante il recupero dei trailers:", error);
+
+    return new Error();
+  }
+}
+
+export async function updateTrailers() {
+  try {
+    const { results } = await fetchTrailersMovies(1, [], true, 100);
+
+    const moviesTable = supabase.from("trailer-movies");
+
+    if (Array.isArray(results)) {
+      const createObjectInsert = results
+        .map(({ movie, ytID }) => {
+          if (!ytID) return null;
+          return {
+            ytID,
+            detail: movie,
+          };
+        })
+        .filter(Boolean);
+
+      const { error } = await moviesTable.upsert(createObjectInsert, {
+        ignoreDuplicates: true,
+      });
+      if (error) {
+        console.error(error);
+      } else {
+        console.log("Data saved successfully!");
+      }
+    } else {
+      console.log("No trailers found!");
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+export async function fetchTrailersMovies(
+  page = 1,
+  prevResult = [],
+  recursive = false,
+  min = 100
+) {
   const baseUrl = "https://api.themoviedb.org/3";
   const trendingMoviesUrl = `${baseUrl}/trending/movie/day?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}`;
+
+  const totalResults = prevResult;
 
   try {
     const response = await fetchPromise(trendingMoviesUrl);
@@ -1154,11 +1213,7 @@ export async function fetchTrailersMovies(page) {
     const trendingMovies = response.results;
 
     if (!trendingMovies.length > 0) {
-      return {
-        results: [],
-        nextPage: hasNext ? page + 1 : 1,
-        previousPage: page > 1 ? page - 1 : undefined,
-      };
+      return await fetchTrailersMovies(page + 1, totalResults);
     }
 
     const trailerPromises = trendingMovies?.map(async (movie) => {
@@ -1194,11 +1249,14 @@ export async function fetchTrailersMovies(page) {
       (result) => result !== null
     );
 
-    if (!moviesWithItalianTrailers.length > 0) {
-      fetchTrailersMovies(page + 1);
+    const aggregateResults = [...totalResults, ...moviesWithItalianTrailers];
+
+    if (recursive && hasNext && aggregateResults.length < min) {
+      return await fetchTrailersMovies(page + 1, aggregateResults);
     }
+
     return {
-      results: moviesWithItalianTrailers,
+      results: aggregateResults,
       nextPage: hasNext ? page + 1 : undefined,
       previousPage: page > 1 ? page - 1 : undefined,
     };

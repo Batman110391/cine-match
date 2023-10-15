@@ -1,24 +1,26 @@
-import React, { useState, useEffect, useRef } from "react";
 import { useTheme } from "@emotion/react";
-import ReactPlayer from "react-player/youtube";
-import { useInfiniteQuery } from "react-query";
-import {
-  Box,
-  IconButton,
-  Slider,
-  Typography,
-  useMediaQuery,
-} from "@mui/material";
-import { fetchTrailersMovies } from "../api/tmdbApis";
-import LoadingPage from "../components/LoadingPage";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import {
+  Box,
+  Button,
+  Chip,
+  IconButton,
+  Slider,
+  Snackbar,
+  useMediaQuery,
+} from "@mui/material";
+import React, { useEffect, useRef, useState } from "react";
+import ReactPlayer from "react-player/youtube";
+import { useInfiniteQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
-import { setQuery } from "../store/movieQuery";
+import { fetchTrailersMovies } from "../api/tmdbApis";
+import CloseIcon from "@mui/icons-material/Close";
 
-import "./TrailersMoviesPage.css";
 import { memo } from "react";
+import { setQuery } from "../store/movieQuery";
+import "./TrailersMoviesPage.css";
 
 export default function TrailersMoviesPage() {
   const videoRefs = useRef([]);
@@ -29,11 +31,11 @@ export default function TrailersMoviesPage() {
   const [stateVideoPlayer, setStateVideoPlayer] = useState({});
   const [muted, setMuted] = useState(true);
   const [currentVideoPos, setCurrentVideoPos] = useState(0);
+  const [openMessage, setOpenMessage] = useState(false);
 
   const currentPage = useSelector(
     (state) => state.movieQuery.showTrailerCurrentPage
   );
-
   const {
     status,
     error,
@@ -46,6 +48,15 @@ export default function TrailersMoviesPage() {
     queryKey: ["trailerMovies"],
     getNextPageParam: (prevData) => prevData.nextPage,
     queryFn: ({ pageParam = 1 }) => {
+      if (!muted) {
+        setMuted(true);
+
+        setOpenMessage(true);
+
+        // setTimeout(() => {
+        //   setOpenMessage(false);
+        // }, 5000);
+      }
       dispatch(setQuery({ showTrailerCurrentPage: pageParam }));
       return fetchTrailersMovies(pageParam);
     },
@@ -70,11 +81,26 @@ export default function TrailersMoviesPage() {
     }
   }
 
+  if (error) return <h1>{JSON.stringify(error)}</h1>;
+
+  function buildThresholdList() {
+    let thresholds = [];
+    let numSteps = trailers?.results?.length;
+
+    for (let i = 3.0; i <= numSteps; i++) {
+      let ratio = i / numSteps;
+      thresholds.push(ratio);
+    }
+
+    thresholds.push(0);
+    return thresholds;
+  }
+
   useEffect(() => {
     const observerOptions = {
-      root: null,
+      root: document.querySelector(".container"),
       rootMargin: "0px",
-      threshold: 0.8, // Adjust this value to change the scroll trigger point
+      threshold: buildThresholdList(),
     };
 
     // This function handles the intersection of videos
@@ -84,30 +110,30 @@ export default function TrailersMoviesPage() {
           const videoElement = entry.target;
           const dataIndex = videoElement.getAttribute("data-index");
 
-          const currentPlayer =
-            videoRefs.current[dataIndex]?.getInternalPlayer();
-
           setCurrentVideoPos((state) => {
             return parseInt(dataIndex);
           });
 
-          if (currentPlayer) {
-            currentPlayer.playVideo();
+          const currentPlayer =
+            videoRefs.current[dataIndex].getInternalPlayer();
+
+          if (currentPlayer && !muted) {
+            currentPlayer?.unMute();
           }
 
-          if (trailers?.results?.length - dataIndex <= 5 && hasNextPage) {
-            fetchNextPage();
+          if (trailers?.results?.length - dataIndex < 5 && hasNextPage) {
+            fetchNextPage().then(() => {});
           }
         } else {
           const videoElement = entry.target;
           const dataIndex = videoElement.getAttribute("data-index");
 
           const currentPlayer =
-            videoRefs.current[dataIndex]?.getInternalPlayer();
+            videoRefs.current[dataIndex].getInternalPlayer();
 
           if (currentPlayer) {
-            currentPlayer.seekTo(0.9, "second");
-            currentPlayer.pauseVideo();
+            currentPlayer?.seekTo(0.9, "second");
+            currentPlayer?.pauseVideo();
           }
         }
       });
@@ -132,7 +158,6 @@ export default function TrailersMoviesPage() {
   }, [trailers, currentVideoPos]);
 
   const handleVideoRef = (index) => (ref) => {
-    //videoRefs.current[index] = ref;
     if (!videoRefs?.current?.[index]) {
       videoRefs.current[index] = ref;
     }
@@ -147,13 +172,21 @@ export default function TrailersMoviesPage() {
     });
   };
 
+  const handleCloseMessage = () => {
+    setOpenMessage(false);
+  };
+
+  //const handle
+
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
 
   console.log("trailers", trailers?.results?.length);
 
   const isReady =
-    stateVideoPlayer?.[`videoPlayer${currentVideoPos + 1}`] &&
-    status !== "loading";
+    currentVideoPos + 1 < trailers?.results?.length
+      ? stateVideoPlayer?.[`videoPlayer${currentVideoPos + 1}`] &&
+        status !== "loading"
+      : true;
 
   return (
     <Box
@@ -172,13 +205,17 @@ export default function TrailersMoviesPage() {
           key={index}
           ytID={video.ytID}
           setVideoRef={handleVideoRef(index)}
-          autoplay={true}
+          autoplay={index === currentVideoPos}
           index={index}
           muted={muted}
           setMuted={setMuted}
           isDesktop={isDesktop}
           isReady={isReady}
           onReadyPlayer={handleReadyPlayer}
+          currentVideoPos={currentVideoPos}
+          videoRefs={videoRefs}
+          openMessage={openMessage}
+          onCloseMessage={handleCloseMessage}
         />
       ))}
     </Box>
@@ -196,25 +233,18 @@ const VideoCard = memo((props) => {
     onReadyPlayer,
     setMuted,
     isDesktop,
+    currentVideoPos,
+    videoRefs,
+    openMessage,
+    onCloseMessage,
   } = props;
   const videoRef = useRef(null);
   const [stateProgress, setStateProgress] = useState({
     duration: 0,
     playedSeconds: 0,
   });
-  //const [isReady, setIsReady] = useState(false);
-  const [isPause, setIsPause] = useState(false);
 
-  const onVideoPress = () => {
-    if (videoRef.current) {
-      const internalPlayer = videoRef.current.getInternalPlayer();
-      if (!isPause) {
-        internalPlayer.pauseVideo();
-      } else {
-        internalPlayer.playVideo();
-      }
-    }
-  };
+  console.log("index muted", index, ".>", muted);
 
   const handleProgress = ({ playedSeconds }) => {
     setStateProgress({ ...stateProgress, playedSeconds });
@@ -234,7 +264,23 @@ const VideoCard = memo((props) => {
   const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
   return (
-    <div className="player" data-index={index} onClick={onVideoPress}>
+    <Box
+      sx={{
+        "& iframe": {
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          width: "100%",
+          height: "300%",
+          transform: isDesktop
+            ? "translate(-50%, -50%) rotateX(40deg)"
+            : "translate(-50%, -50%) scale3d(1.5, 1.5, 1.5)",
+        },
+      }}
+      className="player"
+      data-index={index}
+    >
+      <Box sx={{ position: "absolute", zIndex: 2000 }}>{currentVideoPos}</Box>
       <ReactPlayer
         ref={(ref) => {
           videoRef.current = ref;
@@ -256,43 +302,62 @@ const VideoCard = memo((props) => {
         onProgress={handleProgress}
         onDuration={handleDuration}
         onReady={onReadyPlayer(index)}
-        onPause={() => setIsPause(true)}
-        onPlay={() => setIsPause(false)}
+        //onPause={onReadyPlayer(index)}
+        //onPlay={onReadyPlayer(index)}
       />
-      {/* <Controller
-          videoRef={videoRef}
-          muted={muted}
-          setMuted={setMuted}
-          isDesktop={isDesktop}
-          stateProgress={stateProgress}
-          seekHandler={seekHandler}
-          isReady={isReady}
-          isPause={isPause}
-        /> */}
-    </div>
+      <Controller
+        videoRef={videoRef}
+        muted={muted}
+        setMuted={setMuted}
+        isDesktop={isDesktop}
+        stateProgress={stateProgress}
+        seekHandler={seekHandler}
+        isReady={isReady}
+        activePlayer={index === currentVideoPos}
+        openMessage={openMessage}
+        onCloseMessage={onCloseMessage}
+      />
+    </Box>
   );
 });
 
-function Controller({
-  videoRef,
-  muted,
-  setMuted,
-  isDesktop,
-  stateProgress,
-  seekHandler,
-  isReady,
-  isPause,
-}) {
+const Controller = memo((props) => {
+  const {
+    videoRef,
+    muted,
+    setMuted,
+    isDesktop,
+    stateProgress,
+    seekHandler,
+    isReady,
+    activePlayer,
+    openMessage,
+    onCloseMessage,
+  } = props;
+
+  const [isPause, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    setIsPaused(false);
+  }, [activePlayer]);
+
   const handleClick = () => {
     if (videoRef.current) {
       const currentPlayer = videoRef.current?.getInternalPlayer();
 
       if (!isPause) {
         currentPlayer.pauseVideo();
+        setIsPaused(true);
       } else {
         currentPlayer.playVideo();
+        setIsPaused(false);
       }
     }
+  };
+
+  const handleActiveMessage = () => {
+    setMuted(false);
+    onCloseMessage();
   };
 
   return (
@@ -386,10 +451,7 @@ function Controller({
             sx={{ padding: 0, alignItems: "end" }}
             onClick={() => setMuted(false)}
           >
-            <VolumeOffIcon
-              // fontSize={isDesktop ? "large" : "medium"}
-              sx={{ filter: "brightness(0.7)" }}
-            />
+            <VolumeOffIcon sx={{ filter: "brightness(0.7)" }} />
           </IconButton>
         ) : (
           <IconButton
@@ -397,17 +459,28 @@ function Controller({
             sx={{ padding: 0, alignItems: "end" }}
             onClick={() => setMuted(true)}
           >
-            <VolumeUpIcon
-              // fontSize={isDesktop ? "large" : "medium"}
-              sx={{ filter: "brightness(0.7)" }}
-            />
+            <VolumeUpIcon sx={{ filter: "brightness(0.7)" }} />
           </IconButton>
         )}
       </Box>
+      {openMessage && (
+        <Chip
+          sx={{
+            position: "absolute",
+            zIndex: 1001,
+            top: "65px",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+          label="Riattiva audio"
+          onClick={handleActiveMessage}
+          onDelete={onCloseMessage}
+        />
+      )}
       {isPause && (
         <Box
           sx={{
-            zIndex: 1001,
+            zIndex: 1005,
             position: "absolute",
             top: "50%",
             left: "50%",
@@ -429,4 +502,4 @@ function Controller({
       )}
     </Box>
   );
-}
+});
