@@ -17,20 +17,31 @@ import { useInfiniteQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTrailersMovies } from "../api/tmdbApis";
 import CloseIcon from "@mui/icons-material/Close";
+import { useInView } from "react-intersection-observer";
 
 import { memo } from "react";
 import { setQuery } from "../store/movieQuery";
 import "./TrailersMoviesPage.css";
 
+function buildThresholdList(trailers) {
+  let thresholds = [];
+  let numSteps = trailers?.results?.length;
+
+  for (let i = 3.0; i <= numSteps; i++) {
+    let ratio = i / numSteps;
+    thresholds.push(ratio);
+  }
+
+  thresholds.push(0);
+  return thresholds;
+}
+
 export default function TrailersMoviesPage() {
-  const videoRefs = useRef([]);
   const theme = useTheme();
   const dispatch = useDispatch();
 
   const [trailers, setTrailers] = useState(null);
-  const [stateVideoPlayer, setStateVideoPlayer] = useState({});
   const [muted, setMuted] = useState(true);
-  const [currentVideoPos, setCurrentVideoPos] = useState(0);
   const [openMessage, setOpenMessage] = useState(false);
 
   const currentPage = useSelector(
@@ -83,110 +94,19 @@ export default function TrailersMoviesPage() {
 
   if (error) return <h1>{JSON.stringify(error)}</h1>;
 
-  function buildThresholdList() {
-    let thresholds = [];
-    let numSteps = trailers?.results?.length;
-
-    for (let i = 3.0; i <= numSteps; i++) {
-      let ratio = i / numSteps;
-      thresholds.push(ratio);
-    }
-
-    thresholds.push(0);
-    return thresholds;
-  }
-
-  useEffect(() => {
-    const observerOptions = {
-      root: document.querySelector(".container"),
-      rootMargin: "0px",
-      threshold: buildThresholdList(),
-    };
-
-    // This function handles the intersection of videos
-    const handleIntersection = (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const videoElement = entry.target;
-          const dataIndex = videoElement.getAttribute("data-index");
-
-          setCurrentVideoPos((state) => {
-            return parseInt(dataIndex);
-          });
-
-          const currentPlayer =
-            videoRefs.current[dataIndex].getInternalPlayer();
-
-          if (currentPlayer && !muted) {
-            currentPlayer?.unMute();
-          }
-
-          if (trailers?.results?.length - dataIndex < 5 && hasNextPage) {
-            fetchNextPage().then(() => {});
-          }
-        } else {
-          const videoElement = entry.target;
-          const dataIndex = videoElement.getAttribute("data-index");
-
-          const currentPlayer =
-            videoRefs.current[dataIndex].getInternalPlayer();
-
-          if (currentPlayer) {
-            currentPlayer?.seekTo(0.9, "second");
-            currentPlayer?.pauseVideo();
-          }
-        }
-      });
-    };
-
-    const observer = new IntersectionObserver(
-      handleIntersection,
-      observerOptions
-    );
-
-    const videos = document.querySelectorAll(".player");
-
-    // We observe each video reference to trigger play/pause
-    videoRefs.current.forEach((_, index) => {
-      observer.observe(videos[index]);
-    });
-
-    // We disconnect the observer when the component is unmounted
-    return () => {
-      observer.disconnect();
-    };
-  }, [trailers, currentVideoPos]);
-
-  const handleVideoRef = (index) => (ref) => {
-    if (!videoRefs?.current?.[index]) {
-      videoRefs.current[index] = ref;
-    }
-  };
-
-  const handleReadyPlayer = (index) => () => {
-    setStateVideoPlayer((state) => {
-      return {
-        ...state,
-        [`videoPlayer${index}`]: true,
-      };
-    });
-  };
-
   const handleCloseMessage = () => {
     setOpenMessage(false);
   };
-
-  //const handle
 
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
 
   console.log("trailers", trailers?.results?.length);
 
-  const isReady =
-    currentVideoPos + 1 < trailers?.results?.length
-      ? stateVideoPlayer?.[`videoPlayer${currentVideoPos + 1}`] &&
-        status !== "loading"
-      : true;
+  const isReady = true;
+  // currentVideoPos + 1 < trailers?.results?.length
+  //   ? stateVideoPlayer?.[`videoPlayer${currentVideoPos + 1}`] &&
+  //     status !== "loading"
+  //   : true;
 
   return (
     <Box
@@ -204,18 +124,17 @@ export default function TrailersMoviesPage() {
         <VideoCard
           key={index}
           ytID={video.ytID}
-          setVideoRef={handleVideoRef(index)}
-          autoplay={index === currentVideoPos}
+          movie={video.movie}
           index={index}
           muted={muted}
           setMuted={setMuted}
           isDesktop={isDesktop}
           isReady={isReady}
-          onReadyPlayer={handleReadyPlayer}
-          currentVideoPos={currentVideoPos}
-          videoRefs={videoRefs}
           openMessage={openMessage}
           onCloseMessage={handleCloseMessage}
+          trailers={trailers?.results}
+          fetchNextPage={fetchNextPage}
+          hasNextPage={hasNextPage}
         />
       ))}
     </Box>
@@ -225,26 +144,28 @@ export default function TrailersMoviesPage() {
 const VideoCard = memo((props) => {
   const {
     ytID,
-    setVideoRef,
-    autoplay,
     index,
     muted,
     isReady,
-    onReadyPlayer,
     setMuted,
     isDesktop,
-    currentVideoPos,
-    videoRefs,
     openMessage,
     onCloseMessage,
+    trailers,
+    fetchNextPage,
+    hasNextPage,
+    movie,
   } = props;
+  const { ref, inView, entry } = useInView({
+    rootMargin: "0px",
+    threshold: buildThresholdList(trailers),
+  });
+
   const videoRef = useRef(null);
   const [stateProgress, setStateProgress] = useState({
     duration: 0,
     playedSeconds: 0,
   });
-
-  console.log("index muted", index, ".>", muted);
 
   const handleProgress = ({ playedSeconds }) => {
     setStateProgress({ ...stateProgress, playedSeconds });
@@ -258,13 +179,31 @@ const VideoCard = memo((props) => {
       ...stateProgress,
       playedSeconds: value,
     });
-    ytRef.current.seekTo(value, "second");
+    videoRef.current.seekTo(value, "second");
   };
+
+  const handlePlay = () => {
+    // if (!muted && inView) {
+    //   console.log("test");
+    //   videoRef?.current?.getInternalPlayer()?.unMute();
+    // }
+  };
+
+  useEffect(() => {
+    if (inView) {
+      if (trailers?.length - index < 5 && hasNextPage) {
+        fetchNextPage();
+      }
+    }
+  }, [inView]);
 
   const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
+  //console.log("movie", movie);
+
   return (
     <Box
+      ref={ref}
       sx={{
         "& iframe": {
           position: "absolute",
@@ -280,30 +219,31 @@ const VideoCard = memo((props) => {
       className="player"
       data-index={index}
     >
-      <Box sx={{ position: "absolute", zIndex: 2000 }}>{currentVideoPos}</Box>
+      <Box sx={{ position: "absolute", zIndex: 2000 }}>{index}</Box>
       <ReactPlayer
-        ref={(ref) => {
-          videoRef.current = ref;
-          if (ref) {
-            setVideoRef(ref);
-          }
-        }}
+        ref={videoRef}
         playsinline
         url={`${YOUTUBE_URL}${ytID || "L3oOldViIgY"}`}
-        style={{
-          pointerEvents: "none",
-        }}
+        // style={{
+        //   pointerEvents: "none",
+        // }}
         width="100%"
         height="100%"
         controls={false}
-        playing={autoplay}
+        playing={inView}
         muted={muted}
         loop
         onProgress={handleProgress}
         onDuration={handleDuration}
-        onReady={onReadyPlayer(index)}
+        //onReady={onReadyPlayer(index)}
+        onError={(err) => console.log("err", err)}
+        config={{
+          yourube: {
+            onUnstarted: () => console.log("what"),
+          },
+        }}
         //onPause={onReadyPlayer(index)}
-        //onPlay={onReadyPlayer(index)}
+        onPlay={handlePlay}
       />
       <Controller
         videoRef={videoRef}
@@ -313,7 +253,7 @@ const VideoCard = memo((props) => {
         stateProgress={stateProgress}
         seekHandler={seekHandler}
         isReady={isReady}
-        activePlayer={index === currentVideoPos}
+        activePlayer={inView}
         openMessage={openMessage}
         onCloseMessage={onCloseMessage}
       />
@@ -341,7 +281,8 @@ const Controller = memo((props) => {
     setIsPaused(false);
   }, [activePlayer]);
 
-  const handleClick = () => {
+  const handleClick = (e) => {
+    e.preventDefault();
     if (videoRef.current) {
       const currentPlayer = videoRef.current?.getInternalPlayer();
 
@@ -356,8 +297,22 @@ const Controller = memo((props) => {
   };
 
   const handleActiveMessage = () => {
-    setMuted(false);
+    const currentPlayer = videoRef.current?.getInternalPlayer();
+
     onCloseMessage();
+    currentPlayer?.unMute();
+    setMuted(false);
+  };
+
+  const handleMuted = (bool) => {
+    const currentPlayer = videoRef.current?.getInternalPlayer();
+    if (bool) {
+      setMuted(true);
+      currentPlayer?.mute();
+    } else {
+      setMuted(false);
+      currentPlayer?.unMute();
+    }
   };
 
   return (
@@ -449,7 +404,7 @@ const Controller = memo((props) => {
           <IconButton
             disabled={!isReady}
             sx={{ padding: 0, alignItems: "end" }}
-            onClick={() => setMuted(false)}
+            onClick={() => handleMuted(false)}
           >
             <VolumeOffIcon sx={{ filter: "brightness(0.7)" }} />
           </IconButton>
@@ -457,7 +412,7 @@ const Controller = memo((props) => {
           <IconButton
             disabled={!isReady}
             sx={{ padding: 0, alignItems: "end" }}
-            onClick={() => setMuted(true)}
+            onClick={() => handleMuted(true)}
           >
             <VolumeUpIcon sx={{ filter: "brightness(0.7)" }} />
           </IconButton>
