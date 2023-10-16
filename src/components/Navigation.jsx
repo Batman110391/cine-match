@@ -28,7 +28,7 @@ export const ICON_ROUTE = [
     path: "/showtv",
   },
   {
-    name: "Show Trailer",
+    name: "Trailers",
     icon: <TheatersIcon />,
     path: "/trailerMovies",
   },

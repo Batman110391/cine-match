@@ -40,9 +40,13 @@ export default function TrailersMoviesPage() {
   const theme = useTheme();
   const dispatch = useDispatch();
 
+  const containerRef = useRef(null);
+
   const [trailers, setTrailers] = useState(null);
   const [muted, setMuted] = useState(true);
   const [openMessage, setOpenMessage] = useState(false);
+  const [currentVideoPos, setCurrentVideoPos] = useState(0);
+  const [videoInLight, setVideoInLight] = useState([]);
 
   const currentPage = useSelector(
     (state) => state.movieQuery.showTrailerCurrentPage
@@ -98,6 +102,14 @@ export default function TrailersMoviesPage() {
     setOpenMessage(false);
   };
 
+  const onVideoInLight = (index) => {
+    const exist = videoInLight?.find((ele) => ele === index);
+
+    if (!exist) {
+      setVideoInLight((state) => [...state, index]);
+    }
+  };
+
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
 
   console.log("trailers", trailers?.results?.length);
@@ -110,6 +122,7 @@ export default function TrailersMoviesPage() {
 
   return (
     <Box
+      ref={containerRef}
       className="container"
       sx={{
         overflow: isReady ? "scroll" : "hidden",
@@ -135,6 +148,11 @@ export default function TrailersMoviesPage() {
           trailers={trailers?.results}
           fetchNextPage={fetchNextPage}
           hasNextPage={hasNextPage}
+          setCurrentVideoPos={setCurrentVideoPos}
+          currentVideoPos={currentVideoPos}
+          containerRef={containerRef}
+          onVideoInLight={onVideoInLight}
+          videoInLight={videoInLight}
         />
       ))}
     </Box>
@@ -155,7 +173,15 @@ const VideoCard = memo((props) => {
     fetchNextPage,
     hasNextPage,
     movie,
+    setCurrentVideoPos,
+    currentVideoPos,
+    containerRef,
+    onVideoInLight,
+    videoInLight,
   } = props;
+
+  const isLight = currentVideoPos - index > 15;
+
   const { ref, inView, entry } = useInView({
     rootMargin: "0px",
     threshold: buildThresholdList(trailers),
@@ -189,13 +215,42 @@ const VideoCard = memo((props) => {
     // }
   };
 
+  const checkAbilityScroll = (array) => {
+    const handleWheel = (e) => {
+      if (e.deltaY < 0) {
+        e.preventDefault();
+      }
+    };
+
+    if (containerRef.current && array.indexOf(currentVideoPos - 1) !== -1) {
+      containerRef.current.addEventListener("wheel", handleWheel, {
+        passive: false,
+      });
+    }
+
+    return () => {
+      if (containerRef.current) {
+        containerRef.current.removeEventListener("wheel", handleWheel);
+      }
+    };
+  };
+
   useEffect(() => {
+    //changeStatePlayer(index, ytID);
+
+    checkAbilityScroll(videoInLight);
+
+    if (isLight) {
+      onVideoInLight(index);
+    }
+
     if (inView) {
+      setCurrentVideoPos(index);
       if (trailers?.length - index < 5 && hasNextPage) {
         fetchNextPage();
       }
     }
-  }, [inView]);
+  }, [inView, isLight]);
 
   const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
@@ -227,6 +282,7 @@ const VideoCard = memo((props) => {
         // style={{
         //   pointerEvents: "none",
         // }}
+        light={isLight}
         width="100%"
         height="100%"
         controls={false}
@@ -236,6 +292,7 @@ const VideoCard = memo((props) => {
         onProgress={handleProgress}
         onDuration={handleDuration}
         //onReady={onReadyPlayer(index)}
+        playIcon={<div></div>}
         onError={(err) => console.log("err", err)}
         config={{
           yourube: {
