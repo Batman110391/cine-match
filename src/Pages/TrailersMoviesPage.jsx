@@ -9,6 +9,7 @@ import {
   IconButton,
   Slider,
   Snackbar,
+  Typography,
   useMediaQuery,
 } from "@mui/material";
 import React, { useEffect, useRef, useState } from "react";
@@ -16,12 +17,13 @@ import ReactPlayer from "react-player/youtube";
 import { useInfiniteQuery } from "react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchTrailersMovies } from "../api/tmdbApis";
-import CloseIcon from "@mui/icons-material/Close";
+import LoadingPage from "../components/LoadingPage";
 import { useInView } from "react-intersection-observer";
 
 import { memo } from "react";
 import { setQuery } from "../store/movieQuery";
 import "./TrailersMoviesPage.css";
+import useScrollSnap from "../utils/useScrollScap";
 
 function buildThresholdList(trailers) {
   let thresholds = [];
@@ -41,6 +43,10 @@ export default function TrailersMoviesPage() {
   const dispatch = useDispatch();
 
   const containerRef = useRef(null);
+
+  const { direction } = useScrollSnap({ ref: containerRef });
+
+  // console.log("direction", direction);
 
   const [trailers, setTrailers] = useState(null);
   const [muted, setMuted] = useState(true);
@@ -96,14 +102,70 @@ export default function TrailersMoviesPage() {
     }
   }
 
-  if (error) return <h1>{JSON.stringify(error)}</h1>;
+  // useEffect(() => {
+  //   let lastScrollTop = 0;
+  //   const handleDesktopScroll = (e) => {
+  //     const currentScrollPosition = e.target.scrollTop;
+
+  //     if (currentScrollPosition > lastScrollTop) {
+  //       e.preventDefault();
+  //     } else if (currentScrollPosition < lastScrollTop) {
+  //       e.target.scrollTop = currentScrollPosition;
+  //     }
+
+  //     lastScrollTop = currentScrollPosition;
+  //   };
+
+  //   const handleMobileTouches = (e) => {
+  //     const currentY = e.touches[0].clientY;
+  //     if (currentY < lastScrollTop) {
+  //     }
+  //     e.preventDefault();
+  //     lastScrollTop = currentY;
+  //   };
+
+  //   // const handleAllWheel = (e) => {
+  //   //   e.preventDefault();
+  //   // };
+
+  //   console.log("videoInLight", videoInLight);
+
+  //   if (
+  //     containerRef.current &&
+  //     videoInLight.indexOf(currentVideoPos - 1) !== -1
+  //   ) {
+  //     containerRef.current.addEventListener("scroll", handleDesktopScroll, {
+  //       passive: false,
+  //     });
+  //     containerRef.current.addEventListener("touchmove", handleMobileTouches, {
+  //       passive: false,
+  //     }); // mobile
+  //   }
+
+  //   // if (containerRef.current && isFetchingNextPage) {
+  //   //   containerRef.current.addEventListener("scroll", handleAllWheel, {
+  //   //     passive: false,
+  //   //   });
+  //   // }
+
+  //   return () => {
+  //     if (containerRef.current) {
+  //       containerRef.current.removeEventListener("scroll", handleDesktopScroll);
+  //       containerRef.current.removeEventListener(
+  //         "touchmove",
+  //         handleMobileTouches
+  //       );
+  //       //containerRef.current.removeEventListener("scroll", handleAllWheel);
+  //     }
+  //   };
+  // }, [videoInLight, isFetchingNextPage, currentVideoPos]);
 
   const handleCloseMessage = () => {
     setOpenMessage(false);
   };
 
   const onVideoInLight = (index) => {
-    const exist = videoInLight?.find((ele) => ele === index);
+    const exist = videoInLight.indexOf(index) !== -1;
 
     if (!exist) {
       setVideoInLight((state) => [...state, index]);
@@ -120,6 +182,8 @@ export default function TrailersMoviesPage() {
   //     status !== "loading"
   //   : true;
 
+  if (status === "error") return <h1>{JSON.stringify(error)}</h1>;
+
   return (
     <Box
       ref={containerRef}
@@ -133,28 +197,31 @@ export default function TrailersMoviesPage() {
         paddingTop: isDesktop ? "5px" : 0,
       }}
     >
-      {trailers?.results?.map((video, index) => (
-        <VideoCard
-          key={index}
-          ytID={video.ytID}
-          movie={video.movie}
-          index={index}
-          muted={muted}
-          setMuted={setMuted}
-          isDesktop={isDesktop}
-          isReady={isReady}
-          openMessage={openMessage}
-          onCloseMessage={handleCloseMessage}
-          trailers={trailers?.results}
-          fetchNextPage={fetchNextPage}
-          hasNextPage={hasNextPage}
-          setCurrentVideoPos={setCurrentVideoPos}
-          currentVideoPos={currentVideoPos}
-          containerRef={containerRef}
-          onVideoInLight={onVideoInLight}
-          videoInLight={videoInLight}
-        />
-      ))}
+      {trailers?.results?.map((video, index) => {
+        return (
+          <VideoCard
+            key={index}
+            ytID={video.ytID}
+            movie={video.movie}
+            index={index}
+            muted={muted}
+            setMuted={setMuted}
+            isDesktop={isDesktop}
+            isReady={isReady}
+            openMessage={openMessage}
+            onCloseMessage={handleCloseMessage}
+            trailers={trailers?.results}
+            fetchNextPage={fetchNextPage}
+            hasNextPage={hasNextPage}
+            setCurrentVideoPos={setCurrentVideoPos}
+            currentVideoPos={currentVideoPos}
+            containerRef={containerRef}
+            onVideoInLight={onVideoInLight}
+            videoInLight={videoInLight}
+            isFetchingNextPage={isFetchingNextPage}
+          />
+        );
+      })}
     </Box>
   );
 }
@@ -178,9 +245,10 @@ const VideoCard = memo((props) => {
     containerRef,
     onVideoInLight,
     videoInLight,
+    isFetchingNextPage,
   } = props;
 
-  const isLight = currentVideoPos - index > 15;
+  const isLight = currentVideoPos - index > 10;
 
   const { ref, inView, entry } = useInView({
     rootMargin: "0px",
@@ -215,37 +283,13 @@ const VideoCard = memo((props) => {
     // }
   };
 
-  const checkAbilityScroll = (array) => {
-    const handleWheel = (e) => {
-      if (e.deltaY < 0) {
-        e.preventDefault();
-      }
-    };
-
-    if (containerRef.current && array.indexOf(currentVideoPos - 1) !== -1) {
-      containerRef.current.addEventListener("wheel", handleWheel, {
-        passive: false,
-      });
-    }
-
-    return () => {
-      if (containerRef.current) {
-        containerRef.current.removeEventListener("wheel", handleWheel);
-      }
-    };
-  };
-
   useEffect(() => {
-    //changeStatePlayer(index, ytID);
-
-    checkAbilityScroll(videoInLight);
-
     if (isLight) {
       onVideoInLight(index);
     }
 
     if (inView) {
-      setCurrentVideoPos(index);
+      setCurrentVideoPos((state) => index);
       if (trailers?.length - index < 5 && hasNextPage) {
         fetchNextPage();
       }
@@ -255,7 +299,6 @@ const VideoCard = memo((props) => {
   const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
   //console.log("movie", movie);
-
   return (
     <Box
       ref={ref}
@@ -272,48 +315,65 @@ const VideoCard = memo((props) => {
         },
       }}
       className="player"
-      data-index={index}
     >
-      <Box sx={{ position: "absolute", zIndex: 2000 }}>{index}</Box>
-      <ReactPlayer
-        ref={videoRef}
-        playsinline
-        url={`${YOUTUBE_URL}${ytID || "L3oOldViIgY"}`}
-        // style={{
-        //   pointerEvents: "none",
-        // }}
-        light={isLight}
-        width="100%"
-        height="100%"
-        controls={false}
-        playing={inView}
-        muted={muted}
-        loop
-        onProgress={handleProgress}
-        onDuration={handleDuration}
-        //onReady={onReadyPlayer(index)}
-        playIcon={<div></div>}
-        onError={(err) => console.log("err", err)}
-        config={{
-          yourube: {
-            onUnstarted: () => console.log("what"),
-          },
-        }}
-        //onPause={onReadyPlayer(index)}
-        onPlay={handlePlay}
-      />
-      <Controller
-        videoRef={videoRef}
-        muted={muted}
-        setMuted={setMuted}
-        isDesktop={isDesktop}
-        stateProgress={stateProgress}
-        seekHandler={seekHandler}
-        isReady={isReady}
-        activePlayer={inView}
-        openMessage={openMessage}
-        onCloseMessage={onCloseMessage}
-      />
+      {!entry ? (
+        <LoadingPage />
+      ) : (
+        <>
+          <Typography
+            variant="h6"
+            sx={{
+              position: "absolute",
+              zIndex: 1001,
+              top: 0,
+              left: 5,
+              p: 0,
+              m: 0,
+            }}
+          >
+            {movie?.title} - {index}
+          </Typography>
+          <ReactPlayer
+            ref={videoRef}
+            playsinline
+            url={`${YOUTUBE_URL}${ytID || "L3oOldViIgY"}`}
+            style={{
+              pointerEvents: "none",
+            }}
+            light={isLight}
+            width="100%"
+            height="100%"
+            controls={false}
+            playing={inView}
+            muted={muted}
+            loop
+            onProgress={handleProgress}
+            onDuration={handleDuration}
+            //onReady={onReadyPlayer(index)}
+            playIcon={<div></div>}
+            onError={(err) => console.log("err", err)}
+            config={{
+              yourube: {
+                onUnstarted: () => console.log("what"),
+              },
+            }}
+            //onPause={onReadyPlayer(index)}
+            onPlay={handlePlay}
+          />
+          <Controller
+            videoRef={videoRef}
+            muted={muted}
+            setMuted={setMuted}
+            isDesktop={isDesktop}
+            stateProgress={stateProgress}
+            seekHandler={seekHandler}
+            isReady={isReady}
+            activePlayer={inView}
+            openMessage={openMessage}
+            onCloseMessage={onCloseMessage}
+          />
+        </>
+      )}
     </Box>
   );
 });
