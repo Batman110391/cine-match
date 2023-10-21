@@ -374,7 +374,8 @@ const CustomController = memo(function CustomController(props) {
 
   const heightHeaderBar = isDesktop ? 45 : 80;
   const heightFooter = 20;
-  const aggregateHeight = heightHeaderBar + heightFooter;
+  const marginExtra = 30;
+  const aggregateHeight = heightHeaderBar + heightFooter + marginExtra;
 
   return (
     <Box
