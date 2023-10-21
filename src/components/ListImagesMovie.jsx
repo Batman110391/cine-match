@@ -60,7 +60,6 @@ export default function ListImagesMovie({ images }) {
         sx={{
           width: "100%",
           height: "100%",
-          transform: "translateZ(0)",
         }}
         rowHeight={200}
         cols={useMediaQuery(theme.breakpoints.up("sm")) ? 4 : 1}

@@ -164,6 +164,7 @@ export default function DialogMovieDetail({
                   <YouTubePlayer
                     controls={true}
                     loop
+                    playsinline
                     muted={true}
                     playing={true}
                     width="100%"
@@ -197,6 +198,7 @@ export default function DialogMovieDetail({
                     opacity: 0.04,
                     transition:
                       "background-image 0.8s cubic-bezier(0, 0.71, 0.2, 1.01)",
+                    height: !isDesktop ? "300px" : "unset",
                   },
                 }}
               >
@@ -497,7 +499,7 @@ export default function DialogMovieDetail({
                         </SubHeader>
                       </Grid>
                     )}
-                  <Box sx={{ height: 40, width: "100%" }} />
+                  {/* <Box sx={{ height: 40, width: "100%" }} /> */}
                 </Grid>
               </Box>
             </Box>

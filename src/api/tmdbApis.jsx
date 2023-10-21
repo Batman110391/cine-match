@@ -1173,7 +1173,7 @@ export async function fetchTrailersMovies(page) {
       if (italianTrailers.length > 0) {
         if (italianTrailers?.[0]?.key) {
           const exist = await ytExists(italianTrailers?.[0]?.key);
-          if (exist) {
+          if (exist && italianTrailers?.[0]?.key) {
             return {
               movie,
               ytID: italianTrailers?.[0]?.key,
