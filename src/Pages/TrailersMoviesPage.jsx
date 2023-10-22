@@ -143,8 +143,6 @@ export default function TrailersMoviesPage() {
   // if (status === "loading") return <LoadingPage />;
   if (status === "error") return <h1>{JSON.stringify(error)}</h1>;
 
-  console.log("trailers", trailers?.results?.length);
-
   const optionDesktop = {
     mousewheel: true,
     modules: [Mousewheel],
@@ -269,6 +267,7 @@ const VideoWrapper = memo(function VideoWrapper(props) {
       videoRef={ytRef}
       activePlayer={index === currentVideoPos}
       stateProgress={stateProgress}
+      seekHandler={seekHandler}
       {...props}
     >
       <Box
@@ -397,6 +396,7 @@ const CustomController = memo(function CustomController(props) {
           height: `calc(100% - ${aggregateHeight}px)`,
           background: isPause ? "#00000070" : "transparent",
           transition: "background 0.3s cubic-bezier(0, 0.71, 0.2, 1.01)",
+          userSelect: "none",
         }}
         onClick={handleClick}
       />
@@ -428,7 +428,7 @@ const CustomController = memo(function CustomController(props) {
           sx={{
             position: "absolute",
             zIndex: 1001,
-            top: "65px",
+            top: isDesktop ? "85px" : "155px",
             left: "50%",
             transform: "translate(-50%, -50%)",
           }}
@@ -450,6 +450,7 @@ const CustomController = memo(function CustomController(props) {
           gap: "10px",
           height: `${heightFooter}px`,
           padding: isDesktop ? "15px" : "20px 15px",
+          userSelect: "none",
         }}
       >
         <Slider
@@ -543,6 +544,7 @@ const HeaderControll = memo(function HeaderControll(props) {
           textOverflow: "ellipsis",
           whiteSpace: "nowrap",
           minWidth: isDesktop ? "10%" : "60%",
+          mr: !isDesktop ? "40px" : 0,
         }}
         variant="h6"
       >
@@ -583,11 +585,12 @@ const InfoGenresList = memo(function InfoGenresList({
         display: "flex",
         alignItems: "center",
         gap: 2,
+        userSelect: "none",
         ...otherStyle,
       }}
     >
       {currGenres?.map((name) => {
-        return <Chip size="small" color="secondary" label={name} />;
+        return <Chip key={name} size="small" color="secondary" label={name} />;
       })}
     </Box>
   );
