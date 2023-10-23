@@ -19,6 +19,7 @@ import SpeedDialShare from "./SpeedDialShare";
 import { manageImageSizeAndQuality } from "./NewsCard";
 import ImageLazyLoad from "./ImageLazyLoad";
 import { red } from "@mui/material/colors";
+import moment from "moment";
 
 export default function DialogNewsDetail({ open, onClose, newsID }) {
   const theme = useTheme();
@@ -85,7 +86,11 @@ export default function DialogNewsDetail({ open, onClose, newsID }) {
             {detail?.articleTitle}
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            <Typography variant="caption">{detail?.articleDate}</Typography>
+            <Typography variant="caption">
+              {moment(
+                new Date(detail?.articleDataFromatting).getTime()
+              ).fromNow()}
+            </Typography>
             <Typography variant="caption">
               {detail?.articleType === "review"
                 ? "Recensione"

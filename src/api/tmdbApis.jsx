@@ -1239,40 +1239,51 @@ async function ytExists(videoID) {
   }
 }
 
-export async function updateNews() {
-  const currentYear = new Date().getFullYear();
+export async function updateNews(executionAt) {
+  const url =
+    process.env.NODE_ENV === "development"
+      ? `http://localhost:8888/.netlify/functions/news-movie?executionat=${executionAt}`
+      : `https://cinematicmatch.netlify.app/.netlify/functions/news-movie?executionat=${executionAt}`;
 
   try {
-    const result = await fetchAllFlickMetrixMovies(currentYear);
+    const response = await fetch(url);
 
-    const moviesTable = supabase.from("flickmetrix-movies");
+    const responseJson = await response.json();
 
-    if (Array.isArray(result)) {
+    const result = responseJson?.result;
+
+    const articleTables = supabase.from("articles");
+
+    if (Array.isArray(result) && result.length > 0) {
       const createObjectInsert = result
-        .map((movie) => {
-          if (!movie?.ID || !movie.imdbID) return null;
+        .map((article) => {
+          if (!article?.articleID) return null;
+          if (!article?.titleMovie) return null;
+
           return {
-            id: movie?.ID,
-            imdbID: movie?.imdbID,
-            year: movie?.Year,
-            title: movie.Title,
-            ratingLetterboxd: movie?.LetterboxdScore,
-            ratingImdb: movie?.imdbRating,
-            detail: movie,
+            articleID: article?.articleID,
+            bgImage: article?.bgImage,
+            articleTitle: article?.articleTitle,
+            articleDescription: article.articleDescription,
+            articleReview: article?.articleReview,
+            articleDataFromatting: article?.articleDataFromatting,
+            articleDate: article?.articleDate,
+            articleType: article?.articleType,
+            titleMovie: article?.titleMovie,
           };
         })
         .filter(Boolean);
 
-      const { error } = await moviesTable.upsert(createObjectInsert, {
+      const { error } = await articleTables.upsert(createObjectInsert, {
         ignoreDuplicates: true,
       });
       if (error) {
         console.error(error);
       } else {
-        console.log("Data saved successfully!");
+        console.log("Data news saved successfully!");
       }
     } else {
-      console.log("No movies found!");
+      console.log("No news found!");
     }
   } catch (err) {
     console.error(err);

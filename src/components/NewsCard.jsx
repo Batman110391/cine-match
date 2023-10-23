@@ -9,6 +9,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import React from "react";
+import moment from "moment";
 
 export function manageImageSizeAndQuality(url, px, quality) {
   const newDimensions = px ? px : "250x180";
@@ -113,7 +114,9 @@ export default function NewsCard({ news, w = 175, h = 275, onClick }) {
                       variant={"button"}
                       color={"text.secondary"}
                     >
-                      {news?.articleDate}
+                      {moment(
+                        new Date(news?.articleDataFromatting).getTime()
+                      ).fromNow()}
                     </Typography>
                   </Stack>
                 )}
@@ -133,7 +136,9 @@ export default function NewsCard({ news, w = 175, h = 275, onClick }) {
                     variant={"button"}
                     color={"text.secondary"}
                   >
-                    {news?.articleDate}
+                    {moment(
+                      new Date(news?.articleDataFromatting).getTime()
+                    ).fromNow()}
                   </Typography>
                 </>
               )}

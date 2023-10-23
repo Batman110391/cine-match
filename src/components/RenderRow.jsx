@@ -32,7 +32,7 @@ export default function RenderRow({
           {itemData.map((news, i) => (
             <Grid
               component={motion.div}
-              key={news.articleID}
+              key={news.id}
               xs={12}
               layout={"preserve-aspect"}
               animate={{ scale: 1, opacity: 1 }}
