@@ -423,6 +423,24 @@ export const genresList = [
   },
 ];
 
+export async function fetchNewsByTitleMovie(title) {
+  const formattingSearchInput = title
+    ?.split(" ")
+    ?.map((ele) => `%${ele}%`)
+    ?.join(" ");
+
+  const { data, error } = await supabase
+    .from("articles")
+    .select("*")
+    .ilike("titleMovie", formattingSearchInput);
+
+  if (error) {
+    return null;
+  }
+
+  return data;
+}
+
 export async function fetchNewsMovie(page, searchInput) {
   const range = { start: (page - 1) * 50, end: page * 50 - 1 };
 
@@ -477,7 +495,7 @@ export async function fetchDetailNewsById(newsID) {
   const { data, error } = await supabase
     .from("articles")
     .select("*")
-    .eq("ID", newsID);
+    .eq("id", newsID);
 
   if (error) {
     return null;
@@ -903,15 +921,12 @@ export async function fetchDetailMovieById(id, type, originalTitle) {
         resource,
       ])
     );
-    // const news = data?.original_title
-    //   ? await fetchNewsMovie(1, data?.original_title)
-    //   : null;
-    const news = null;
+    const news = await fetchNewsByTitleMovie(data?.original_title);
 
     if (resources.videos?.results?.length > 0) {
       return {
         ...data,
-        news: news ? news?.results : null,
+        news: news || null,
         credits: resources.credits,
         videos: resources.videos,
         images: resources.images,
@@ -1221,5 +1236,45 @@ async function ytExists(videoID) {
   } catch (error) {
     console.error(error);
     return false;
+  }
+}
+
+export async function updateNews() {
+  const currentYear = new Date().getFullYear();
+
+  try {
+    const result = await fetchAllFlickMetrixMovies(currentYear);
+
+    const moviesTable = supabase.from("flickmetrix-movies");
+
+    if (Array.isArray(result)) {
+      const createObjectInsert = result
+        .map((movie) => {
+          if (!movie?.ID || !movie.imdbID) return null;
+          return {
+            id: movie?.ID,
+            imdbID: movie?.imdbID,
+            year: movie?.Year,
+            title: movie.Title,
+            ratingLetterboxd: movie?.LetterboxdScore,
+            ratingImdb: movie?.imdbRating,
+            detail: movie,
+          };
+        })
+        .filter(Boolean);
+
+      const { error } = await moviesTable.upsert(createObjectInsert, {
+        ignoreDuplicates: true,
+      });
+      if (error) {
+        console.error(error);
+      } else {
+        console.log("Data saved successfully!");
+      }
+    } else {
+      console.log("No movies found!");
+    }
+  } catch (err) {
+    console.error(err);
   }
 }

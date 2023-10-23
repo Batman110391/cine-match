@@ -80,6 +80,11 @@ export default function DialogMovieDetailProvider({ children }) {
     setPersonIDSub(personID);
   };
 
+  const handleClickNews = (newsID) => {
+    setOpenNewsDialog(true);
+    setNewsID(newsID);
+  };
+
   const handleCloseDialog = () => {
     setOpenNewsDialog(false);
     setNewsID(null);
@@ -98,6 +103,7 @@ export default function DialogMovieDetailProvider({ children }) {
           type={type}
           subItemClick={handleClickSubItem}
           openPersonDialog={handleClickPerson}
+          openDialogNewsDetail={handleClickNews}
         />
       )}
       {movieIDSubDialog && typeSubDialog && (

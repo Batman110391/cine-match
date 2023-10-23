@@ -34,6 +34,8 @@ export default function CarouselDiscover({
   type,
   invertBg,
   nobg,
+  Component,
+  customStyle,
 }) {
   if (isLoading) {
     return (
@@ -58,6 +60,19 @@ export default function CarouselDiscover({
     },
     modules: [Navigation, FreeMode],
   };
+
+  const styleSwiperSlide = customStyle
+    ? customStyle
+    : {
+        width: isDesktop
+          ? `${MOVIE_CARD_WIDTH}px`
+          : `${MOVIE_CARD_WIDTH_MOBILE}px`,
+      };
+
+  const action =
+    handleClickItem && typeof handleClickItem === "function"
+      ? handleClickItem
+      : null;
 
   return (
     <Box
@@ -107,21 +122,26 @@ export default function CarouselDiscover({
             return (
               <SwiperSlide
                 key={slideContent.id}
-                style={{
-                  width: isDesktop
-                    ? `${MOVIE_CARD_WIDTH}px`
-                    : `${MOVIE_CARD_WIDTH_MOBILE}px`,
-                }}
-                onClick={() => handleClickItem(slideContent.id, type)}
+                style={styleSwiperSlide}
+                {...(action
+                  ? { onClick: () => action(slideContent.id, type) }
+                  : null)}
               >
-                <MovieCard
-                  bg={slideContent?.poster_path}
-                  title={slideContent?.title || slideContent?.name}
-                  w={isDesktop ? MOVIE_CARD_WIDTH : MOVIE_CARD_WIDTH_MOBILE}
-                  h={isDesktop ? MOVIE_CARD_HEIGHT : MOVIE_CARD_HEIGTH_MOBILE}
-                  badgeRating={slideContent?.vote_average}
-                  isDesktop={isDesktop}
-                />
+                {Component ? (
+                  <Component
+                    slideContent={slideContent}
+                    isDesktop={isDesktop}
+                  />
+                ) : (
+                  <MovieCard
+                    bg={slideContent?.poster_path}
+                    title={slideContent?.title || slideContent?.name}
+                    w={isDesktop ? MOVIE_CARD_WIDTH : MOVIE_CARD_WIDTH_MOBILE}
+                    h={isDesktop ? MOVIE_CARD_HEIGHT : MOVIE_CARD_HEIGTH_MOBILE}
+                    badgeRating={slideContent?.vote_average}
+                    isDesktop={isDesktop}
+                  />
+                )}
               </SwiperSlide>
             );
           })}
@@ -131,7 +151,11 @@ export default function CarouselDiscover({
   );
 }
 
-function LoadingCarousel({ titleDiscover, isDesktop, invertBg }) {
+const LoadingCarousel = React.memo(function LoadingCarousel({
+  titleDiscover,
+  isDesktop,
+  invertBg,
+}) {
   return (
     <Box
       sx={{
@@ -170,4 +194,4 @@ function LoadingCarousel({ titleDiscover, isDesktop, invertBg }) {
       <Divider sx={{ my: 2, borderColor: "transparent" }} />
     </Box>
   );
-}
+});

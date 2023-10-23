@@ -31,8 +31,6 @@ export default function DialogNewsDetail({ open, onClose, newsID }) {
 
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
 
-  console.log("detail news", detail);
-
   return (
     <DialogWrapperResponsivness
       open={open}
@@ -76,7 +74,12 @@ export default function DialogNewsDetail({ open, onClose, newsID }) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          sx={{ paddingX: 1.5 }}
+          sx={{
+            paddingX: 1.5,
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+          }}
         >
           <Typography variant="h4" letterSpacing={1.2}>
             {detail?.articleTitle}
@@ -89,7 +92,12 @@ export default function DialogNewsDetail({ open, onClose, newsID }) {
                 : "Approfondimento"}
             </Typography>
           </Box>
-          <Typography variant="h6" fontWeight={300}>
+          <Typography
+            variant="h6"
+            fontWeight={300}
+            fontSize={"1.15rem"}
+            fontStyle={"italic"}
+          >
             {detail?.articleDescription}
           </Typography>
           {detail?.articleReview?.map(
@@ -105,24 +113,30 @@ export default function DialogNewsDetail({ open, onClose, newsID }) {
 
               return (
                 <Box key={i + "textBlock"}>
-                  <Box sx={{ textAlign: "center", my: 1 }}>{renderImage}</Box>
-                  <Typography
-                    sx={{
-                      py: 2,
-                      textDecoration: "underline",
-                      textDecorationColor: red[400],
-                    }}
-                    variant="h5"
-                    letterSpacing={1.2}
-                  >
-                    {subtitle}
-                  </Typography>
+                  {renderImage && (
+                    <Box sx={{ textAlign: "center", my: 1 }}>{renderImage}</Box>
+                  )}
+
+                  {subtitle && (
+                    <Typography
+                      sx={{
+                        py: 2,
+                        textDecoration: "underline",
+                        textDecorationColor: red[400],
+                      }}
+                      variant="h5"
+                      letterSpacing={1.2}
+                    >
+                      {subtitle}
+                    </Typography>
+                  )}
                   {textBlocks?.map((text, i) => (
                     <Typography
                       key={i + "subTextBlock"}
                       sx={{ py: 1 }}
                       fontWeight={300}
-                      letterSpacing={1.8}
+                      fontFamily={"system-ui"}
+                      letterSpacing={1}
                       dangerouslySetInnerHTML={{ __html: text }}
                     />
                   ))}

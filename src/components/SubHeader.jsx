@@ -9,6 +9,7 @@ export default function SubHeader({
   children,
   noAction = false,
   startHidden,
+  sx,
 }) {
   const [view, setView] = React.useState(startHidden ? false : true);
 
@@ -63,7 +64,7 @@ export default function SubHeader({
           })}
       </Box>
       {children && (
-        <Box sx={{ height: view ? "100%" : "0px", overflow: "hidden" }}>
+        <Box sx={{ height: view ? "100%" : "0px", overflow: "hidden", ...sx }}>
           {children}
         </Box>
       )}

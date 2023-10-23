@@ -15,7 +15,7 @@ function srcset(image, resolution, px, quality) {
 export default function ImageLazyLoad({
   url = "",
   w,
-  h,
+  h = "300px",
   resolution,
   px,
   quality,

@@ -55,7 +55,7 @@ export default function RenderRow({
                 news={news}
                 w={isDesktop ? 250 : 125}
                 h={isDesktop ? 180 : 155}
-                onClick={() => handleClickItem(news.ID)}
+                onClick={() => handleClickItem(news.id)}
               />
             </Grid>
           ))}

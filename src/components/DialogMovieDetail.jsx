@@ -52,6 +52,7 @@ export default function DialogMovieDetail({
   type,
   subItemClick,
   openPersonDialog,
+  openDialogNewsDetail,
 }) {
   const theme = useTheme();
 
@@ -486,7 +487,11 @@ export default function DialogMovieDetail({
                     detail?.news?.length > 0 && (
                       <Grid item xs={12}>
                         <SubHeader title={"News"}>
-                          <ListNewsMovie news={detail?.news} />
+                          <ListNewsMovie
+                            news={detail?.news}
+                            isDesktop={isDesktop}
+                            openDialogNewsDetail={openDialogNewsDetail}
+                          />
                         </SubHeader>
                       </Grid>
                     )}

@@ -111,6 +111,7 @@ export default function NewsCard({ news, w = 175, h = 275, onClick }) {
                       component="span"
                       sx={{ fontSize: "0.7rem" }}
                       variant={"button"}
+                      color={"text.secondary"}
                     >
                       {news?.articleDate}
                     </Typography>
@@ -130,6 +131,7 @@ export default function NewsCard({ news, w = 175, h = 275, onClick }) {
                     component="span"
                     sx={{ fontSize: "0.7rem" }}
                     variant={"button"}
+                    color={"text.secondary"}
                   >
                     {news?.articleDate}
                   </Typography>
