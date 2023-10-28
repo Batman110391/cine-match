@@ -441,8 +441,27 @@ export async function fetchNewsByTitleMovie(title) {
   return data;
 }
 
+async function getTotalNews() {
+  try {
+    const { count } = await supabase
+      .from("articles")
+      .select("*", { count: "exact", head: true });
+
+    return count;
+  } catch (err) {
+    return null;
+  }
+}
+
 export async function fetchNewsMovie(page, searchInput) {
-  const range = { start: (page - 1) * 50, end: page * 50 - 1 };
+  const totalNews = await getTotalNews();
+
+  const rangeStarted = { start: (page - 1) * 200, end: page * 200 - 1 };
+
+  const range = {
+    start: totalNews - rangeStarted.end - 1,
+    end: totalNews - rangeStarted.start - (page - 1 !== 0 ? 1 : 0),
+  };
 
   if (searchInput) {
     const formattingSearchInput = searchInput
@@ -474,7 +493,8 @@ export async function fetchNewsMovie(page, searchInput) {
   const { data, error } = await supabase
     .from("articles")
     .select("*")
-    .range(range.start, range.end);
+    .range(range.start, range.end)
+    .order("articleDataFromatting", { ascending: false });
 
   if (error) {
     return null;
@@ -1256,11 +1276,13 @@ export async function updateNews(executionAt) {
 
     if (Array.isArray(result) && result.length > 0) {
       const createObjectInsert = result
-        .map((article) => {
+        .slice(0, 190)
+        .map((article, i) => {
           if (!article?.articleID) return null;
           if (!article?.titleMovie) return null;
 
           return {
+            id: 10718 + i,
             articleID: article?.articleID,
             bgImage: article?.bgImage,
             articleTitle: article?.articleTitle,

@@ -2,9 +2,6 @@ const axios = require("axios");
 const cheerio = require("cheerio");
 
 exports.handler = async (event, context) => {
-  const { queryStringParameters } = event;
-  const { executionat } = queryStringParameters;
-
   const URL_DOMAIN = "https://movieplayer.it";
   let pagination = true;
 
@@ -16,34 +13,80 @@ exports.handler = async (event, context) => {
     if (strData === "ieri") {
       const yesterday = new Date(now);
       yesterday.setDate(now.getDate() - 1);
-      return yesterday;
+      if (isNaN(yesterday.getTime())) {
+        return null;
+      } else {
+        return new Date(yesterday).toISOString().toLocaleString("it-IT");
+      }
     } else if (strData.includes("ora") || strData.includes("ore")) {
       const hoursAgo = parseInt(strData.split(" ")[0]);
       const hoursAgoDate = new Date(now);
       hoursAgoDate.setHours(now.getHours() - hoursAgo);
-      return hoursAgoDate;
+      if (isNaN(hoursAgoDate.getTime())) {
+        return null;
+      } else {
+        return new Date(hoursAgoDate).toISOString().toLocaleString("it-IT");
+      }
+    } else if (strData.includes("minuto") || strData.includes("minuti")) {
+      const minutesAgo = parseInt(strData.split(" ")[0]);
+      const minutesAgoDate = new Date(now);
+      minutesAgoDate.setMinutes(now.getMinutes() - minutesAgo);
+      if (isNaN(minutesAgoDate.getTime())) {
+        return null;
+      } else {
+        return new Date(minutesAgoDate).toISOString().toLocaleString("it-IT");
+      }
     } else if (strData.includes("giorno") || strData.includes("giorni")) {
       const daysAgo = parseInt(strData.split(" ")[0]);
       const daysAgoDate = new Date(now);
       daysAgoDate.setDate(now.getDate() - daysAgo);
-      return daysAgoDate;
+      if (isNaN(daysAgoDate.getTime())) {
+        return null;
+      } else {
+        return new Date(daysAgoDate).toISOString().toLocaleString("it-IT");
+      }
     } else if (strData.includes("settimana") || strData.includes("settimane")) {
       const weeksAgo = parseInt(strData.split(" ")[0]);
       const weeksAgoDate = new Date(now);
       weeksAgoDate.setDate(now.getDate() - weeksAgo * 7);
-      return weeksAgoDate;
+      if (isNaN(weeksAgoDate.getTime())) {
+        return null;
+      } else {
+        return new Date(weeksAgoDate).toISOString().toLocaleString("it-IT");
+      }
     } else if (strData.includes("mese") || strData.includes("mesi")) {
       const monthsAgo = parseInt(strData.split(" ")[0]);
       const monthsAgoDate = new Date(now);
       monthsAgoDate.setMonth(now.getMonth() - monthsAgo);
-      return monthsAgoDate;
+      if (isNaN(monthsAgoDate.getTime())) {
+        return null;
+      } else {
+        return new Date(monthsAgoDate).toISOString().toLocaleString("it-IT");
+      }
     } else if (strData.includes("anno") || strData.includes("anni")) {
       const yearsAgo = parseInt(strData.split(" ")[0]);
       const yearsAgoDate = new Date(now);
       yearsAgoDate.setFullYear(now.getFullYear() - yearsAgo);
-      return yearsAgoDate;
+      if (isNaN(yearsAgoDate.getTime())) {
+        return null;
+      } else {
+        return new Date(yearsAgoDate).toISOString().toLocaleString("it-IT");
+      }
     } else {
-      return null;
+      var parts = strData.split(" ");
+      var day = parseInt(parts[0]);
+      var month = monthNames[parts[1]];
+      var year = parseInt(parts[2]);
+
+      // Crea un oggetto data con i valori ottenuti
+      var date = new Date(year, month, day);
+
+      // Verifica se la data è valida
+      if (isNaN(date.getTime())) {
+        return null;
+      } else {
+        return new Date(date).toISOString().toLocaleString("it-IT");
+      }
     }
   }
 
@@ -115,12 +158,12 @@ exports.handler = async (event, context) => {
     const response = await axios.get(url);
     const $ = cheerio.load(response.data);
 
-    const nextLinkExists = $('head link[rel="next"]').length > 0;
+    // const nextLinkExists = $('head link[rel="next"]').length > 0;
 
-    if (!nextLinkExists) {
-      pagination = null;
-      return null;
-    }
+    // if (!nextLinkExists) {
+    //   pagination = null;
+    //   return null;
+    // }
 
     const articles = $("ul.list-news");
 
@@ -136,16 +179,18 @@ exports.handler = async (event, context) => {
       const dateArticle = dateString;
       const articleDataFromatting = convertData(dateString);
 
-      const timestampTest = new Date(`${articleDataFromatting}`).getTime();
+      // if (articleDataFromatting) {
+      //   const timestampTest = new Date(`${articleDataFromatting}`).getTime();
 
-      const differenceInDays = Math.floor(
-        (timestampTest - parseInt(executionat)) / (24 * 60 * 60 * 1000)
-      );
+      //   const differenceInDays = Math.floor(
+      //     (timestampTest - parseInt(executionat)) / (24 * 60 * 60 * 1000)
+      //   );
 
-      if (differenceInDays < -1) {
-        pagination = null;
-        return null;
-      }
+      //   if (differenceInDays < -1) {
+      //     pagination = null;
+      //     return null;
+      //   }
+      // }
 
       const description = $element.find("p").text().trim();
 
@@ -176,11 +221,14 @@ exports.handler = async (event, context) => {
     return result;
   }
 
-  const response = [];
+  let responseAll = [];
 
   try {
     index = 1;
     while (pagination) {
+      if (index > 3) {
+        pagination = false;
+      }
       const contentForPage = await fetchNewsPage(index);
       if (contentForPage) {
         console.log("page " + index + " complete!");
@@ -205,18 +253,36 @@ exports.handler = async (event, context) => {
             })
             .filter(Boolean);
 
-          response.push(createObjectInsert);
+          responseAll = responseAll.concat(createObjectInsert);
         }
         await sleep(500);
         index++;
       }
     }
 
+    const reorderResponse = responseAll.sort(
+      (a, b) =>
+        new Date(a?.articleDataFromatting) - new Date(b?.articleDataFromatting)
+    );
+
     return {
       statusCode: 200,
-      body: JSON.stringify({ result: response }),
+      body: JSON.stringify({ result: reorderResponse }),
     };
   } catch (err) {
+    if (responseAll && Array.isArray(responseAll) && responseAll.length > 0) {
+      const reorderResponse = responseAll.sort(
+        (a, b) =>
+          new Date(a?.articleDataFromatting) -
+          new Date(b?.articleDataFromatting)
+      );
+
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ result: reorderResponse }),
+      };
+    }
+
     console.log("err", err);
     return {
       statusCode: 500,

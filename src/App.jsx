@@ -39,6 +39,7 @@ export default function App() {
         );
         return;
       }
+      // await updateNews();
 
       if (data.length > 0) {
         const timestampStr = data[0].date;
@@ -52,7 +53,7 @@ export default function App() {
 
         if (differenceInDays > 1) {
           await updateMovies();
-          await updateNews(executionAt);
+          await updateNews();
           const { error } = await supabase
             .from("execution-dates")
             .upsert([{ id: 1, date: currentDate }]);
@@ -67,7 +68,7 @@ export default function App() {
         }
       } else {
         await updateMovies();
-        await updateNews(executionAt);
+        await updateNews();
         const currentDate = Date.now();
         const { error } = await supabase
           .from("execution-dates")

@@ -229,7 +229,7 @@ export default function NewsMovie() {
               style={{ overflow: "hidden" }}
               dataLength={news?.results?.length || 0}
               next={() => debounceFetchNextPage()}
-              hasMore={hasNextPage}
+              hasMore={false}
               loader={
                 <Box sx={{ display: "flex", justifyContent: "center" }}>
                   <CircularProgress />
