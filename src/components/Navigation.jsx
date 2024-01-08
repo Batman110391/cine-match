@@ -32,11 +32,11 @@ export const ICON_ROUTE = [
     icon: <TheatersIcon />,
     path: "/trailerMovies",
   },
-  {
-    name: "News",
-    icon: <NewspaperIcon />,
-    path: "/newsmovie",
-  },
+  // {
+  //   name: "News",
+  //   icon: <NewspaperIcon />,
+  //   path: "/newsmovie",
+  // },
   // {
   //   name: "Consigliati",
   //   icon: <Letterboxd noMargin />,

@@ -1,6 +1,7 @@
-import { Box, Card, Typography } from "@mui/material";
+import { Box, Card, CardMedia, Typography } from "@mui/material";
 import React from "react";
 import { CircularProgressWithLabel } from "./ChartCompatibility";
+import { LazyLoadImage } from "react-lazy-load-image-component";
 
 export default function MovieCard({
   title,
@@ -21,10 +22,10 @@ export default function MovieCard({
       elevation={3}
       sx={{
         position: "relative",
-        backgroundImage: `url(http://image.tmdb.org/t/p/w500${bg})`,
-        backgroundSize: "cover",
-        backgroundRepeat: "no-repeat",
-        backgroundPosition: "center center",
+        // backgroundImage: `url(http://image.tmdb.org/t/p/w500${bg})`,
+        // backgroundSize: "cover",
+        // backgroundRepeat: "no-repeat",
+        // backgroundPosition: "center center",
         height: h ? `${h}px` : "200px",
         width: w ? `${w}px` : "133px",
         display: "flex",
@@ -52,6 +53,15 @@ export default function MovieCard({
         >
           {title}
         </Typography>
+      )}
+      {bg && (
+        <LazyLoadImage
+          alt={title}
+          height={h ? `${h}px` : "200px"}
+          placeholderSrc={`http://image.tmdb.org/t/p/w92${bg}`}
+          src={`http://image.tmdb.org/t/p/w500${bg}`}
+          width={w ? `${w}px` : "133px"}
+        />
       )}
       {percentRating > 0 && (
         <Box sx={{ position: "absolute", top: 2, left: 0 }}>

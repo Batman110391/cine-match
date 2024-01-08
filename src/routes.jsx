@@ -39,10 +39,10 @@ export const routes = [
     route: "/letterboxdraccomendations",
     component: <LetterboxdRaccomendations />,
   },
-  {
-    name: "NewsMovie",
-    key: "newsmovie",
-    route: "/newsmovie/:newsID?/:type?",
-    component: <NewsMovie />,
-  },
+  // {
+  //   name: "NewsMovie",
+  //   key: "newsmovie",
+  //   route: "/newsmovie/:newsID?/:type?",
+  //   component: <NewsMovie />,
+  // },
 ];

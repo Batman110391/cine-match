@@ -53,7 +53,7 @@ export default function App() {
 
         if (differenceInDays > 1) {
           await updateMovies();
-          await updateNews();
+          // await updateNews();
           const { error } = await supabase
             .from("execution-dates")
             .upsert([{ id: 1, date: currentDate }]);
@@ -68,7 +68,7 @@ export default function App() {
         }
       } else {
         await updateMovies();
-        await updateNews();
+        // await updateNews();
         const currentDate = Date.now();
         const { error } = await supabase
           .from("execution-dates")
