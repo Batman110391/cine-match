@@ -23,12 +23,14 @@ import {
   useMediaQuery,
 } from "@mui/material";
 
+import "regenerator-runtime/runtime";
+
 import { alpha, styled } from "@mui/material/styles";
 import * as React from "react";
 
 import { useTheme } from "@emotion/react";
 import CloseIcon from "@mui/icons-material/Close";
-import { green, lightBlue, orange, purple } from "@mui/material/colors";
+import { green, lightBlue, orange, purple, red } from "@mui/material/colors";
 import { useQuery } from "react-query";
 import { fetchMoviesByKeywords } from "../api/tmdbApis";
 import CastsCard from "../components/CastsCard";
@@ -46,6 +48,11 @@ import LiveTvIcon from "@mui/icons-material/LiveTv";
 import MovieIcon from "@mui/icons-material/Movie";
 import PersonIcon from "@mui/icons-material/Person";
 import DialogWrapperResponsivness from "./DialogWrapperResponsivness";
+import MicIcon from "@mui/icons-material/Mic";
+
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -121,7 +128,18 @@ export default function SearchPageDialog({ open, setOpen }) {
 
   const theme = useTheme();
 
+  const {
+    transcript,
+    listening,
+    resetTranscript,
+    browserSupportsSpeechRecognition,
+  } = useSpeechRecognition();
+
   const debouncedSearchTerm = useDebounce(searchInput, 500);
+
+  React.useEffect(() => {
+    setSearchInput(transcript);
+  }, [transcript]);
 
   const { isLoading, error, data } = useQuery(
     ["searchKeyword", debouncedSearchTerm, typeQuery],
@@ -129,6 +147,10 @@ export default function SearchPageDialog({ open, setOpen }) {
   );
 
   if (error) return <h1>{JSON.stringify(error)}</h1>;
+
+  const handleSpeechToText = () => {
+    SpeechRecognition.startListening();
+  };
 
   const handleClickChip = (type) => {
     if (typeQuery !== type) {
@@ -163,7 +185,16 @@ export default function SearchPageDialog({ open, setOpen }) {
       isDesktop={isDesktop}
       scroll={"paper"}
     >
-      <DialogTitle sx={{ bgcolor: "background.paper", p: 2, pb: 0 }}>
+      <DialogTitle
+        sx={{
+          bgcolor: "background.paper",
+          p: 2,
+          pb: 0,
+          zIndex: 2,
+          position: "sticky",
+          top: 0,
+        }}
+      >
         <Box sx={{ width: "90%" }}>
           <Search>
             <SearchIconWrapper>
@@ -174,32 +205,63 @@ export default function SearchPageDialog({ open, setOpen }) {
               value={searchInput}
               onChange={handleSearchInputChange}
               endAdornment={
-                searchInput && (
-                  <InputAdornment position="end">
-                    <Chip
-                      sx={{
-                        borderRadius: "0",
-                      }}
-                      size="small"
-                      label={
-                        <Typography
-                          sx={{
-                            padding: 0,
-                            margin: 0,
-                          }}
-                          fontSize={"0.6rem"}
-                          variant="button"
-                        >
-                          {"azzera"}
-                        </Typography>
-                      }
-                      color="secondary"
-                      onClick={handleClearSearchInput}
-                      variant="outlined"
-                      clickable
-                    />
-                  </InputAdornment>
-                )
+                <>
+                  {searchInput && (
+                    <InputAdornment position="end">
+                      <Chip
+                        sx={{
+                          borderRadius: "0",
+                        }}
+                        size="small"
+                        label={
+                          <Typography
+                            sx={{
+                              padding: 0,
+                              margin: 0,
+                            }}
+                            fontSize={"0.6rem"}
+                            variant="button"
+                          >
+                            {"azzera"}
+                          </Typography>
+                        }
+                        color="secondary"
+                        onClick={handleClearSearchInput}
+                        variant="outlined"
+                        clickable
+                      />
+                    </InputAdornment>
+                  )}
+                  {browserSupportsSpeechRecognition && (
+                    <InputAdornment position="end">
+                      <IconButton
+                        sx={
+                          listening
+                            ? {
+                                color: red[800],
+                                animation: "wave 0.9s ease-in-out infinite",
+                                "@keyframes wave": {
+                                  "0%": {
+                                    transform: "scale(1.2)",
+                                  },
+                                  "50%": {
+                                    transform: "scale(1.1)",
+                                  },
+                                  "100%": {
+                                    transform: "scale(1)",
+                                  },
+                                },
+                              }
+                            : {}
+                        }
+                        size="small"
+                        onClick={handleSpeechToText}
+                      >
+                        <MicIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  )}
+                </>
               }
             />
           </Search>
@@ -234,8 +296,11 @@ export default function SearchPageDialog({ open, setOpen }) {
       <DialogContent
         sx={{
           bgcolor: "background.paper",
-          overflow: { xs: "hidden", sm: "auto" },
-          p: { xs: 0, sm: 2 },
+          // overflow: { xs: "hidden", sm: "auto" },
+          overflow: "hidden",
+          // py: { xs: 0, sm: 2 },
+          px: 0,
+          py: 0,
         }}
         dividers
       >
@@ -243,7 +308,7 @@ export default function SearchPageDialog({ open, setOpen }) {
           sx={{
             width: "100%",
             height: "100%",
-            minHeight: "80vh",
+            // minHeight: "80vh",
             overflowX: "hidden",
             bgcolor: (theme) => alpha(theme.palette.common.white, 0.07),
             mb: 2,

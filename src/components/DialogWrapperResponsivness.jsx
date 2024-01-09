@@ -25,6 +25,9 @@ export default function DialogWrapperResponsivness({
       open={open}
       onClose={onClose}
       TransitionComponent={Transition}
+      PaperProps={{
+        sx: { height: "calc(100% - 64px)" },
+      }}
       {...rest}
     >
       {children}
