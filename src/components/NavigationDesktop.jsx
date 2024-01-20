@@ -1,5 +1,4 @@
-import MailIcon from "@mui/icons-material/Mail";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
+import React from "react";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
 import Drawer from "@mui/material/Drawer";
@@ -8,12 +7,11 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import Toolbar from "@mui/material/Toolbar";
-import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setQuery } from "../store/movieQuery";
-import { ICON_ROUTE } from "./Navigation";
 import { Tooltip } from "@mui/material";
 import { Link } from "react-router-dom";
+import { routes } from "../routes";
 
 const drawerWidth = 70;
 
@@ -45,9 +43,9 @@ export default function NavigationDesktop({ children }) {
       >
         <Toolbar />
         <List>
-          {ICON_ROUTE.map((routeIcon, index) => (
+          {routes.map((route, index) => (
             <ListItem
-              key={routeIcon.name}
+              key={route.name}
               sx={{
                 display: "flex",
                 alignItems: "center",
@@ -55,8 +53,8 @@ export default function NavigationDesktop({ children }) {
               }}
               disablePadding
             >
-              <Tooltip title={routeIcon.name}>
-                <Box component={Link} to={routeIcon.path}>
+              <Tooltip title={route.name}>
+                <Box component={Link} to={route.route}>
                   <ListItemButton
                     selected={index === currentRoute}
                     onClick={() => handleClick(index)}
@@ -74,7 +72,7 @@ export default function NavigationDesktop({ children }) {
                         alignItems: "center",
                       }}
                     >
-                      {routeIcon.icon}
+                      {route.icon}
                     </ListItemIcon>
                   </ListItemButton>
                 </Box>

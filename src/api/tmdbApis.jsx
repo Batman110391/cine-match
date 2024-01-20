@@ -5,6 +5,7 @@ import { fetchPromise } from "../utils/fetchPromise";
 import { KEYWORDS_SEARCH_MOVIE } from "../utils/constant";
 import { uniqueArray } from "../utils/uniqueArray";
 import { supabase } from "../supabaseClient";
+import * as cheerio from "cheerio";
 dayjs.extend(isBetween);
 
 const API_KEY = import.meta.env.VITE_API_KEY;
@@ -44,7 +45,7 @@ async function convertJson(obj) {
   return json;
 }
 
-async function useProxy(url, customProxy) {
+async function useProxy(url, customProxy, type = "json") {
   let responseJson = null;
 
   const urlNetlifyProxy1 =
@@ -95,7 +96,6 @@ async function useProxy(url, customProxy) {
       console.error(e);
     }
   }
-
   return responseJson;
 }
 
@@ -900,6 +900,45 @@ export async function fetchShowTvPage(page, querySearch) {
   });
 }
 
+async function getPlayerLink(id) {
+  try {
+    const { imdb_id } = await fetchPromise(
+      `https://api.themoviedb.org/3/movie/${id}/external_ids?api_key=${API_KEY}`
+    );
+
+    const link = `https://guardahd.stream/movie/${imdb_id}`;
+
+    const response = await useProxy(link, false, "html");
+
+    const $ = cheerio.load(response);
+
+    const firstDiv = $("ul._player-mirrors li").first();
+
+    const idLink = firstDiv.attr("data-link");
+
+    const id_movie_stream = idLink.split("/").pop();
+
+    if (id_movie_stream) {
+      const downloadLink = `https://supervideo.tv/dl?op=download_orig&id=${id_movie_stream}&mode=n`;
+
+      const respDownloadHtml = await fetch(downloadLink);
+      const body = await respDownloadHtml.text();
+
+      const $2 = cheerio.load(body);
+
+      const linkDownloadElem = $2("a.btn_direct-download");
+
+      const valueLink = linkDownloadElem.attr("href");
+
+      return valueLink;
+    } else {
+      return null;
+    }
+  } catch (err) {
+    console.log("err");
+  }
+}
+
 export async function fetchDetailMovieById(id, type, originalTitle) {
   return fetchPromise(
     `https://api.themoviedb.org/3/${type}/${id}?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
@@ -929,6 +968,10 @@ export async function fetchDetailMovieById(id, type, originalTitle) {
           `https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
         ),
       },
+      {
+        name: "internalLink",
+        api: getPlayerLink(id),
+      },
     ];
 
     const aggregationResources = await Promise.all(
@@ -941,12 +984,13 @@ export async function fetchDetailMovieById(id, type, originalTitle) {
         resource,
       ])
     );
-    const news = await fetchNewsByTitleMovie(data?.original_title);
+    // const news = await fetchNewsByTitleMovie(data?.original_title);
 
     if (resources.videos?.results?.length > 0) {
       return {
         ...data,
-        news: news || null,
+        // news: news || null,
+        internalLink: resources.internalLink,
         credits: resources.credits,
         videos: resources.videos,
         images: resources.images,
@@ -959,6 +1003,7 @@ export async function fetchDetailMovieById(id, type, originalTitle) {
 
       return {
         ...data,
+        internalLink: resources.internalLink,
         credits: resources.credits,
         videos: currVideosEN,
         images: resources.images,

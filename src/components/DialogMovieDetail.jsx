@@ -57,6 +57,7 @@ export default function DialogMovieDetail({
   const theme = useTheme();
 
   const [openTrailerDialog, setOpenTrailerDialog] = React.useState(false);
+  const [openMoviePlayer, setOpenMoviePlayer] = React.useState(false);
   const [selectedImage, setSelectedImage] = React.useState(null);
 
   const [infoMovieRef, { height }] = useElementSize();
@@ -76,6 +77,13 @@ export default function DialogMovieDetail({
     type === "movie"
       ? detail?.credits?.crew?.find((c) => c?.department === "Directing")
       : detail?.created_by;
+
+  const handleClickOpenDialogPlayMovie = () => {
+    setOpenMoviePlayer(true);
+  };
+  const handleCloseDialogMoviePlayer = () => {
+    setOpenMoviePlayer(false);
+  };
 
   const handleClickOpenDialogTrailer = () => {
     setOpenTrailerDialog(true);
@@ -147,6 +155,24 @@ export default function DialogMovieDetail({
                 mb: 3,
               }}
             >
+              <Dialog
+                fullWidth={true}
+                maxWidth={"lg"}
+                open={openMoviePlayer}
+                onClose={handleCloseDialogMoviePlayer}
+              >
+                <video
+                  style={{
+                    height: "100%",
+                    width: "100%",
+                  }}
+                  autoPlay
+                  controls
+                  src={detail?.internalLink}
+                  type="application/vnd.apple.mpegurl"
+                />
+              </Dialog>
+
               <Dialog
                 //fullScreen={fullScreen}
                 fullWidth={true}
@@ -386,6 +412,17 @@ export default function DialogMovieDetail({
                           onClick={handleClickOpenDialogTrailer}
                         >
                           Guarda Trailer
+                        </Button>
+                      )}
+
+                      {detail?.internalLink && (
+                        <Button
+                          sx={{ pl: 0, mt: 1 }}
+                          variant="text"
+                          startIcon={<PlayArrowIcon />}
+                          onClick={handleClickOpenDialogPlayMovie}
+                        >
+                          Riproduci
                         </Button>
                       )}
 
