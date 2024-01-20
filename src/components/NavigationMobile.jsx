@@ -65,15 +65,17 @@ export default function NavigationMobile({ children }) {
               handleClick(newValue);
             }}
           >
-            {routes.map((route) => (
-              <BottomNavigationAction
-                key={route.name}
-                LinkComponent={Link}
-                to={route.route}
-                label={route.name}
-                icon={route.icon}
-              />
-            ))}
+            {routes
+              .filter((route) => !route.hidden)
+              .map((route) => (
+                <BottomNavigationAction
+                  key={route.name}
+                  LinkComponent={Link}
+                  to={route.route}
+                  label={route.name}
+                  icon={route.icon}
+                />
+              ))}
           </BottomNavigation>
         </Paper>
       </HideOnScroll>

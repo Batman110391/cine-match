@@ -12,7 +12,7 @@ import { updateMovies, updateNews } from "./api/tmdbApis";
 import { supabase } from "./supabaseClient";
 
 export default function App() {
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
 
   const dispatch = useDispatch();
 
@@ -23,6 +23,11 @@ export default function App() {
   const [configCineMatch, setConfigCineMatch] = useSessionStorage(
     "configCineMatch",
     initialStateStore
+  );
+
+  const [configPermission, setConfigPermission] = useSessionStorage(
+    "permission",
+    { isAdmin: false }
   );
 
   const fetchLastExecutionDate = async () => {
@@ -91,6 +96,19 @@ export default function App() {
   };
 
   useEffect(() => {
+    if (configPermission && configPermission.isAdmin) {
+      console.log("sei admin");
+    } else {
+      const queryParams = new URLSearchParams(search);
+      const isAdmin = queryParams.get("user");
+
+      if (isAdmin && isAdmin === "admin") {
+        setConfigPermission({
+          isAdmin: true,
+        });
+      }
+    }
+
     if (configCineMatch) {
       dispatch(setQuery(configCineMatch));
     }
@@ -120,10 +138,18 @@ export default function App() {
             <ErrorBoundary fallback={<div>Error...</div>}>
               <Suspense fallback={<LoadingPage />}>
                 <BoxLayout
-                  withNavigation={route.key === "trailermovies" ? false : true}
-                  sx={route.key === "trailermovies" ? { bgcolor: "black" } : {}}
+                  withNavigation={
+                    route.key === "trailermovies" || route.key === "player"
+                      ? false
+                      : true
+                  }
+                  sx={
+                    route.key === "trailermovies" || route.key === "player"
+                      ? { bgcolor: "black" }
+                      : {}
+                  }
                 >
-                  {route.component}{" "}
+                  {route.component}
                 </BoxLayout>
               </Suspense>
             </ErrorBoundary>

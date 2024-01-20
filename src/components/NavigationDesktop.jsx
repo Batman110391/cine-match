@@ -43,42 +43,44 @@ export default function NavigationDesktop({ children }) {
       >
         <Toolbar />
         <List>
-          {routes.map((route, index) => (
-            <ListItem
-              key={route.name}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-              disablePadding
-            >
-              <Tooltip title={route.name}>
-                <Box component={Link} to={route.route}>
-                  <ListItemButton
-                    selected={index === currentRoute}
-                    onClick={() => handleClick(index)}
-                    sx={{
-                      py: 3,
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <ListItemIcon
+          {routes
+            .filter((route) => !route.hidden)
+            .map((route, index) => (
+              <ListItem
+                key={route.name}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                disablePadding
+              >
+                <Tooltip title={route.name}>
+                  <Box component={Link} to={route.route}>
+                    <ListItemButton
+                      selected={index === currentRoute}
+                      onClick={() => handleClick(index)}
                       sx={{
+                        py: 3,
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
                       }}
                     >
-                      {route.icon}
-                    </ListItemIcon>
-                  </ListItemButton>
-                </Box>
-              </Tooltip>
-            </ListItem>
-          ))}
+                      <ListItemIcon
+                        sx={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        {route.icon}
+                      </ListItemIcon>
+                    </ListItemButton>
+                  </Box>
+                </Tooltip>
+              </ListItem>
+            ))}
         </List>
       </Drawer>
       <Box sx={{ width: `calc(100% - ${drawerWidth}px)` }}>{children}</Box>

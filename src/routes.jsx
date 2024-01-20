@@ -12,6 +12,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import Letterboxd from "./components/icons/Letterboxd";
 import NewspaperIcon from "@mui/icons-material/Newspaper";
 import TheatersIcon from "@mui/icons-material/Theaters";
+import AdaptiveStreamingVideoPlayer from "./components/AdaptiveStreamingVideoPlayer";
 
 export const routes = [
   {
@@ -43,6 +44,14 @@ export const routes = [
     key: "trailermovies",
     route: "/trailerMovies",
     component: <TrailersMoviesPage />,
+  },
+  {
+    name: "player",
+    hidden: true,
+    key: "player",
+    route: "/player/:src?",
+    exact: false,
+    component: <AdaptiveStreamingVideoPlayer />,
   },
   // {
   //   name: "Consigliati",

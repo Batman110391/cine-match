@@ -45,7 +45,7 @@ async function convertJson(obj) {
   return json;
 }
 
-async function useProxy(url, customProxy, type = "json") {
+async function useProxy(url, customProxy) {
   let responseJson = null;
 
   const urlNetlifyProxy1 =
@@ -901,6 +901,12 @@ export async function fetchShowTvPage(page, querySearch) {
 }
 
 async function getPlayerLink(id) {
+  // if (true) {
+  //   const link =
+  //     "https://hfs265.serversicuro.cc/dnzpe6wh2tgqsj6yvcwh5mlwylw6iddvbwyrjr3swf7ohignx7bvvfq6zqba/la-societa-della-neve-2024[supervideo.tv].mp4";
+  //   return link;
+  // }
+
   try {
     const { imdb_id } = await fetchPromise(
       `https://api.themoviedb.org/3/movie/${id}/external_ids?api_key=${API_KEY}`
@@ -908,7 +914,7 @@ async function getPlayerLink(id) {
 
     const link = `https://guardahd.stream/movie/${imdb_id}`;
 
-    const response = await useProxy(link, false, "html");
+    const response = await useProxy(link);
 
     const $ = cheerio.load(response);
 
@@ -968,15 +974,13 @@ export async function fetchDetailMovieById(id, type, originalTitle) {
           `https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
         ),
       },
-      {
-        name: "internalLink",
-        api: getPlayerLink(id),
-      },
     ];
 
     const aggregationResources = await Promise.all(
       resourcesAll.map((r) => r.api)
     );
+
+    const internalLink = await getPlayerLink(id);
 
     const resources = Object.fromEntries(
       aggregationResources.map((resource, index) => [
@@ -990,7 +994,7 @@ export async function fetchDetailMovieById(id, type, originalTitle) {
       return {
         ...data,
         // news: news || null,
-        internalLink: resources.internalLink,
+        internalLink,
         credits: resources.credits,
         videos: resources.videos,
         images: resources.images,
@@ -1003,7 +1007,7 @@ export async function fetchDetailMovieById(id, type, originalTitle) {
 
       return {
         ...data,
-        internalLink: resources.internalLink,
+        internalLink,
         credits: resources.credits,
         videos: currVideosEN,
         images: resources.images,

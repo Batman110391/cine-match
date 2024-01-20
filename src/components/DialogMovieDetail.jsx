@@ -42,6 +42,9 @@ import SubHeader from "./SubHeader";
 import Tmdb from "./icons/Tmdb";
 import RatingsWorld from "./RatingsWorld";
 import ListNewsMovie from "./ListNewsMovie";
+import AdaptiveStreamingVideoPlayer from "./AdaptiveStreamingVideoPlayer";
+import { Link } from "react-router-dom";
+import { useSessionStorage } from "../utils/useSessionStorage";
 
 const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
@@ -57,10 +60,13 @@ export default function DialogMovieDetail({
   const theme = useTheme();
 
   const [openTrailerDialog, setOpenTrailerDialog] = React.useState(false);
-  const [openMoviePlayer, setOpenMoviePlayer] = React.useState(false);
   const [selectedImage, setSelectedImage] = React.useState(null);
 
   const [infoMovieRef, { height }] = useElementSize();
+
+  const [configPermission] = useSessionStorage("permission", {
+    isAdmin: false,
+  });
 
   const { isLoading, error, data } = useQuery(
     ["detailMovie", movieID, type],
@@ -73,17 +79,14 @@ export default function DialogMovieDetail({
     (p) => p?.iso_639_1 === "en"
   )?.file_path;
 
+  const bgContainerPosterVideoPlayer = detail?.images?.backdrops?.find(
+    (p) => p?.iso_639_1 === "en"
+  )?.file_path;
+
   const director =
     type === "movie"
       ? detail?.credits?.crew?.find((c) => c?.department === "Directing")
       : detail?.created_by;
-
-  const handleClickOpenDialogPlayMovie = () => {
-    setOpenMoviePlayer(true);
-  };
-  const handleCloseDialogMoviePlayer = () => {
-    setOpenMoviePlayer(false);
-  };
 
   const handleClickOpenDialogTrailer = () => {
     setOpenTrailerDialog(true);
@@ -155,24 +158,6 @@ export default function DialogMovieDetail({
                 mb: 3,
               }}
             >
-              <Dialog
-                fullWidth={true}
-                maxWidth={"lg"}
-                open={openMoviePlayer}
-                onClose={handleCloseDialogMoviePlayer}
-              >
-                <video
-                  style={{
-                    height: "100%",
-                    width: "100%",
-                  }}
-                  autoPlay
-                  controls
-                  src={detail?.internalLink}
-                  type="application/vnd.apple.mpegurl"
-                />
-              </Dialog>
-
               <Dialog
                 //fullScreen={fullScreen}
                 fullWidth={true}
@@ -415,16 +400,22 @@ export default function DialogMovieDetail({
                         </Button>
                       )}
 
-                      {detail?.internalLink && (
-                        <Button
-                          sx={{ pl: 0, mt: 1 }}
-                          variant="text"
-                          startIcon={<PlayArrowIcon />}
-                          onClick={handleClickOpenDialogPlayMovie}
-                        >
-                          Riproduci
-                        </Button>
-                      )}
+                      {detail?.internalLink &&
+                        configPermission &&
+                        configPermission.isAdmin && (
+                          <Button
+                            component={Link}
+                            to={`player?bg=${bgContainerPosterVideoPlayer}&src=${encodeURIComponent(
+                              detail.internalLink
+                            )}`}
+                            target="_blank"
+                            sx={{ pl: 0, mt: 1 }}
+                            variant="text"
+                            startIcon={<PlayArrowIcon />}
+                          >
+                            Riproduci
+                          </Button>
+                        )}
 
                       {detail?.tagline && (
                         <Box sx={{ my: 2 }}>
