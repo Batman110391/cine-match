@@ -8,6 +8,7 @@ export default function AdaptiveStreamingVideoPlayer() {
   const queryParams = new URLSearchParams(search);
   const src = queryParams.get("src");
   const bg = queryParams.get("bg");
+  const imdb_id = queryParams.get("imdb_id");
 
   const theme = useTheme();
 
@@ -18,6 +19,16 @@ export default function AdaptiveStreamingVideoPlayer() {
         poster: "http://image.tmdb.org/t/p/original" + bg,
       }
     : {};
+
+  if (imdb_id) {
+    return (
+      <iframe
+        width={"100%"}
+        height={"100%"}
+        src={`https://guardahd.stream/movie/${imdb_id}`}
+      />
+    );
+  }
 
   return (
     <Box

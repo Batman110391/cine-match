@@ -417,6 +417,21 @@ export default function DialogMovieDetail({
                           </Button>
                         )}
 
+                      {!detail?.internalLink &&
+                        configPermission &&
+                        configPermission.isAdmin && (
+                          <Button
+                            component={Link}
+                            to={`player?imdb_id=${detail?.imdb_id}`}
+                            target="_blank"
+                            sx={{ pl: 0, mt: 1 }}
+                            variant="text"
+                            startIcon={<PlayArrowIcon />}
+                          >
+                            Riproduci
+                          </Button>
+                        )}
+
                       {detail?.tagline && (
                         <Box sx={{ my: 2 }}>
                           <Typography
