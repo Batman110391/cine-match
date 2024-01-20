@@ -418,11 +418,12 @@ export default function DialogMovieDetail({
                         )}
 
                       {!detail?.internalLink &&
+                        detail?.imdb_id &&
                         configPermission &&
                         configPermission.isAdmin && (
                           <Button
-                            component={Link}
-                            to={`player?imdb_id=${detail?.imdb_id}`}
+                            component={"a"}
+                            href={`https://guardahd.stream/movie/${detail?.imdb_id}`}
                             target="_blank"
                             sx={{ pl: 0, mt: 1 }}
                             variant="text"
