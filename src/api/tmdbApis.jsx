@@ -61,7 +61,6 @@ async function useProxy(url, customProxy) {
   const proxyUrls = [
     "https://api.allorigins.win/get?url=",
     "https://thingproxy.freeboard.io/fetch/",
-    "https://proxy.cors.sh/",
     urlNetlifyProxy1,
     urlNetlifyProxy2,
     "https://cors-proxy-share-chi.vercel.app/api?url=",
@@ -980,8 +979,6 @@ export async function fetchDetailMovieById(id, type, originalTitle) {
       resourcesAll.map((r) => r.api)
     );
 
-    const internalLink = await getPlayerLink(id);
-
     const resources = Object.fromEntries(
       aggregationResources.map((resource, index) => [
         resourcesAll[index].name,
@@ -994,7 +991,6 @@ export async function fetchDetailMovieById(id, type, originalTitle) {
       return {
         ...data,
         // news: news || null,
-        internalLink,
         credits: resources.credits,
         videos: resources.videos,
         images: resources.images,
@@ -1007,7 +1003,6 @@ export async function fetchDetailMovieById(id, type, originalTitle) {
 
       return {
         ...data,
-        internalLink,
         credits: resources.credits,
         videos: currVideosEN,
         images: resources.images,

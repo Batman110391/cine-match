@@ -45,14 +45,14 @@ export const routes = [
     route: "/trailerMovies",
     component: <TrailersMoviesPage />,
   },
-  {
-    name: "player",
-    hidden: true,
-    key: "player",
-    route: "/player/:src?",
-    exact: false,
-    component: <AdaptiveStreamingVideoPlayer />,
-  },
+  // {
+  //   name: "player",
+  //   hidden: true,
+  //   key: "player",
+  //   route: "/player/:src?",
+  //   exact: false,
+  //   component: <AdaptiveStreamingVideoPlayer />,
+  // },
   // {
   //   name: "Consigliati",
   //   icon: <Letterboxd noMargin />,

@@ -79,9 +79,11 @@ export default function DialogMovieDetail({
     (p) => p?.iso_639_1 === "en"
   )?.file_path;
 
-  const bgContainerPosterVideoPlayer = detail?.images?.backdrops?.find(
-    (p) => p?.iso_639_1 === "en"
-  )?.file_path;
+  // const bgContainerPosterVideoPlayer = detail?.images?.backdrops?.find(
+  //   (p) => p?.iso_639_1 === "en"
+  // )?.file_path;
+
+  const isProviderStreaming = detail?.providers ? true : false;
 
   const director =
     type === "movie"
@@ -400,24 +402,7 @@ export default function DialogMovieDetail({
                         </Button>
                       )}
 
-                      {detail?.internalLink &&
-                        configPermission &&
-                        configPermission.isAdmin && (
-                          <Button
-                            component={Link}
-                            to={`player?bg=${bgContainerPosterVideoPlayer}&src=${encodeURIComponent(
-                              detail.internalLink
-                            )}`}
-                            target="_blank"
-                            sx={{ pl: 0, mt: 1 }}
-                            variant="text"
-                            startIcon={<PlayArrowIcon />}
-                          >
-                            Riproduci
-                          </Button>
-                        )}
-
-                      {!detail?.internalLink &&
+                      {isProviderStreaming &&
                         detail?.imdb_id &&
                         configPermission &&
                         configPermission.isAdmin && (
