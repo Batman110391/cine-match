@@ -95,7 +95,7 @@ export default function SearchPage() {
         querySearch: {
           from: "1970-01-01",
           to: CURRENT_DATE_FORMATTING,
-          order_by: "popularity.desc",
+          order_by: "primary_release_date.desc",
           with_genres: [],
           with_ott_providers: [],
           exact_search: false,
@@ -116,7 +116,7 @@ export default function SearchPage() {
         querySearch: {
           from: "1970-01-01",
           to: CURRENT_DATE_FORMATTING,
-          order_by: "popularity.desc",
+          order_by: "primary_release_date.desc",
           with_genres: [],
           with_ott_providers: [],
           exact_search: false,

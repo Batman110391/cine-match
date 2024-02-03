@@ -196,11 +196,11 @@ export const KEYWORDS_SEARCH_MOVIE = [
     queries: [
       {
         id: 261681,
-        name: "south korea",
+        name: "south-korea",
       },
       {
         id: 290327,
-        name: "seoul, south korea",
+        name: "seoul, south-korea",
       },
       {
         id: 260672,
@@ -212,11 +212,11 @@ export const KEYWORDS_SEARCH_MOVIE = [
       },
       {
         id: 260266,
-        name: "korean spy",
+        name: "korean-spy",
       },
       {
         id: 292026,
-        name: "korean food",
+        name: "korean-food",
       },
     ],
   },

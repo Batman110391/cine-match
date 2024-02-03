@@ -186,7 +186,7 @@ const getUrlMoviesWithCustomParams = ({
   }
 
   if (providers) {
-    url.searchParams.set("with_ott_providers", providers);
+    url.searchParams.set("with_watch_providers", providers);
     url.searchParams.set("watch_region", "IT");
   }
 
@@ -239,10 +239,10 @@ const getUrlSerieTvWithCustomParams = ({
   url.searchParams.set("api_key", API_KEY);
   url.searchParams.set("language", LANGUAGE);
   url.searchParams.set("include_adult", false);
-  url.searchParams.set("first_air_date.gte", from);
-  url.searchParams.set("first_air_date.lte", to);
+  url.searchParams.set("air_date.gte", from);
+  url.searchParams.set("air_date.lte", to);
   url.searchParams.set("certification_country", "IT");
-  url.searchParams.set("ott_region", "IT");
+  url.searchParams.set("watch_region", "IT");
   url.searchParams.set("sort_by", order_by);
   url.searchParams.set(
     "vote_count.gte",
@@ -258,7 +258,7 @@ const getUrlSerieTvWithCustomParams = ({
   }
 
   if (providers) {
-    url.searchParams.set("with_ott_providers", providers);
+    url.searchParams.set("with_watch_providers", providers);
   }
 
   if (with_original_language) {
@@ -681,7 +681,10 @@ export async function fetchMoviesDiscover(page = 1) {
       name: ksm.name,
       api: fetchPromise(
         `${getUrlMoviesWithCustomParams({
+          order_by: "primary_release_date.desc",
           with_keywords: ksm.queries,
+          watch_region: "IT",
+          vote_count: "200",
         })}&page=${page}`
       ),
     };
@@ -710,6 +713,7 @@ export async function fetchMoviesDiscover(page = 1) {
       name: "italian_movie",
       api: fetchPromise(
         `${getUrlMoviesWithCustomParams({
+          order_by: "primary_release_date.desc",
           with_original_language: "it",
           region: "IT",
           watch_region: "IT",

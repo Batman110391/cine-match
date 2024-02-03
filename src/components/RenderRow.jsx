@@ -146,7 +146,7 @@ export default function RenderRow({
             >
               <MovieCard
                 bg={movie?.poster_path}
-                title={movie?.title}
+                title={movie?.title || movie?.name}
                 w={
                   isDesktop
                     ? MOVIE_PAGE_CARD_WIDTH
