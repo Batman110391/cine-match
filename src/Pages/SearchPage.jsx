@@ -121,6 +121,8 @@ export default function SearchPage() {
           with_ott_providers: [],
           exact_search: false,
           with_keywords: keyword,
+          watch_region: "IT",
+          vote_count: "100",
         },
       })
     );

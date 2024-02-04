@@ -665,7 +665,7 @@ export async function fetchProviders() {
 
 export async function fetchSimilarMoviesOrTvById(id, type) {
   return fetchPromise(
-    `https://api.themoviedb.org/3/${type}/${id}/similar?api_key=${API_KEY}&page=${1}&${CURRENT_LANGUAGE}`
+    `https://api.themoviedb.org/3/${type}/${id}/recommendations?api_key=${API_KEY}&page=${1}&${CURRENT_LANGUAGE}`
   ).then((data) => {
     if (data && data?.results?.length > 0) {
       return data?.results;
@@ -684,7 +684,7 @@ export async function fetchMoviesDiscover(page = 1) {
           order_by: "primary_release_date.desc",
           with_keywords: ksm.queries,
           watch_region: "IT",
-          vote_count: "200",
+          vote_count: "100",
         })}&page=${page}`
       ),
     };

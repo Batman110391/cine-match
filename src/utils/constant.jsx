@@ -199,24 +199,8 @@ export const KEYWORDS_SEARCH_MOVIE = [
         name: "south-korea",
       },
       {
-        id: 290327,
-        name: "seoul, south-korea",
-      },
-      {
         id: 260672,
-        name: "korea",
-      },
-      {
-        id: 284606,
-        name: "koreano",
-      },
-      {
-        id: 260266,
-        name: "korean-spy",
-      },
-      {
-        id: 292026,
-        name: "korean-food",
+        name: "korean",
       },
     ],
   },
