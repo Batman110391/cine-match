@@ -9,6 +9,7 @@ import App from "./App";
 import { darkTheme } from "./context/theme";
 import { store } from "./store/store";
 import DialogMovieDetailProvider from "./components/DialogMovieDetailProvider";
+import { AuthContextProvider } from "./context/authentication";
 
 const queryClient = new QueryClient();
 
@@ -17,11 +18,13 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <CssBaseline />
     <BrowserRouter>
       <Provider store={store}>
-        <QueryClientProvider client={queryClient}>
-          <DialogMovieDetailProvider>
-            <App />
-          </DialogMovieDetailProvider>
-        </QueryClientProvider>
+        <AuthContextProvider>
+          <QueryClientProvider client={queryClient}>
+            <DialogMovieDetailProvider>
+              <App />
+            </DialogMovieDetailProvider>
+          </QueryClientProvider>
+        </AuthContextProvider>
       </Provider>
     </BrowserRouter>
   </ThemeProvider>

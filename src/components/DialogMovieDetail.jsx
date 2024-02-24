@@ -20,7 +20,9 @@ import AppBar from "@mui/material/AppBar";
 import IconButton from "@mui/material/IconButton";
 import Toolbar from "@mui/material/Toolbar";
 import { motion } from "framer-motion";
-import React, { useEffect } from "react";
+import moment from "moment";
+import "moment/locale/it";
+import React from "react";
 import YouTubePlayer from "react-player/youtube";
 import { useQuery } from "react-query";
 import { fetchDetailMovieById } from "../api/tmdbApis";
@@ -31,20 +33,27 @@ import {
 import { roundToHalf } from "../utils/numberFormatting";
 import { formatMinutes } from "../utils/timeFormat";
 import useElementSize from "../utils/useElementSize";
+import { useSessionStorage } from "../utils/useSessionStorage";
 import CastListDetail from "./CastListDetail";
 import DialogWrapperResponsivness from "./DialogWrapperResponsivness";
 import ListImagesMovie from "./ListImagesMovie";
+import ListNewsMovie from "./ListNewsMovie";
 import ListSeasonTv from "./ListSeasonTv";
 import ListSimilarMoviesAndTv from "./ListSimilarMoviesAndTv";
 import MovieCard from "./MovieCard";
+import RatingsWorld from "./RatingsWorld";
 import SpeedDialShare from "./SpeedDialShare";
 import SubHeader from "./SubHeader";
 import Tmdb from "./icons/Tmdb";
-import RatingsWorld from "./RatingsWorld";
-import ListNewsMovie from "./ListNewsMovie";
-import AdaptiveStreamingVideoPlayer from "./AdaptiveStreamingVideoPlayer";
-import { Link } from "react-router-dom";
-import { useSessionStorage } from "../utils/useSessionStorage";
+
+const RELEASE_TYPE = [
+  { label: "Prima" },
+  { label: "Cinematografica (in edizione limitata)" },
+  { label: "Cinematografica" },
+  { label: "Digitale" },
+  { label: "DVD" },
+  { label: "TV" },
+];
 
 const YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
@@ -74,6 +83,8 @@ export default function DialogMovieDetail({
   );
 
   const detail = data;
+
+  console.log("detail", detail);
 
   const bgContainerPoster = detail?.images?.logos?.find(
     (p) => p?.iso_639_1 === "en"
@@ -265,8 +276,14 @@ export default function DialogMovieDetail({
                               sx={{ fontSize: "0.7rem" }}
                               variant={"button"}
                             >
-                              {detail?.release_date?.substring(0, 4) ||
-                                detail?.first_air_date?.substring(0, 4)}
+                              <RelaseDataFormatting
+                                production={detail?.production_countries}
+                                release={detail?.release}
+                                originalReleaseDate={
+                                  detail?.release_date || detail?.first_air_date
+                                }
+                                onlyYear
+                              />
                             </Typography>
                             {director && type === "movie" && (
                               <>
@@ -344,7 +361,14 @@ export default function DialogMovieDetail({
                             variant={"button"}
                             color={"text.secondary"}
                           >
-                            {detail?.release_date || detail?.first_air_date}
+                            {/* {detail?.release_date || detail?.first_air_date} */}
+                            <RelaseDataFormatting
+                              production={detail?.production_countries}
+                              release={detail?.release}
+                              originalReleaseDate={
+                                detail?.release_date || detail?.first_air_date
+                              }
+                            />
                           </Typography>
 
                           <Typography
@@ -563,5 +587,52 @@ export default function DialogMovieDetail({
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+function RelaseDataFormatting({
+  production,
+  release,
+  originalReleaseDate,
+  onlyYear = false,
+  type,
+}) {
+  const originalProductionCountryISO = production?.[0]?.iso_3166_1;
+
+  if (release && Array.isArray(release?.results) && type === "movie") {
+    const findItalyRelase = release?.results?.find(
+      (rel) => rel.iso_3166_1 === "IT"
+    );
+
+    if (findItalyRelase) {
+      const normalizeData = onlyYear
+        ? findItalyRelase?.release_dates?.[
+            findItalyRelase?.release_dates?.length - 1
+          ]?.release_date?.substring(0, 4)
+        : findItalyRelase?.release_dates?.[
+            findItalyRelase?.release_dates?.length - 1
+          ];
+
+      return (
+        <Typography sx={{ fontSize: "0.7rem" }} variant={"button"}>
+          {onlyYear
+            ? normalizeData
+            : `${moment(normalizeData?.release_date)
+                .locale("it")
+                .format("YYYY-MM-DD")}
+          - ( IT ) - ${RELEASE_TYPE[normalizeData?.type - 1].label}`}
+        </Typography>
+      );
+    }
+  }
+
+  const normalizeData = onlyYear
+    ? originalReleaseDate?.substring(0, 4)
+    : `${originalReleaseDate} - ( ${originalProductionCountryISO} ) `;
+
+  return (
+    <Typography sx={{ fontSize: "0.7rem" }} variant={"button"}>
+      {normalizeData}
+    </Typography>
   );
 }

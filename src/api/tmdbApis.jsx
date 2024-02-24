@@ -977,6 +977,16 @@ export async function fetchDetailMovieById(id, type, originalTitle) {
           `https://api.themoviedb.org/3/${type}/${id}/videos?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
         ),
       },
+      ...(type === "movie"
+        ? [
+            {
+              name: "release",
+              api: fetchPromise(
+                `https://api.themoviedb.org/3/${type}/${id}/release_dates?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+              ),
+            },
+          ]
+        : []),
     ];
 
     const aggregationResources = await Promise.all(
@@ -999,6 +1009,7 @@ export async function fetchDetailMovieById(id, type, originalTitle) {
         videos: resources.videos,
         images: resources.images,
         providers: resources.providers?.results?.["IT"],
+        release: resources.release,
       };
     } else {
       const currVideosEN = await fetchPromise(
@@ -1011,6 +1022,7 @@ export async function fetchDetailMovieById(id, type, originalTitle) {
         videos: currVideosEN,
         images: resources.images,
         providers: resources.providers?.results?.["IT"],
+        release: resources.release,
       };
     }
   });

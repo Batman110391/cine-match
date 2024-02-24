@@ -29,12 +29,6 @@ import ListGenresSetting from "./ListGenresSetting";
 import ListProviderSettng from "./ListProviderSettng";
 import SearchPeriods from "./SearchPeriods";
 
-const ORDERS = [
-  { name: "Popolari", label: "popularity.desc" },
-  { name: "Più Votati", label: "vote_average.desc" },
-  { name: "Più recenti", label: "primary_release_date.desc" },
-];
-
 export default function DialogSettingMovies({
   open,
   setOpen,
@@ -49,6 +43,20 @@ export default function DialogSettingMovies({
 
   const popertiesDispatch =
     movieQueryType === "movie" ? "querySearch" : "querySearchTv";
+
+  const ordersType = React.useMemo(() => {
+    return [
+      { name: "Popolari", label: "popularity.desc" },
+      { name: "Più Votati", label: "vote_average.desc" },
+      {
+        name: "Più recenti",
+        label:
+          movieQueryType === "movie"
+            ? "primary_release_date.desc"
+            : "first_air_date.desc",
+      },
+    ];
+  }, [movieQueryType]);
 
   const fromPrev = useSelector(
     (state) => state.movieQuery?.[popertiesDispatch]?.from
@@ -238,7 +246,7 @@ export default function DialogSettingMovies({
               Ordinamento
             </Typography>
             <Stack flexDirection={"row"} gap={2} flexWrap={"wrap"}>
-              {ORDERS.map((order) => (
+              {ordersType.map((order) => (
                 <Chip
                   key={order.label}
                   label={order.name}

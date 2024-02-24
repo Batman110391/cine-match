@@ -21,24 +21,30 @@ export default function RatingsWorld({ id, originalTitle }) {
       {isLoading ? (
         <LoadingRating />
       ) : (
-        data?.ratings?.map(({ source, value, count }) => (
-          <Box
-            key={source}
-            sx={{ mt: 0.5, display: "flex", alignItems: "center", gap: 0.5 }}
-          >
-            <Chip
-              sx={{ borderColor: "transparent" }}
-              variant="outlined"
-              icon={source === "Imdb" ? <Imdb /> : <Letterboxd />}
-              label={
-                <Rating value={roundToHalf(value)} precision={0.5} readOnly />
-              }
-            />
-            <Typography fontWeight={"bold"} variant={"caption"}>
-              {value}
-            </Typography>
-          </Box>
-        ))
+        data?.ratings?.map(({ source, value, count }) => {
+          if (!value) {
+            return null;
+          }
+
+          return (
+            <Box
+              key={source}
+              sx={{ mt: 0.5, display: "flex", alignItems: "center", gap: 0.5 }}
+            >
+              <Chip
+                sx={{ borderColor: "transparent" }}
+                variant="outlined"
+                icon={source === "Imdb" ? <Imdb /> : <Letterboxd />}
+                label={
+                  <Rating value={roundToHalf(value)} precision={0.5} readOnly />
+                }
+              />
+              <Typography fontWeight={"bold"} variant={"caption"}>
+                {value}
+              </Typography>
+            </Box>
+          );
+        })
       )}
     </>
   );
