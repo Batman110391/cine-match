@@ -25,7 +25,7 @@ import "moment/locale/it";
 import React from "react";
 import YouTubePlayer from "react-player/youtube";
 import { useQuery } from "react-query";
-import { fetchDetailMovieById } from "../api/tmdbApis";
+import { addItemInProfile, fetchDetailMovieById } from "../api/tmdbApis";
 import {
   MOVIE_PAGE_CARD_HEIGTH_MOBILE,
   MOVIE_PAGE_CARD_WIDTH_MOBILE,
@@ -45,6 +45,9 @@ import RatingsWorld from "./RatingsWorld";
 import SpeedDialShare from "./SpeedDialShare";
 import SubHeader from "./SubHeader";
 import Tmdb from "./icons/Tmdb";
+import WatchLaterTwoToneIcon from "@mui/icons-material/WatchLaterTwoTone";
+import AuthContext from "../context/authentication";
+import UserController from "./UserController";
 
 const RELEASE_TYPE = [
   { label: "Prima" },
@@ -68,6 +71,7 @@ export default function DialogMovieDetail({
 }) {
   const theme = useTheme();
 
+  const { user } = React.useContext(AuthContext);
   const [openTrailerDialog, setOpenTrailerDialog] = React.useState(false);
   const [selectedImage, setSelectedImage] = React.useState(null);
 
@@ -111,6 +115,23 @@ export default function DialogMovieDetail({
 
   const handleCloseImageOpen = () => {
     setSelectedImage(null);
+  };
+
+  const handleAddItemProfile = async (field) => {
+    await addItemInProfile(
+      type,
+      field,
+      user?.id,
+      {
+        poster_path: detail?.poster_path,
+        id: detail?.id,
+        title: detail?.title || detail?.name,
+        vote_average: detail?.vote_average,
+      },
+      (error) => {
+        console.log("err", error);
+      }
+    );
   };
 
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
@@ -383,6 +404,13 @@ export default function DialogMovieDetail({
                           </Typography>
                         </Box>
                       </Stack>
+                      {user && (
+                        <UserController
+                          detail={detail}
+                          userID={user.id}
+                          type={type}
+                        />
+                      )}
                       <Box
                         sx={{
                           mt: 2,

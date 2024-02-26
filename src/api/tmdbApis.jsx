@@ -1371,3 +1371,144 @@ export async function updateNews(executionAt) {
     console.error(err);
   }
 }
+
+export async function fetchProfileData(user) {
+  if (!user) {
+    return {};
+  }
+
+  const { data, error } = await supabase
+    .from("profile")
+    .select("movie,tv")
+    .eq("id", user?.id)
+    .limit(1);
+
+  if (error) {
+    return {};
+  }
+
+  if (!data?.length > 0) {
+    const profileTables = supabase.from("profile");
+    const objectInsert = {
+      id: user?.id,
+      movie: {
+        seen: [],
+        favorite: [],
+        watchlist: [],
+        notifications: [],
+      },
+      tv: {
+        seen: [],
+        favorite: [],
+        watchlist: [],
+        notifications: [],
+      },
+    };
+    const { data: newData, error: newError } = await profileTables
+      .insert(objectInsert)
+      .select("movie,tv");
+
+    if (newError) {
+      return {};
+    }
+
+    return newData[0];
+  }
+
+  return data[0];
+}
+
+export async function addItemInProfile(type, field, userID, item, cb) {
+  const { poster_path, title, id, vote_average } = item;
+
+  const { data, error } = await supabase
+    .from("profile")
+    .select(`${type}`)
+    .eq("id", userID)
+    .limit(1);
+
+  if (error) {
+    if (typeof cb === "function") {
+      return cb("error");
+    }
+  }
+
+  const result = data[0];
+
+  const objectInsert = {
+    poster_path,
+    title,
+    id,
+    vote_average,
+  };
+
+  const { error: newError } = await supabase
+    .from("profile")
+    .update({
+      [type]: {
+        ...result[type],
+        [field]: [...result[type][field], objectInsert],
+      },
+    })
+    .eq("id", userID);
+
+  if (newError) {
+    if (typeof cb === "function") {
+      return cb("error");
+    }
+  }
+
+  if (typeof cb === "function") {
+    return cb(null);
+  }
+}
+
+export async function removeItemInProfile(type, field, userID, itemID, cb) {
+  const { data, error } = await supabase
+    .from("profile")
+    .select(`${type}`)
+    .eq("id", userID)
+    .limit(1);
+
+  if (error) {
+    if (typeof cb === "function") {
+      return cb("error");
+    }
+  }
+
+  const result = data[0];
+
+  const { error: newError } = await supabase
+    .from("profile")
+    .update({
+      [type]: {
+        ...result[type],
+        [field]: [...result[type][field]].filter((item) => item.id !== itemID),
+      },
+    })
+    .eq("id", userID);
+
+  if (newError) {
+    if (typeof cb === "function") {
+      return cb("error");
+    }
+  }
+
+  if (typeof cb === "function") {
+    return cb(null);
+  }
+}
+
+export async function fetchProfileDataChecking(userID, type) {
+  const { data, error } = await supabase
+    .from("profile")
+    .select(`${type}`)
+    .eq("id", userID)
+    .limit(1);
+
+  if (error) {
+    return {};
+  }
+
+  return data[0];
+}

@@ -1,4 +1,4 @@
-import React from "react";
+import { Tooltip } from "@mui/material";
 import Box from "@mui/material/Box";
 import CssBaseline from "@mui/material/CssBaseline";
 import Drawer from "@mui/material/Drawer";
@@ -7,19 +7,15 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import Toolbar from "@mui/material/Toolbar";
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setQuery } from "../store/movieQuery";
-import { IconButton, Tooltip } from "@mui/material";
 import { Link } from "react-router-dom";
-import LoginIcon from "@mui/icons-material/Login";
-import LogoutIcon from "@mui/icons-material/Logout";
 import { routes } from "../routes";
+import { setQuery } from "../store/movieQuery";
 
 const drawerWidth = 70;
 
-export default function NavigationDesktop({ auth, children }) {
-  const { user, login, logout, authReady } = auth;
-
+export default function NavigationDesktop({ children }) {
   const dispatch = useDispatch();
 
   const currentRoute = useSelector((state) => state.movieQuery.currentRoute);
@@ -85,40 +81,6 @@ export default function NavigationDesktop({ auth, children }) {
                 </Tooltip>
               </ListItem>
             ))}
-
-          <Box flexGrow={1} />
-          {authReady && (
-            <ListItem
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-              disablePadding
-            >
-              <Tooltip title={user ? "Esci" : "Accedi"}>
-                <ListItemButton
-                  onClick={user ? logout : login}
-                  sx={{
-                    py: 3,
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <ListItemIcon
-                    sx={{
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    {user ? <LogoutIcon /> : <LoginIcon />}
-                  </ListItemIcon>
-                </ListItemButton>
-              </Tooltip>
-            </ListItem>
-          )}
         </List>
       </Drawer>
       <Box sx={{ width: `calc(100% - ${drawerWidth}px)` }}>{children}</Box>

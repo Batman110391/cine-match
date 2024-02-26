@@ -9,10 +9,12 @@ import TrailersMoviesPage from "./Pages/TrailersMoviesPage";
 import LiveTvIcon from "@mui/icons-material/LiveTv";
 import MovieIcon from "@mui/icons-material/Movie";
 import SearchIcon from "@mui/icons-material/Search";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
 import Letterboxd from "./components/icons/Letterboxd";
 import NewspaperIcon from "@mui/icons-material/Newspaper";
 import TheatersIcon from "@mui/icons-material/Theaters";
 import AdaptiveStreamingVideoPlayer from "./components/AdaptiveStreamingVideoPlayer";
+import ProfilePage from "./Pages/ProfilePage";
 
 export const routes = [
   {
@@ -21,6 +23,7 @@ export const routes = [
     key: "homepage",
     route: "/home",
     component: <SearchPage />,
+    navbar: true,
   },
   {
     name: "Film",
@@ -29,6 +32,7 @@ export const routes = [
     route: "/movies/:movieID?/:type?",
     exact: false,
     component: <MoviesAndTvPages typeSearch={"movie"} />,
+    navbar: true,
   },
   {
     name: "Serie TV",
@@ -37,6 +41,7 @@ export const routes = [
     route: "/showtv/:movieID?/:type?",
     exact: false,
     component: <MoviesAndTvPages typeSearch={"tv"} />,
+    navbar: true,
   },
   {
     name: "Trailers",
@@ -44,6 +49,15 @@ export const routes = [
     key: "trailermovies",
     route: "/trailerMovies",
     component: <TrailersMoviesPage />,
+    navbar: false,
+  },
+  {
+    name: "Profilo",
+    icon: <PersonOutlineIcon />,
+    key: "profile",
+    route: "/profile",
+    component: <ProfilePage />,
+    navbar: true,
   },
   // {
   //   name: "player",
@@ -52,6 +66,7 @@ export const routes = [
   //   route: "/player/:src?",
   //   exact: false,
   //   component: <AdaptiveStreamingVideoPlayer />,
+  //    navbar: false
   // },
   // {
   //   name: "Consigliati",

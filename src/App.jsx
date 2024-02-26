@@ -138,11 +138,7 @@ export default function App() {
             <ErrorBoundary fallback={<div>Error...</div>}>
               <Suspense fallback={<LoadingPage />}>
                 <BoxLayout
-                  withNavigation={
-                    route.key === "trailermovies" || route.key === "player"
-                      ? false
-                      : true
-                  }
+                  withNavigation={route.navbar}
                   sx={
                     route.key === "trailermovies" || route.key === "player"
                       ? { bgcolor: "black" }

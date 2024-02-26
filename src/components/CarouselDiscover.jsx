@@ -36,6 +36,7 @@ export default function CarouselDiscover({
   nobg,
   Component,
   customStyle,
+  FallbackComponent,
 }) {
   if (isLoading) {
     return (
@@ -105,47 +106,55 @@ export default function CarouselDiscover({
           alignItems={"center"}
         >
           <Typography variant="body1">{titleDiscover}</Typography>
-          <Button LinkComponent={Link} to={path} onClick={onAction}>
-            <Typography variant="button">{"Vedi tutti"}</Typography>
-          </Button>
+          {onAction && (
+            <Button LinkComponent={Link} to={path} onClick={onAction}>
+              <Typography variant="button">{"Vedi tutti"}</Typography>
+            </Button>
+          )}
         </Stack>
       )}
-      <Swiper
-        style={{
-          width: "100%",
-        }}
-        {...(isDesktop ? optionsDesktopSwiper : optionsMobileSwiper)}
-      >
-        {slides &&
-          slides.length > 0 &&
-          slides.map((slideContent, index) => {
-            return (
-              <SwiperSlide
-                key={slideContent.id}
-                style={styleSwiperSlide}
-                {...(action
-                  ? { onClick: () => action(slideContent.id, type) }
-                  : null)}
-              >
-                {Component ? (
-                  <Component
-                    slideContent={slideContent}
-                    isDesktop={isDesktop}
-                  />
-                ) : (
-                  <MovieCard
-                    bg={slideContent?.poster_path}
-                    title={slideContent?.title || slideContent?.name}
-                    w={isDesktop ? MOVIE_CARD_WIDTH : MOVIE_CARD_WIDTH_MOBILE}
-                    h={isDesktop ? MOVIE_CARD_HEIGHT : MOVIE_CARD_HEIGTH_MOBILE}
-                    badgeRating={slideContent?.vote_average}
-                    isDesktop={isDesktop}
-                  />
-                )}
-              </SwiperSlide>
-            );
-          })}
-      </Swiper>
+      {!slides?.length > 0 && FallbackComponent ? (
+        <FallbackComponent />
+      ) : (
+        <Swiper
+          style={{
+            width: "100%",
+          }}
+          {...(isDesktop ? optionsDesktopSwiper : optionsMobileSwiper)}
+        >
+          {slides &&
+            slides.length > 0 &&
+            slides.map((slideContent, index) => {
+              return (
+                <SwiperSlide
+                  key={slideContent.id}
+                  style={styleSwiperSlide}
+                  {...(action
+                    ? { onClick: () => action(slideContent.id, type) }
+                    : null)}
+                >
+                  {Component ? (
+                    <Component
+                      slideContent={slideContent}
+                      isDesktop={isDesktop}
+                    />
+                  ) : (
+                    <MovieCard
+                      bg={slideContent?.poster_path}
+                      title={slideContent?.title || slideContent?.name}
+                      w={isDesktop ? MOVIE_CARD_WIDTH : MOVIE_CARD_WIDTH_MOBILE}
+                      h={
+                        isDesktop ? MOVIE_CARD_HEIGHT : MOVIE_CARD_HEIGTH_MOBILE
+                      }
+                      badgeRating={slideContent?.vote_average}
+                      isDesktop={isDesktop}
+                    />
+                  )}
+                </SwiperSlide>
+              );
+            })}
+        </Swiper>
+      )}
       <Divider sx={{ my: 2, borderColor: "transparent" }} />
     </Box>
   );
