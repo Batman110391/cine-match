@@ -10,8 +10,7 @@ import React from "react";
 import AuthContext from "../context/authentication";
 import LoadingPage from "../components/LoadingPage";
 import { deepOrange } from "@mui/material/colors";
-import { useQuery } from "react-query";
-import { CURRENT_DATE_FORMATTING, fetchProfileData } from "../api/tmdbApis";
+import { CURRENT_DATE_FORMATTING } from "../api/tmdbApis";
 import CarouselDiscover from "../components/CarouselDiscover";
 import { useTheme } from "@emotion/react";
 import { useDispatch, useSelector } from "react-redux";
@@ -25,15 +24,9 @@ export default function ProfilePage() {
   const dispatch = useDispatch();
   const { user, login, logout, authReady } = React.useContext(AuthContext);
   const { openDialogMovieDetail } = React.useContext(DialogMovieDetailContext);
-  const actionChange = useSelector((state) => state.profileQuery.actionChange);
+  const data = useSelector((state) => state.profileQuery) || {};
 
-  const {
-    isLoading,
-    error,
-    data = {},
-  } = useQuery(["profile", user, actionChange], () => fetchProfileData(user));
-
-  const { tv, movie } = data;
+  const { tv, movie, loading: isLoading } = data;
 
   const userInfo = React.useMemo(() => {
     return user
@@ -180,11 +173,11 @@ export default function ProfilePage() {
                 <CarouselDiscover
                   slides={allUniqueMovie}
                   titleDiscover={"FILM"}
-                  isLoading={isLoading}
                   path={"/movies"}
                   onAction={
                     allUniqueMovie?.length > 0 ? handleSeeAllMovie : null
                   }
+                  isLoading={isLoading}
                   handleClickItem={handleClickItem}
                   isDesktop={isDesktop}
                   type={"movie"}
@@ -218,11 +211,11 @@ export default function ProfilePage() {
                 <CarouselDiscover
                   slides={allUniqueTv}
                   titleDiscover={"SERIE TV"}
-                  isLoading={isLoading}
                   path={"/tv"}
                   onAction={
                     allUniqueTv?.length > 0 ? handleSeeAllPopularTv : null
                   }
+                  isLoading={isLoading}
                   handleClickItem={handleClickItem}
                   isDesktop={isDesktop}
                   type={"tv"}

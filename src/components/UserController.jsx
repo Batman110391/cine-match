@@ -1,20 +1,17 @@
-import { Box, CircularProgress, IconButton, Skeleton } from "@mui/material";
-import React from "react";
-import WatchLaterTwoToneIcon from "@mui/icons-material/WatchLaterTwoTone";
 import FavoriteTwoToneIcon from "@mui/icons-material/FavoriteTwoTone";
 import NotificationsTwoToneIcon from "@mui/icons-material/NotificationsTwoTone";
 import VisibilityTwoToneIcon from "@mui/icons-material/VisibilityTwoTone";
-import {
-  addItemInProfile,
-  fetchProfileDataChecking,
-  removeItemInProfile,
-} from "../api/tmdbApis";
-import { useQuery } from "react-query";
-import { useDispatch } from "react-redux";
-import { setActionChange } from "../store/profileQuery";
+import WatchLaterTwoToneIcon from "@mui/icons-material/WatchLaterTwoTone";
+import { Box, CircularProgress, IconButton } from "@mui/material";
+import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { addItemInProfile, removeItemInProfile } from "../api/tmdbApis";
+import { addItem, removeItem } from "../store/profileQuery";
 
 export default function UserController({ detail, userID, type }) {
   const dispatch = useDispatch();
+
+  const profileState = useSelector((state) => state.profileQuery) || {};
 
   const [state, setState] = React.useState({
     watchlist: {
@@ -39,41 +36,40 @@ export default function UserController({ detail, userID, type }) {
     },
   });
 
-  const { isLoading, error } = useQuery({
-    queryKey: ["profile-checking", userID],
-    queryFn: () => fetchProfileDataChecking(userID, type),
-    keepPreviousData: true,
-    onSuccess: (data) => {
-      if (data && data[type]) {
-        setState({
-          watchlist: {
-            results: data[type]["watchlist"],
-            loading: false,
-            active: data[type]["watchlist"].some(
-              (res) => res.id === detail?.id
-            ),
-          },
-          seen: {
-            results: data[type]["seen"],
-            loading: false,
-            active: data[type]["seen"].some((res) => res.id === detail?.id),
-          },
-          favorite: {
-            results: data[type]["favorite"],
-            loading: false,
-            active: data[type]["favorite"].some((res) => res.id === detail?.id),
-          },
-          notifications: {
-            results: data[type]["notifications"],
-            loading: false,
-            active: data[type]["notifications"].some(
-              (res) => res.id === detail?.id
-            ),
-          },
-        });
-      }
-    },
-  });
+  React.useEffect(() => {
+    if (profileState && profileState[type]) {
+      setState({
+        watchlist: {
+          results: profileState[type]["watchlist"],
+          loading: false,
+          active: profileState[type]["watchlist"].some(
+            (res) => res.id === detail?.id
+          ),
+        },
+        seen: {
+          results: profileState[type]["seen"],
+          loading: false,
+          active: profileState[type]["seen"].some(
+            (res) => res.id === detail?.id
+          ),
+        },
+        favorite: {
+          results: profileState[type]["favorite"],
+          loading: false,
+          active: profileState[type]["favorite"].some(
+            (res) => res.id === detail?.id
+          ),
+        },
+        notifications: {
+          results: profileState[type]["notifications"],
+          loading: false,
+          active: profileState[type]["notifications"].some(
+            (res) => res.id === detail?.id
+          ),
+        },
+      });
+    }
+  }, [userID]);
 
   const handleToggleItemProfile = async (field) => {
     if (state[field].active) {
@@ -96,7 +92,7 @@ export default function UserController({ detail, userID, type }) {
             },
           }));
 
-          dispatch(setActionChange());
+          dispatch(removeItem({ itemID: detail?.id, field, type }));
         }
 
         setState((prev) => ({
@@ -126,18 +122,95 @@ export default function UserController({ detail, userID, type }) {
           title: detail?.title || detail?.name,
           vote_average: detail?.vote_average,
         },
-        (error) => {
+        async (error) => {
           if (!error) {
-            setState((prev) => ({
-              ...prev,
-              [field]: {
-                results: prev[field].results.concat(detail?.id),
-                active: !prev[field].active,
-                loading: false,
-              },
-            }));
+            if (field === "watchlist" && state.seen.active) {
+              await removeItemInProfile(
+                type,
+                "seen",
+                userID,
+                detail?.id,
+                (error) => {
+                  if (!error) {
+                    setState((prev) => ({
+                      ...prev,
+                      seen: {
+                        results: prev.seen.results.filter(
+                          (res) => res !== detail?.id
+                        ),
+                        active: !prev.seen.active,
+                        loading: false,
+                      },
+                      [field]: {
+                        results: prev[field].results.concat(detail?.id),
+                        active: !prev[field].active,
+                        loading: false,
+                      },
+                    }));
 
-            dispatch(setActionChange());
+                    dispatch(
+                      removeItem({ itemID: detail?.id, field: "seen", type })
+                    );
+                  }
+                }
+              );
+            } else if (field === "seen" && state.watchlist.active) {
+              await removeItemInProfile(
+                type,
+                "watchlist",
+                userID,
+                detail?.id,
+                (error) => {
+                  if (!error) {
+                    setState((prev) => ({
+                      ...prev,
+                      watchlist: {
+                        results: prev.watchlist.results.filter(
+                          (res) => res !== detail?.id
+                        ),
+                        active: !prev.watchlist.active,
+                        loading: false,
+                      },
+                      [field]: {
+                        results: prev[field].results.concat(detail?.id),
+                        active: !prev[field].active,
+                        loading: false,
+                      },
+                    }));
+
+                    dispatch(
+                      removeItem({
+                        itemID: detail?.id,
+                        field: "watchlist",
+                        type,
+                      })
+                    );
+                  }
+                }
+              );
+            } else {
+              setState((prev) => ({
+                ...prev,
+                [field]: {
+                  results: prev[field].results.concat(detail?.id),
+                  active: !prev[field].active,
+                  loading: false,
+                },
+              }));
+            }
+
+            dispatch(
+              addItem({
+                field,
+                value: {
+                  poster_path: detail?.poster_path,
+                  id: detail?.id,
+                  title: detail?.title || detail?.name,
+                  vote_average: detail?.vote_average,
+                },
+                type,
+              })
+            );
           }
 
           setState((prev) => ({
@@ -168,9 +241,9 @@ export default function UserController({ detail, userID, type }) {
         gap: 0.5,
       }}
     >
-      {!error && (
+      {profileState && (
         <>
-          {state["watchlist"].loading || isLoading ? (
+          {state["watchlist"].loading ? (
             <IconButton>
               <CircularProgress size={24} />
             </IconButton>
@@ -181,7 +254,7 @@ export default function UserController({ detail, userID, type }) {
               />
             </IconButton>
           )}
-          {state["seen"].loading || isLoading ? (
+          {state["seen"].loading ? (
             <IconButton>
               <CircularProgress size={24} />
             </IconButton>
@@ -192,7 +265,7 @@ export default function UserController({ detail, userID, type }) {
               />
             </IconButton>
           )}
-          {state["favorite"].loading || isLoading ? (
+          {state["favorite"].loading ? (
             <IconButton>
               <CircularProgress size={24} />
             </IconButton>
@@ -203,7 +276,7 @@ export default function UserController({ detail, userID, type }) {
               />
             </IconButton>
           )}
-          {state["notifications"].loading || isLoading ? (
+          {state["notifications"].loading ? (
             <IconButton>
               <CircularProgress size={24} />
             </IconButton>
