@@ -10,13 +10,16 @@ import ErrorBoundary from "./utils/ErrorBoundary";
 import { useSessionStorage } from "./utils/useSessionStorage";
 import { updateMovies, updateNews } from "./api/tmdbApis";
 import { supabase } from "./supabaseClient";
+import { useSnackbar } from "notistack";
 
 export default function App() {
   const { pathname, search } = useLocation();
+  const { enqueueSnackbar } = useSnackbar();
 
   const dispatch = useDispatch();
 
   const initialStateStore = useSelector((state) => state.movieQuery);
+  const error = useSelector((state) => state.profileQuery.error) || false;
 
   const [initialLoading, setInitialLoading] = useState(true);
 
@@ -126,6 +129,14 @@ export default function App() {
   useEffect(() => {
     setConfigCineMatch(initialStateStore);
   }, [initialStateStore]);
+
+  useEffect(() => {
+    if (error) {
+      enqueueSnackbar("Errore imprevisto, riprova pià tardi.", {
+        variant: "error",
+      });
+    }
+  }, [error]);
 
   const getRoutes = (allRoutes) =>
     allRoutes.map((route) => {

@@ -2,6 +2,8 @@ import { createSlice } from "@reduxjs/toolkit";
 
 export const initialState = {
   loading: false,
+  error: false,
+  userID: null,
   tv: {
     watchlist: [],
     seen: [],
@@ -49,33 +51,46 @@ export const profileQuerySlice = createSlice({
         },
       };
     },
+    updateProfileError: (state, action) => {
+      return { error: true, ...action.payload };
+    },
     upsertSeenTvEpisode: (state, action) => {
-      const { itemID, seasonID, value } = action.payload;
+      const { itemID, seasonID, infoTv, value } = action.payload;
 
-      const complete = state.tv.seen.every((item) => {
-        return Object.entries(item?.seasons_seen || {}).every(
-          ([_, value]) => value.complete
-        );
-      });
+      const newItems = state.tv.seen.find((tv) => tv.id === itemID)
+        ? state.tv.seen.map((ele) => {
+            if (ele.id === itemID) {
+              return {
+                ...ele,
+                seasons_seen: {
+                  ...(ele?.seasons_seen || {}),
+                  [seasonID]: {
+                    ...value,
+                  },
+                },
+              };
+            }
 
-      const newItems = state.tv.seen.map((ele) => {
-        if (ele.id === itemID) {
-          return {
-            ...item,
-            complete,
-            seasons_seen: {
-              ...(item?.seasons_seen || {}),
-              [seasonID]: {
-                ...value,
+            return ele;
+          })
+        : [
+            ...state.tv.seen,
+            {
+              ...infoTv,
+              seasons_seen: {
+                [seasonID]: {
+                  ...value,
+                },
               },
             },
-          };
-        }
+          ];
 
-        return ele;
-      });
-
-      return { ...state, tv: { ...state.tv, seen: newItems } };
+      return {
+        ...state,
+        error: false,
+        loading: false,
+        tv: { ...state.tv, seen: newItems },
+      };
     },
   },
 });
@@ -87,6 +102,7 @@ export const {
   removeItem,
   upsertSeenTvEpisode,
   setLoadingProfile,
+  updateProfileError,
 } = profileQuerySlice.actions;
 
 export default profileQuerySlice.reducer;

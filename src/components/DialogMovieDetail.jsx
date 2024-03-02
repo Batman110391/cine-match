@@ -529,6 +529,26 @@ export default function DialogMovieDetail({
                         )}
                     </Box>
                   </Grid>
+
+                  {type === "tv" &&
+                    !isDesktop &&
+                    Array.isArray(detail?.seasons) &&
+                    detail?.seasons?.length > 0 && (
+                      <Grid item xs={12}>
+                        <SubHeader title={"Stagioni"} noAction={true}>
+                          <ListSeasonTv
+                            tvID={detail?.id}
+                            seasons={detail.seasons}
+                            isDesktop={isDesktop}
+                            posterPath={detail?.poster_path}
+                            title={detail?.name}
+                            voteAverage={detail?.vote_average}
+                            activeAction={Boolean(user)}
+                          />
+                        </SubHeader>
+                      </Grid>
+                    )}
+
                   <Grid item xs={12} sm={4}>
                     <CastListDetail
                       person={detail?.credits?.cast}
@@ -537,18 +557,24 @@ export default function DialogMovieDetail({
                     />
                   </Grid>
                   {type === "tv" &&
+                    isDesktop &&
                     Array.isArray(detail?.seasons) &&
                     detail?.seasons?.length > 0 && (
                       <Grid item xs={12}>
-                        <SubHeader title={"Stagioni"}>
+                        <SubHeader title={"Stagioni"} noAction={true}>
                           <ListSeasonTv
                             tvID={detail?.id}
                             seasons={detail.seasons}
                             isDesktop={isDesktop}
+                            posterPath={detail?.poster_path}
+                            title={detail?.name}
+                            voteAverage={detail?.vote_average}
+                            activeAction={Boolean(user)}
                           />
                         </SubHeader>
                       </Grid>
                     )}
+
                   <Grid item xs={12}>
                     <SubHeader
                       title={

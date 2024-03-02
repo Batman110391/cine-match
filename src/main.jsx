@@ -10,6 +10,7 @@ import { darkTheme } from "./context/theme";
 import { store } from "./store/store";
 import DialogMovieDetailProvider from "./components/DialogMovieDetailProvider";
 import { AuthContextProvider } from "./context/authentication";
+import { SnackbarProvider } from "notistack";
 
 const queryClient = new QueryClient();
 
@@ -18,13 +19,15 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     <CssBaseline />
     <BrowserRouter>
       <Provider store={store}>
-        <AuthContextProvider>
-          <QueryClientProvider client={queryClient}>
-            <DialogMovieDetailProvider>
-              <App />
-            </DialogMovieDetailProvider>
-          </QueryClientProvider>
-        </AuthContextProvider>
+        <SnackbarProvider maxSnack={3}>
+          <AuthContextProvider>
+            <QueryClientProvider client={queryClient}>
+              <DialogMovieDetailProvider>
+                <App />
+              </DialogMovieDetailProvider>
+            </QueryClientProvider>
+          </AuthContextProvider>
+        </SnackbarProvider>
       </Provider>
     </BrowserRouter>
   </ThemeProvider>

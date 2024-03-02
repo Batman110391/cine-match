@@ -26,7 +26,13 @@ export const AuthContextProvider = ({ children }) => {
     const result = await fetchProfileData(user);
 
     if (result && result?.tv && result?.movie) {
-      dispatch(initializeProfileState({ tv: result.tv, movie: result.movie }));
+      dispatch(
+        initializeProfileState({
+          tv: result.tv,
+          movie: result.movie,
+          userID: user.id,
+        })
+      );
     }
 
     dispatch(setLoadingProfile({ loading: false }));

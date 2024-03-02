@@ -1499,16 +1499,19 @@ export async function removeItemInProfile(type, field, userID, itemID, cb) {
   }
 }
 
-export async function fetchProfileDataChecking(userID, type) {
-  const { data, error } = await supabase
+export async function updateItemInProfile(newState, userID, cb) {
+  const { error: newError } = await supabase
     .from("profile")
-    .select(`${type}`)
-    .eq("id", userID)
-    .limit(1);
+    .update(newState)
+    .eq("id", userID);
 
-  if (error) {
-    return {};
+  if (newError) {
+    if (typeof cb === "function") {
+      return cb("error");
+    }
   }
 
-  return data[0];
+  if (typeof cb === "function") {
+    return cb(null);
+  }
 }
