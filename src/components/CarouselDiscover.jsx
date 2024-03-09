@@ -111,6 +111,11 @@ export default function CarouselDiscover({
               <Typography variant="button">{"Vedi tutti"}</Typography>
             </Button>
           )}
+          {path && (
+            <Button LinkComponent={Link} to={path}>
+              <Typography variant="button">{"Vedi tutti"}</Typography>
+            </Button>
+          )}
         </Stack>
       )}
       {!slides?.length > 0 && FallbackComponent ? (

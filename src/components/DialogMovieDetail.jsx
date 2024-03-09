@@ -304,6 +304,7 @@ export default function DialogMovieDetail({
                                   detail?.release_date || detail?.first_air_date
                                 }
                                 onlyYear
+                                type={type}
                               />
                             </Typography>
                             {director && type === "movie" && (
@@ -389,6 +390,7 @@ export default function DialogMovieDetail({
                               originalReleaseDate={
                                 detail?.release_date || detail?.first_air_date
                               }
+                              type={type}
                             />
                           </Typography>
 
@@ -544,6 +546,8 @@ export default function DialogMovieDetail({
                             title={detail?.name}
                             voteAverage={detail?.vote_average}
                             activeAction={Boolean(user)}
+                            numberEpisodes={detail?.number_of_episodes}
+                            numberSeasons={detail?.number_of_seasons}
                           />
                         </SubHeader>
                       </Grid>
@@ -570,6 +574,8 @@ export default function DialogMovieDetail({
                             title={detail?.name}
                             voteAverage={detail?.vote_average}
                             activeAction={Boolean(user)}
+                            numberEpisodes={detail?.number_of_episodes}
+                            numberSeasons={detail?.number_of_seasons}
                           />
                         </SubHeader>
                       </Grid>

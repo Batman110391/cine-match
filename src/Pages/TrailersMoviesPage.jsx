@@ -518,7 +518,6 @@ const CustomController = memo(function CustomController(props) {
 
 const HeaderControll = memo(function HeaderControll(props) {
   const { isDesktop, height, movie } = props;
-  //console.log("movie", movie);
 
   return (
     <Box

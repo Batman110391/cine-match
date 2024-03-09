@@ -1,234 +1,184 @@
 import FavoriteTwoToneIcon from "@mui/icons-material/FavoriteTwoTone";
-import NotificationsTwoToneIcon from "@mui/icons-material/NotificationsTwoTone";
 import VisibilityTwoToneIcon from "@mui/icons-material/VisibilityTwoTone";
 import WatchLaterTwoToneIcon from "@mui/icons-material/WatchLaterTwoTone";
-import { Box, CircularProgress, IconButton } from "@mui/material";
+import { Box, IconButton } from "@mui/material";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addItemInProfile, removeItemInProfile } from "../api/tmdbApis";
-import { addItem, removeItem } from "../store/profileQuery";
+import { addItem, removeItem, updateItem } from "../store/profileQuery";
 
 export default function UserController({ detail, userID, type }) {
   const dispatch = useDispatch();
 
   const profileState = useSelector((state) => state.profileQuery) || {};
 
-  const [state, setState] = React.useState({
-    watchlist: {
-      results: [],
-      loading: true,
-      active: false,
+  const currentSession = React.useMemo(() => {
+    return profileState[type]?.[detail?.id] || null;
+  }, [profileState]);
+
+  const existAtLeastOneAttribute = React.useCallback(
+    (newCurrentSession) => {
+      return Boolean(
+        newCurrentSession?.complete ||
+          newCurrentSession?.favorite ||
+          newCurrentSession?.notification ||
+          (newCurrentSession?.seasons_seen &&
+            Object.values(newCurrentSession.seasons_seen).some(
+              (seas) => seas.episodes_seen.length > 0
+            ))
+      );
     },
-    seen: {
-      results: [],
-      loading: true,
-      active: false,
-    },
-    favorite: {
-      results: [],
-      loading: true,
-      active: false,
-    },
-    notifications: {
-      results: [],
-      loading: true,
-      active: false,
-    },
-  });
+    [profileState]
+  );
 
-  React.useEffect(() => {
-    if (profileState && profileState[type]) {
-      setState({
-        watchlist: {
-          results: profileState[type]["watchlist"],
-          loading: false,
-          active: profileState[type]["watchlist"].some(
-            (res) => res.id === detail?.id
-          ),
-        },
-        seen: {
-          results: profileState[type]["seen"],
-          loading: false,
-          active: profileState[type]["seen"].some(
-            (res) => res.id === detail?.id
-          ),
-        },
-        favorite: {
-          results: profileState[type]["favorite"],
-          loading: false,
-          active: profileState[type]["favorite"].some(
-            (res) => res.id === detail?.id
-          ),
-        },
-        notifications: {
-          results: profileState[type]["notifications"],
-          loading: false,
-          active: profileState[type]["notifications"].some(
-            (res) => res.id === detail?.id
-          ),
-        },
-      });
-    }
-  }, [userID]);
+  const handleToggleItemProfile = (field) => {
+    switch (field) {
+      case "watchlist": {
+        if (!currentSession) {
+          const newValue = {
+            poster_path: detail?.poster_path,
+            title: detail?.title || detail?.name,
+            id: detail.id,
+            vote_average: detail?.vote_average,
+            watchlist: true,
+            favorite: false,
+            notification: false,
+            complete: false,
+          };
 
-  const handleToggleItemProfile = async (field) => {
-    if (state[field].active) {
-      setState((prev) => ({
-        ...prev,
-        [field]: {
-          ...prev[field],
-          loading: true,
-        },
-      }));
-
-      await removeItemInProfile(type, field, userID, detail?.id, (error) => {
-        if (!error) {
-          setState((prev) => ({
-            ...prev,
-            [field]: {
-              results: prev[field].results.filter((res) => res !== detail?.id),
-              active: !prev[field].active,
-              loading: false,
-            },
-          }));
-
-          dispatch(removeItem({ itemID: detail?.id, field, type }));
-        }
-
-        setState((prev) => ({
-          ...prev,
-          [field]: {
-            ...prev[field],
-            loading: false,
-          },
-        }));
-      });
-    } else {
-      setState((prev) => ({
-        ...prev,
-        [field]: {
-          ...prev[field],
-          loading: true,
-        },
-      }));
-
-      await addItemInProfile(
-        type,
-        field,
-        userID,
-        {
-          poster_path: detail?.poster_path,
-          id: detail?.id,
-          title: detail?.title || detail?.name,
-          vote_average: detail?.vote_average,
-        },
-        async (error) => {
-          if (!error) {
-            if (field === "watchlist" && state.seen.active) {
-              await removeItemInProfile(
+          return dispatch(
+            addItem({ type, itemID: detail.id, value: newValue })
+          );
+        } else {
+          if (
+            existAtLeastOneAttribute({
+              ...currentSession,
+              watchlist: !currentSession.watchlist,
+            })
+          ) {
+            return dispatch(
+              updateItem({
+                itemID: detail.id,
                 type,
-                "seen",
-                userID,
-                detail?.id,
-                (error) => {
-                  if (!error) {
-                    setState((prev) => ({
-                      ...prev,
-                      seen: {
-                        results: prev.seen.results.filter(
-                          (res) => res !== detail?.id
-                        ),
-                        active: !prev.seen.active,
-                        loading: false,
-                      },
-                      [field]: {
-                        results: prev[field].results.concat(detail?.id),
-                        active: !prev[field].active,
-                        loading: false,
-                      },
-                    }));
-
-                    dispatch(
-                      removeItem({ itemID: detail?.id, field: "seen", type })
-                    );
-                  }
-                }
-              );
-            } else if (field === "seen" && state.watchlist.active) {
-              await removeItemInProfile(
-                type,
-                "watchlist",
-                userID,
-                detail?.id,
-                (error) => {
-                  if (!error) {
-                    setState((prev) => ({
-                      ...prev,
-                      watchlist: {
-                        results: prev.watchlist.results.filter(
-                          (res) => res !== detail?.id
-                        ),
-                        active: !prev.watchlist.active,
-                        loading: false,
-                      },
-                      [field]: {
-                        results: prev[field].results.concat(detail?.id),
-                        active: !prev[field].active,
-                        loading: false,
-                      },
-                    }));
-
-                    dispatch(
-                      removeItem({
-                        itemID: detail?.id,
-                        field: "watchlist",
-                        type,
-                      })
-                    );
-                  }
-                }
-              );
-            } else {
-              setState((prev) => ({
-                ...prev,
-                [field]: {
-                  results: prev[field].results.concat(detail?.id),
-                  active: !prev[field].active,
-                  loading: false,
-                },
-              }));
-            }
-
-            dispatch(
-              addItem({
-                field,
-                value: {
-                  poster_path: detail?.poster_path,
-                  id: detail?.id,
-                  title: detail?.title || detail?.name,
-                  vote_average: detail?.vote_average,
-                },
-                type,
+                value: { watchlist: !currentSession.watchlist },
               })
             );
+          } else {
+            return dispatch(removeItem({ itemID: detail.id, type }));
           }
-
-          setState((prev) => ({
-            ...prev,
-            [field]: {
-              ...prev[field],
-              loading: false,
-            },
-          }));
         }
-      );
-      setState((prev) => ({
-        ...prev,
-        [field]: {
-          ...prev[field],
-          loading: false,
-        },
-      }));
+      }
+
+      case "seen": {
+        if (!currentSession) {
+          const newValue = {
+            poster_path: detail?.poster_path,
+            title: detail?.title || detail?.name,
+            id: detail.id,
+            vote_average: detail?.vote_average,
+            watchlist: false,
+            favorite: false,
+            notification: false,
+            complete: true,
+          };
+
+          return dispatch(
+            addItem({ type, itemID: detail.id, value: newValue })
+          );
+        } else {
+          if (
+            existAtLeastOneAttribute({
+              ...currentSession,
+              complete: !currentSession.complete,
+            })
+          ) {
+            return dispatch(
+              updateItem({
+                itemID: detail.id,
+                type,
+                value: { complete: !currentSession.complete },
+              })
+            );
+          } else {
+            return dispatch(removeItem({ itemID: detail.id, type }));
+          }
+        }
+      }
+
+      case "notification": {
+        if (!currentSession) {
+          const newValue = {
+            poster_path: detail?.poster_path,
+            title: detail?.title || detail?.name,
+            id: detail.id,
+            vote_average: detail?.vote_average,
+            watchlist: false,
+            favorite: false,
+            notification: true,
+            complete: false,
+          };
+
+          return dispatch(
+            addItem({ type, itemID: detail.id, value: newValue })
+          );
+        } else {
+          if (
+            existAtLeastOneAttribute({
+              ...currentSession,
+              notification: !currentSession.notification,
+            })
+          ) {
+            return dispatch(
+              updateItem({
+                itemID: detail.id,
+                type,
+                value: { notification: !currentSession.notification },
+              })
+            );
+          } else {
+            return dispatch(removeItem({ itemID: detail.id, type }));
+          }
+        }
+      }
+
+      case "favorite": {
+        if (!currentSession) {
+          const newValue = {
+            poster_path: detail?.poster_path,
+            title: detail?.title || detail?.name,
+            id: detail.id,
+            vote_average: detail?.vote_average,
+            watchlist: false,
+            favorite: true,
+            notification: false,
+            complete: false,
+          };
+
+          return dispatch(
+            addItem({ type, itemID: detail.id, value: newValue })
+          );
+        } else {
+          if (
+            existAtLeastOneAttribute({
+              ...currentSession,
+              favorite: !currentSession.favorite,
+            })
+          ) {
+            return dispatch(
+              updateItem({
+                itemID: detail.id,
+                type,
+                value: { favorite: !currentSession.favorite },
+              })
+            );
+          } else {
+            return dispatch(removeItem({ itemID: detail.id, type }));
+          }
+        }
+      }
+
+      default: {
+        return null;
+      }
     }
   };
 
@@ -241,56 +191,32 @@ export default function UserController({ detail, userID, type }) {
         gap: 0.5,
       }}
     >
-      {profileState && (
-        <>
-          {state["watchlist"].loading ? (
-            <IconButton>
-              <CircularProgress size={24} />
-            </IconButton>
-          ) : (
-            <IconButton onClick={() => handleToggleItemProfile("watchlist")}>
-              <WatchLaterTwoToneIcon
-                color={state["watchlist"].active ? "success" : "inherit"}
-              />
-            </IconButton>
-          )}
-          {state["seen"].loading ? (
-            <IconButton>
-              <CircularProgress size={24} />
-            </IconButton>
-          ) : (
-            <IconButton onClick={() => handleToggleItemProfile("seen")}>
-              <VisibilityTwoToneIcon
-                color={state["seen"].active ? "success" : "inherit"}
-              />
-            </IconButton>
-          )}
-          {state["favorite"].loading ? (
-            <IconButton>
-              <CircularProgress size={24} />
-            </IconButton>
-          ) : (
-            <IconButton onClick={() => handleToggleItemProfile("favorite")}>
-              <FavoriteTwoToneIcon
-                color={state["favorite"].active ? "success" : "inherit"}
-              />
-            </IconButton>
-          )}
-          {state["notifications"].loading ? (
-            <IconButton>
-              <CircularProgress size={24} />
-            </IconButton>
-          ) : (
-            <IconButton
-              onClick={() => handleToggleItemProfile("notifications")}
-            >
-              <NotificationsTwoToneIcon
-                color={state["notifications"].active ? "success" : "inherit"}
-              />
-            </IconButton>
-          )}
-        </>
-      )}
+      <IconButton onClick={() => handleToggleItemProfile("seen")}>
+        <VisibilityTwoToneIcon
+          color={currentSession?.complete ? "success" : "inherit"}
+        />
+      </IconButton>
+
+      <IconButton onClick={() => handleToggleItemProfile("watchlist")}>
+        <WatchLaterTwoToneIcon
+          color={currentSession?.watchlist ? "success" : "inherit"}
+        />
+      </IconButton>
+
+      <IconButton onClick={() => handleToggleItemProfile("favorite")}>
+        <FavoriteTwoToneIcon
+          color={currentSession?.favorite ? "success" : "inherit"}
+        />
+      </IconButton>
+      {/* <IconButton onClick={() => handleToggleItemProfile("notification")}>
+        <NotificationsTwoToneIcon
+          color={
+            currentSession && currentSession?.notification
+              ? "success"
+              : "inherit"
+          }
+        />
+      </IconButton> */}
     </Box>
   );
 }

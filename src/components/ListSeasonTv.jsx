@@ -40,18 +40,18 @@ export default function ListSeasonTv({
   title,
   voteAverage,
   activeAction = false,
+  numberEpisodes,
+  numberSeasons,
 }) {
   const dispatch = useDispatch();
 
-  const tvProfile = useSelector((state) => state.profileQuery.tv.seen);
+  const tvProfile = useSelector((state) => state.profileQuery.tv);
 
   const [expanded, setExpanded] = React.useState(false);
 
   const currentTvDetailProfile = React.useMemo(() => {
-    return tvProfile.find((tv) => tv.id === tvID);
+    return tvProfile?.[tvID] || null;
   }, [tvProfile]);
-
-  console.log("currentTvDetailProfile", currentTvDetailProfile);
 
   const handleChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : false);
@@ -65,12 +65,8 @@ export default function ListSeasonTv({
 
   const zeroPad = (num, places = 2) => String(num).padStart(places, "0");
 
-  console.log("data", data);
-
   const handleAddSeason = (seasonID) => {
     const currentSession = data.find((session) => session.id === seasonID);
-
-    //se esiste ed è attiva reset
 
     if (currentSession) {
       const { id, season_number, episodes } = currentSession;
@@ -84,6 +80,8 @@ export default function ListSeasonTv({
           title,
           id: tvID,
           vote_average: voteAverage,
+          numberEpisodes,
+          numberSeasons,
         };
 
         const value = {
@@ -115,6 +113,8 @@ export default function ListSeasonTv({
           title,
           id: tvID,
           vote_average: voteAverage,
+          numberEpisodes,
+          numberSeasons,
         };
 
         const value = {
@@ -185,6 +185,8 @@ export default function ListSeasonTv({
           title,
           id: tvID,
           vote_average: voteAverage,
+          numberEpisodes,
+          numberSeasons,
         };
 
         const value = {
@@ -222,17 +224,33 @@ export default function ListSeasonTv({
                 <AccordionSummary
                   aria-controls={`${keySeason}bh-content`}
                   id={`${keySeason}bh-header`}
+                  sx={{ position: "relative" }}
                 >
+                  <ProgressBarSeason
+                    complete={currentTvDetailProfile?.complete}
+                    currentSeason={
+                      currentTvDetailProfile?.seasons_seen?.[season.id]
+                    }
+                  />
+
                   <Stack
                     flexDirection={"row"}
                     alignItems={"center"}
                     gap={2}
                     width={"100%"}
                   >
-                    <Typography variant="button">{keySeason}</Typography>
+                    <Typography
+                      sx={{ fontSize: isDesktop ? "0.9rem" : "0.7rem" }}
+                      variant="button"
+                    >
+                      {keySeason}
+                    </Typography>
                     <Typography
                       variant={"button"}
-                      sx={{ fontSize: "0.7rem", color: "text.secondary" }}
+                      sx={{
+                        fontSize: isDesktop ? "0.7rem" : "0.6rem",
+                        color: "text.secondary",
+                      }}
                     >
                       {season?.air_date?.substring(0, 4)}{" "}
                       {season?.air_date && " | "}
@@ -265,6 +283,7 @@ export default function ListSeasonTv({
                           <CheckCircleIcon
                             sx={{ width: "1.2em", height: "1.2em" }}
                             color={
+                              currentTvDetailProfile?.complete ||
                               currentTvDetailProfile?.seasons_seen?.[season.id]
                                 ?.complete
                                 ? "success"
@@ -310,6 +329,7 @@ export default function ListSeasonTv({
                               <CheckCircleIcon
                                 sx={{ width: "1.2em", height: "1.2em" }}
                                 color={
+                                  currentTvDetailProfile?.complete ||
                                   currentTvDetailProfile?.seasons_seen?.[
                                     season.id
                                   ]?.episodes_seen.includes(episode.id)
@@ -375,7 +395,7 @@ export default function ListSeasonTv({
                                   >
                                     <Typography
                                       sx={{
-                                        fontSize: "1rem",
+                                        fontSize: isDesktop ? "1rem" : "0.8rem",
                                         letterSpacing: 1.2,
                                       }}
                                       variant={"h6"}
@@ -401,7 +421,11 @@ export default function ListSeasonTv({
                                   <Stack>
                                     <Typography
                                       component="span"
-                                      sx={{ fontSize: "0.7rem" }}
+                                      sx={{
+                                        fontSize: isDesktop
+                                          ? "0.7rem"
+                                          : "0.6rem",
+                                      }}
                                       variant={"button"}
                                     >
                                       {episode?.air_date}
@@ -422,7 +446,7 @@ export default function ListSeasonTv({
                                       fontWeight={300}
                                       sx={{
                                         mt: 1,
-                                        fontSize: "1rem",
+                                        fontSize: isDesktop ? "1rem" : "0.9rem",
                                         fontWeight: 300,
                                       }}
                                       variant={"body2"}
@@ -446,6 +470,30 @@ export default function ListSeasonTv({
             );
           })}
     </Box>
+  );
+}
+
+function ProgressBarSeason({ complete, currentSeason = {} }) {
+  const { episodes_total = 0, episodes_seen = [] } = currentSeason;
+
+  const currentValue = (episodes_seen.length * 100) / episodes_total;
+
+  if (!complete && !currentValue > 0) {
+    return null;
+  }
+
+  return (
+    <LinearProgress
+      variant="determinate"
+      value={complete ? 100 : currentValue}
+      color={complete || currentValue == 100 ? "success" : "warning"}
+      sx={{
+        position: "absolute",
+        left: 0,
+        bottom: 0,
+        width: "100%",
+      }}
+    />
   );
 }
 

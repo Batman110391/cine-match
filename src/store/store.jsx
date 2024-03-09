@@ -3,7 +3,14 @@ import movieQueryReducer from "./movieQuery";
 import profileQueryReducer, { updateProfileError } from "./profileQuery";
 import { updateItemInProfile } from "../api/tmdbApis";
 
-const UPDATE_DB_VALID_ACTIONS = ["profileQuery/upsertSeenTvEpisode"];
+const UPDATE_DB_VALID_ACTIONS = [
+  "profileQuery/upsertSeenTvEpisode",
+  "profileQuery/addItem",
+  "profileQuery/removeItem",
+  "profileQuery/upsertSeenTvEpisode",
+  "profileQuery/updateProfileError",
+  "profileQuery/updateItem",
+];
 
 const customMiddleware = (store) => (next) => (action) => {
   const { profileQuery: profileQueryPrev = {} } = store?.getState() || {};

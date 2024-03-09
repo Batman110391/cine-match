@@ -4,18 +4,8 @@ export const initialState = {
   loading: false,
   error: false,
   userID: null,
-  tv: {
-    watchlist: [],
-    seen: [],
-    favorite: [],
-    notification: [],
-  },
-  movie: {
-    watchlist: [],
-    seen: [],
-    favorite: [],
-    notification: [],
-  },
+  tv: {},
+  movie: {},
 };
 
 export const profileQuerySlice = createSlice({
@@ -27,55 +17,82 @@ export const profileQuerySlice = createSlice({
       return { ...state, loading };
     },
     initializeProfileState: (state, action) => {
-      return { loading: state.loading, ...action.payload };
+      return { ...state, ...action.payload };
     },
     resetProfileState: () => {
       return initialState;
     },
     addItem: (state, action) => {
-      const { field, value, type } = action.payload;
-
-      return {
-        ...state,
-        [type]: { ...state[type], [field]: [...state[type][field], value] },
-      };
-    },
-    removeItem: (state, action) => {
-      const { itemID, field, type } = action.payload;
+      const { type, value, itemID } = action.payload;
 
       return {
         ...state,
         [type]: {
           ...state[type],
-          [field]: state[type][field].filter((item) => item.id !== itemID),
+          [itemID]: {
+            ...value,
+          },
+        },
+      };
+    },
+    removeItem: (state, action) => {
+      const { itemID, type } = action.payload;
+
+      const newTypeList = Object.entries(state[type]).reduce(
+        (prev, [key, value]) => {
+          if (key != itemID) {
+            return {
+              ...prev,
+              [key]: value,
+            };
+          }
+
+          return prev;
+        },
+        {}
+      );
+
+      return {
+        ...state,
+        [type]: newTypeList,
+      };
+    },
+    updateItem: (state, action) => {
+      const { itemID, type, value } = action.payload;
+
+      return {
+        ...state,
+        [type]: {
+          ...state[type],
+          [itemID]: {
+            ...state[type][itemID],
+            ...value,
+          },
         },
       };
     },
     updateProfileError: (state, action) => {
-      return { error: true, ...action.payload };
+      return { error: true, loading: false, ...action.payload };
     },
     upsertSeenTvEpisode: (state, action) => {
       const { itemID, seasonID, infoTv, value } = action.payload;
 
-      const newItems = state.tv.seen.find((tv) => tv.id === itemID)
-        ? state.tv.seen.map((ele) => {
-            if (ele.id === itemID) {
-              return {
-                ...ele,
-                seasons_seen: {
-                  ...(ele?.seasons_seen || {}),
-                  [seasonID]: {
-                    ...value,
-                  },
+      const newItems = state.tv?.[itemID]
+        ? {
+            ...state.tv,
+            [itemID]: {
+              ...state.tv[itemID],
+              seasons_seen: {
+                ...(state.tv[itemID]?.seasons_seen || {}),
+                [seasonID]: {
+                  ...value,
                 },
-              };
-            }
-
-            return ele;
-          })
-        : [
-            ...state.tv.seen,
-            {
+              },
+            },
+          }
+        : {
+            ...state.tv,
+            [itemID]: {
               ...infoTv,
               seasons_seen: {
                 [seasonID]: {
@@ -83,13 +100,13 @@ export const profileQuerySlice = createSlice({
                 },
               },
             },
-          ];
+          };
 
       return {
         ...state,
         error: false,
         loading: false,
-        tv: { ...state.tv, seen: newItems },
+        tv: newItems,
       };
     },
   },
@@ -103,6 +120,7 @@ export const {
   upsertSeenTvEpisode,
   setLoadingProfile,
   updateProfileError,
+  updateItem,
 } = profileQuerySlice.actions;
 
 export default profileQuerySlice.reducer;

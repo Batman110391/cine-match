@@ -1,3 +1,4 @@
+import { useTheme } from "@emotion/react";
 import {
   Avatar,
   Box,
@@ -6,18 +7,15 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import React from "react";
-import AuthContext from "../context/authentication";
-import LoadingPage from "../components/LoadingPage";
 import { deepOrange } from "@mui/material/colors";
-import { CURRENT_DATE_FORMATTING } from "../api/tmdbApis";
-import CarouselDiscover from "../components/CarouselDiscover";
-import { useTheme } from "@emotion/react";
+import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { setQuery } from "../store/movieQuery";
-import { DialogMovieDetailContext } from "../components/DialogMovieDetailProvider";
 import { Link } from "react-router-dom";
-import { uniqueArray } from "../utils/uniqueArray";
+import CarouselDiscover from "../components/CarouselDiscover";
+import { DialogMovieDetailContext } from "../components/DialogMovieDetailProvider";
+import LoadingPage from "../components/LoadingPage";
+import AuthContext from "../context/authentication";
+import { HEIGHT_NAVIGATION_MOBILE } from "../utils/constant";
 
 export default function ProfilePage() {
   const theme = useTheme();
@@ -43,43 +41,9 @@ export default function ProfilePage() {
     openDialogMovieDetail(movieID, type);
   };
 
-  const handleSeeAllMovie = () => {
-    dispatch(
-      setQuery({
-        currentRoute: 1,
-        querySearch: {
-          from: "1970-01-01",
-          to: CURRENT_DATE_FORMATTING,
-          order_by: "popularity.desc",
-          with_genres: [],
-          with_ott_providers: [],
-          exact_search: false,
-        },
-      })
-    );
-  };
-
-  const handleSeeAllPopularTv = () => {
-    dispatch(
-      setQuery({
-        currentRoute: 2,
-        querySearchTv: {
-          from: "1970-01-01",
-          to: CURRENT_DATE_FORMATTING,
-          order_by: "popularity.desc",
-          with_genres: [],
-          with_ott_providers: [],
-          exact_search: false,
-        },
-      })
-    );
-  };
-
   const flattenDataMovie = React.useMemo(() => {
     if (movie) {
-      return Object.keys(movie)?.reduce((prev, key) => {
-        return [...prev, ...movie[key]];
-      }, []);
+      return Object.values(movie);
     }
 
     return [];
@@ -87,19 +51,20 @@ export default function ProfilePage() {
 
   const flattenDataTv = React.useMemo(() => {
     if (tv) {
-      return Object.keys(tv)?.reduce((prev, key) => {
-        return [...prev, ...tv[key]];
-      }, []);
+      return Object.values(tv);
     }
 
     return [];
   }, [tv]);
 
-  const allUniqueMovie = uniqueArray(flattenDataMovie);
-  const allUniqueTv = uniqueArray(flattenDataTv);
-
   return (
-    <Box sx={{ height: "100vh" }}>
+    <Box
+      sx={{
+        height: isDesktop
+          ? "100vh"
+          : `calc(100vh - ${HEIGHT_NAVIGATION_MOBILE}px)`,
+      }}
+    >
       {authReady ? (
         <>
           {!user ? (
@@ -171,12 +136,9 @@ export default function ProfilePage() {
               <Divider />
               <Box sx={{ width: "100%", height: "100%", px: 2 }}>
                 <CarouselDiscover
-                  slides={allUniqueMovie}
+                  slides={flattenDataMovie}
                   titleDiscover={"FILM"}
-                  path={"/movies"}
-                  onAction={
-                    allUniqueMovie?.length > 0 ? handleSeeAllMovie : null
-                  }
+                  path={flattenDataMovie?.length > 0 ? "/movielist" : null}
                   isLoading={isLoading}
                   handleClickItem={handleClickItem}
                   isDesktop={isDesktop}
@@ -209,12 +171,9 @@ export default function ProfilePage() {
                 />
 
                 <CarouselDiscover
-                  slides={allUniqueTv}
+                  slides={flattenDataTv}
                   titleDiscover={"SERIE TV"}
-                  path={"/tv"}
-                  onAction={
-                    allUniqueTv?.length > 0 ? handleSeeAllPopularTv : null
-                  }
+                  path={flattenDataTv?.length > 0 ? "/tvlist" : null}
                   isLoading={isLoading}
                   handleClickItem={handleClickItem}
                   isDesktop={isDesktop}

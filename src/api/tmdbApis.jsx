@@ -1391,18 +1391,8 @@ export async function fetchProfileData(user) {
     const profileTables = supabase.from("profile");
     const objectInsert = {
       id: user?.id,
-      movie: {
-        seen: [],
-        favorite: [],
-        watchlist: [],
-        notifications: [],
-      },
-      tv: {
-        seen: [],
-        favorite: [],
-        watchlist: [],
-        notifications: [],
-      },
+      movie: {},
+      tv: {},
     };
     const { data: newData, error: newError } = await profileTables
       .insert(objectInsert)

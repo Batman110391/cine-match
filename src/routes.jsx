@@ -15,6 +15,8 @@ import NewspaperIcon from "@mui/icons-material/Newspaper";
 import TheatersIcon from "@mui/icons-material/Theaters";
 import AdaptiveStreamingVideoPlayer from "./components/AdaptiveStreamingVideoPlayer";
 import ProfilePage from "./Pages/ProfilePage";
+import ProfilePageTv from "./Pages/ProfilePageTv";
+import ProfilePageMovie from "./Pages/ProfilePageMovie";
 
 export const routes = [
   {
@@ -58,6 +60,22 @@ export const routes = [
     route: "/profile",
     component: <ProfilePage />,
     navbar: true,
+  },
+  {
+    name: "ListaTv",
+    key: "tvlist",
+    route: "/tvlist",
+    component: <ProfilePageTv />,
+    navbar: true,
+    hidden: true,
+  },
+  {
+    name: "ListaMovie",
+    key: "movielist",
+    route: "/movielist",
+    component: <ProfilePageMovie />,
+    navbar: true,
+    hidden: true,
   },
   // {
   //   name: "player",
