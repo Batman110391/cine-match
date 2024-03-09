@@ -79,7 +79,14 @@ export function SectionMovie({
   }
 
   return (
-    <Box sx={{ height: "auto", width: "100%", position: "relative" }}>
+    <Box
+      sx={{
+        height: "auto",
+        p: isDesktop ? 2 : 1,
+        width: "100%",
+        position: "relative",
+      }}
+    >
       <Box
         sx={{
           width: "100%",
@@ -89,14 +96,17 @@ export function SectionMovie({
           alignItems: "center",
           justifyContent: "center",
           py: 2,
+          zIndex: 2,
         }}
       >
-        <Chip label={label} />
+        <Chip sx={{ backgroundColor: "#778899bf" }} label={label} />
       </Box>
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill,minmax(180px, 1fr))",
+          gridTemplateColumns: `repeat(auto-fill, minmax(${
+            isDesktop ? MOVIE_CARD_WIDTH + 15 : MOVIE_CARD_WIDTH_MOBILE + 15
+          }px, 1fr))`,
         }}
       >
         {sections.map((section, i) => {
