@@ -11,6 +11,7 @@ import {
   MOVIE_CARD_WIDTH,
   MOVIE_CARD_WIDTH_MOBILE,
 } from "../utils/constant";
+import SimpleGridFlexBox from "../components/SimpleGridFlexBox";
 
 export default function ProfilePageMovie() {
   const theme = useTheme();
@@ -101,15 +102,13 @@ export function SectionMovie({
       >
         <Chip sx={{ backgroundColor: "#778899bf" }} label={label} />
       </Box>
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: `repeat(auto-fill, minmax(${
-            isDesktop ? MOVIE_CARD_WIDTH + 15 : MOVIE_CARD_WIDTH_MOBILE + 15
-          }px, 1fr))`,
-        }}
+
+      <SimpleGridFlexBox
+        w={isDesktop ? MOVIE_CARD_WIDTH : MOVIE_CARD_WIDTH_MOBILE}
+        spacingW={2}
+        spacingH={isDesktop ? 0.5 : 0.2}
       >
-        {sections.map((section, i) => {
+        {sections.map((section) => {
           const progressValue = progressBar ? calcProgressTv(section) : null;
 
           return (
@@ -157,7 +156,7 @@ export function SectionMovie({
             </Box>
           );
         })}
-      </Box>
+      </SimpleGridFlexBox>
     </Box>
   );
 }
