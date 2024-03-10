@@ -2,6 +2,7 @@ import React from "react";
 import DialogMovieDetail from "./DialogMovieDetail";
 import DialogPersonDetail from "./DialogPersonDetail";
 import DialogNewsDetail from "./DialogNewsDetail";
+import DialogEpisodeDetail from "./DialogEpisodeDetail";
 
 export const DialogMovieDetailContext = React.createContext({});
 
@@ -23,6 +24,11 @@ export default function DialogMovieDetailProvider({ children }) {
   const [openNewsDialog, setOpenNewsDialog] = React.useState(false);
   const [newsID, setNewsID] = React.useState(null);
 
+  const [openEpisodeDialog, setOpenEpisodeDialog] = React.useState(false);
+  const [episodeNumber, setEpisodeNumber] = React.useState(null);
+  const [seriesID, setSeriesID] = React.useState(null);
+  const [seasonNumber, setSeasonNumber] = React.useState(null);
+
   const contextValue = React.useMemo(
     () => ({
       openDialogMovieDetail(movieID, type) {
@@ -37,6 +43,12 @@ export default function DialogMovieDetailProvider({ children }) {
       openDialogNewsDetail(newsID) {
         setOpenNewsDialog(true);
         setNewsID(newsID);
+      },
+      openDialogEpisodeDetail(seriesID, seasonNumber, episodeNumber) {
+        setOpenEpisodeDialog(true);
+        setSeriesID(seriesID);
+        setSeasonNumber(seasonNumber);
+        setEpisodeNumber(episodeNumber);
       },
     }),
     []
@@ -90,6 +102,20 @@ export default function DialogMovieDetailProvider({ children }) {
     setNewsID(null);
   };
 
+  const handleClickEpisode = (seriesID, seasonNumber, episodeNumber) => {
+    setOpenEpisodeDialog(true);
+    setSeriesID(seriesID);
+    setSeasonNumber(seasonNumber);
+    setEpisodeNumber(episodeNumber);
+  };
+
+  const handleCloseEpisodeDialog = () => {
+    setOpenEpisodeDialog(false);
+    setSeriesID(null);
+    setEpisodeNumber(null);
+    setSeasonNumber(null);
+  };
+
   return (
     <React.Fragment>
       <DialogMovieDetailContext.Provider value={contextValue}>
@@ -104,6 +130,7 @@ export default function DialogMovieDetailProvider({ children }) {
           subItemClick={handleClickSubItem}
           openPersonDialog={handleClickPerson}
           openDialogNewsDetail={handleClickNews}
+          openDialogEpisodeDetail={handleClickEpisode}
         />
       )}
       {movieIDSubDialog && typeSubDialog && (
@@ -140,6 +167,17 @@ export default function DialogMovieDetailProvider({ children }) {
           open={openNewsDialog}
           onClose={handleCloseDialog}
           newsID={newsID}
+        />
+      )}
+
+      {seriesID && seasonNumber && episodeNumber && (
+        <DialogEpisodeDetail
+          open={openEpisodeDialog}
+          handleClose={handleCloseEpisodeDialog}
+          seriesID={seriesID}
+          seasonNumber={seasonNumber}
+          episodeNumber={episodeNumber}
+          openPersonDialog={handleClickPerson}
         />
       )}
     </React.Fragment>

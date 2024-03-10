@@ -68,6 +68,7 @@ export default function DialogMovieDetail({
   subItemClick,
   openPersonDialog,
   openDialogNewsDetail,
+  openDialogEpisodeDetail,
 }) {
   const theme = useTheme();
 
@@ -548,6 +549,7 @@ export default function DialogMovieDetail({
                             activeAction={Boolean(user)}
                             numberEpisodes={detail?.number_of_episodes}
                             numberSeasons={detail?.number_of_seasons}
+                            openDialogEpisodeDetail={openDialogEpisodeDetail}
                           />
                         </SubHeader>
                       </Grid>
@@ -558,6 +560,7 @@ export default function DialogMovieDetail({
                       person={detail?.credits?.cast}
                       height={height}
                       openDialogPersonDetail={openPersonDialog}
+                      isDesktop={isDesktop}
                     />
                   </Grid>
                   {type === "tv" &&
@@ -576,6 +579,7 @@ export default function DialogMovieDetail({
                             activeAction={Boolean(user)}
                             numberEpisodes={detail?.number_of_episodes}
                             numberSeasons={detail?.number_of_seasons}
+                            openDialogEpisodeDetail={openDialogEpisodeDetail}
                           />
                         </SubHeader>
                       </Grid>
@@ -650,7 +654,7 @@ export default function DialogMovieDetail({
   );
 }
 
-function RelaseDataFormatting({
+export function RelaseDataFormatting({
   production,
   release,
   originalReleaseDate,

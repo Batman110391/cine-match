@@ -23,14 +23,12 @@ export default function CastListDetail({
   person,
   height,
   openDialogPersonDetail,
+  isDesktop,
+  sx,
 }) {
-  const theme = useTheme();
-
   const [maxPersonRow, setMaxPersonRow] = React.useState(
     MAX_CAST_VISUALIZATION
   );
-
-  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
 
   const filterPersonForMobile = isDesktop
     ? person
@@ -72,6 +70,7 @@ export default function CastListDetail({
         width: "100%",
         maxHeight: { xs: "inherit", sm: height ? `${height}px` : "50vh" },
         overflowY: { xs: "inherit", sm: "auto" },
+        ...sx,
       }}
       subheader={
         isDesktop ? (

@@ -1505,3 +1505,19 @@ export async function updateItemInProfile(newState, userID, cb) {
     return cb(null);
   }
 }
+
+export async function fetchEpisodeDetailByID(
+  seriesID,
+  seasonNumber,
+  episodeNumber
+) {
+  return fetchPromise(
+    `https://api.themoviedb.org/3/tv/${seriesID}/season/${seasonNumber}/episode/${episodeNumber}?api_key=${API_KEY}&${CURRENT_LANGUAGE}`
+  ).then((data) => {
+    if (data) {
+      return data;
+    } else {
+      return {};
+    }
+  });
+}

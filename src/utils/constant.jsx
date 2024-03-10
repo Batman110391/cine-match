@@ -26,6 +26,9 @@ export const EPISODE_CARD_HEIGHT = 130;
 export const EPISODE_CARD_WIDTH_MOBILE = 110;
 export const EPISODE_CARD_HEIGHT_MOBILE = 90;
 
+export const EPISODE_CARD_DETAIL_WIDTH = 220;
+export const EPISODE_CARD_DETAIL_HEIGHT = 130;
+
 export const MINI_MOVIE_CARD_WIDTH = 60;
 export const MINI_MOVIE_CARD_HEIGTH = 85;
 

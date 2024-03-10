@@ -42,6 +42,7 @@ export default function ListSeasonTv({
   activeAction = false,
   numberEpisodes,
   numberSeasons,
+  openDialogEpisodeDetail,
 }) {
   const dispatch = useDispatch();
 
@@ -367,6 +368,13 @@ export default function ListSeasonTv({
                                 flexDirection: "row",
                               }}
                               key={i + "episode"}
+                              onClick={() =>
+                                openDialogEpisodeDetail(
+                                  tvID,
+                                  episode?.season_number,
+                                  episode?.episode_number
+                                )
+                              }
                             >
                               <ListItemAvatar>
                                 <MovieCard
@@ -383,6 +391,9 @@ export default function ListSeasonTv({
                                       : EPISODE_CARD_HEIGHT_MOBILE
                                   }
                                   isDesktop={false}
+                                  imageStyle={{
+                                    objectFit: "cover",
+                                  }}
                                 />
                               </ListItemAvatar>
                               <ListItemText

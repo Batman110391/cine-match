@@ -12,7 +12,8 @@ export default function MovieCard({
   badgeRating,
   onClick,
   isDesktop = true,
-  sx,
+  sx = {},
+  imageStyle = {},
 }) {
   const percentRating = badgeRating && (badgeRating.toFixed(1) * 100) / 10;
 
@@ -61,6 +62,9 @@ export default function MovieCard({
           placeholderSrc={`http://image.tmdb.org/t/p/w92${bg}`}
           src={`http://image.tmdb.org/t/p/w500${bg}`}
           width={w ? `${w}px` : "133px"}
+          style={{
+            ...imageStyle,
+          }}
         />
       )}
       {percentRating > 0 && (

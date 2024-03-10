@@ -111,7 +111,7 @@ export default function CarouselDiscover({
               <Typography variant="button">{"Vedi tutti"}</Typography>
             </Button>
           )}
-          {path && (
+          {path && !onAction && (
             <Button LinkComponent={Link} to={path}>
               <Typography variant="button">{"Vedi tutti"}</Typography>
             </Button>
