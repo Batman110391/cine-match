@@ -12,8 +12,7 @@ const API_KEY = import.meta.env.VITE_API_KEY;
 const LANGUAGE = "it-IT";
 const CURRENT_LANGUAGE = `language=${LANGUAGE}`;
 
-export const PROVIDERS =
-  "8|119|337|350|29|39|359|40|109|110|222|1726|531|582|1796";
+export const PROVIDERS = "8|119|337|350|29|39|359|40|109|110|222|531";
 
 export const CURRENT_DATE_FORMATTING = dayjs(new Date()).format("YYYY-MM-DD");
 export const DATA_TOMORROW = dayjs(CURRENT_DATE_FORMATTING)

@@ -25,7 +25,11 @@ import "moment/locale/it";
 import React from "react";
 import YouTubePlayer from "react-player/youtube";
 import { useQuery } from "react-query";
-import { addItemInProfile, fetchDetailMovieById } from "../api/tmdbApis";
+import {
+  PROVIDERS,
+  addItemInProfile,
+  fetchDetailMovieById,
+} from "../api/tmdbApis";
 import {
   MOVIE_PAGE_CARD_HEIGTH_MOBILE,
   MOVIE_PAGE_CARD_WIDTH_MOBILE,
@@ -517,15 +521,25 @@ export default function DialogMovieDetail({
                                 gap={2}
                                 sx={{ mt: 2 }}
                               >
-                                {detail?.providers?.flatrate?.map(
-                                  (provider) => (
-                                    <Avatar
-                                      key={provider?.provider_id}
-                                      alt={provider?.provider_name}
-                                      src={`http://image.tmdb.org/t/p/w500${provider?.logo_path}`}
-                                    />
+                                {[
+                                  ...(detail?.providers?.flatrate || []),
+                                  ...(detail?.providers?.buy || []),
+                                ]
+                                  ?.filter((prov) =>
+                                    PROVIDERS.includes(prov.provider_id)
                                   )
-                                )}
+                                  ?.map((provider) => (
+                                    <a
+                                      key={provider?.provider_id}
+                                      href={detail?.providers?.link}
+                                      target="_blank"
+                                    >
+                                      <Avatar
+                                        alt={provider?.provider_name}
+                                        src={`http://image.tmdb.org/t/p/w500${provider?.logo_path}`}
+                                      />
+                                    </a>
+                                  ))}
                               </Stack>
                             </SubHeader>
                           </Box>
