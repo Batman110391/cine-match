@@ -13,7 +13,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { motion } from "framer-motion";
-import React from "react";
+import React, { useMemo } from "react";
 import { useQuery } from "react-query";
 import { fetchPersonDetailById } from "../api/tmdbApis";
 import {
@@ -33,6 +33,7 @@ import DialogWrapperResponsivness from "./DialogWrapperResponsivness";
 import GridListImageVisualizations from "./GridListImageVisualizations";
 import MovieCard from "./MovieCard";
 import SubHeader from "./SubHeader";
+import { uniqueArray } from "../utils/uniqueArray";
 
 export default function DialogPersonDetail({
   open,
@@ -48,6 +49,16 @@ export default function DialogPersonDetail({
 
   const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
 
+  const knownForDepartment = useMemo(() => {
+    const currDepartment = data && data?.["known_for_department"];
+
+    if (!currDepartment) {
+      return null;
+    }
+
+    return DEPARTMENT_PERSONS[currDepartment];
+  }, [data]);
+
   const personalInformation = [
     { key: "name", info: "Nome:" },
     { key: "deathday", info: "Morto il:" },
@@ -60,23 +71,44 @@ export default function DialogPersonDetail({
     { key: "place_of_birth", info: "Nato a:" },
   ];
 
-  const actorsMovies = data?.cast;
-  const directorsMovies = data?.crew?.filter(
-    (dMovie) => dMovie?.department === "Directing"
-  );
-  const productorsMovies = data?.crew?.filter(
-    (pMovie) => pMovie?.department === "Production"
-  );
-  const wrtiterMovies = data?.crew?.filter(
-    (wMovie) => wMovie?.department === "Writing"
-  );
+  const actorsMovies = useMemo(() => {
+    return normalizeMovie(data, "cast");
+  }, [data]);
 
-  const aggregateCredits = [
-    { type: "Recitazione", data: actorsMovies },
-    { type: "Direzione", data: directorsMovies },
-    { type: "Produzione", data: productorsMovies },
-    { type: "Scrittura", data: wrtiterMovies },
-  ];
+  const directorsMovies = useMemo(() => {
+    return normalizeMovie(data, "crew", "Directing");
+  }, [data]);
+
+  const productorsMovies = useMemo(() => {
+    return normalizeMovie(data, "crew", "Production");
+  }, [data]);
+
+  const wrtiterMovies = useMemo(() => {
+    return normalizeMovie(data, "crew", "Writing");
+  }, [data]);
+
+  const aggregateCredits = useMemo(() => {
+    return [
+      { type: "Recitazione", data: actorsMovies },
+      { type: "Direzione", data: directorsMovies },
+      { type: "Produzione", data: productorsMovies },
+      { type: "Scrittura", data: wrtiterMovies },
+    ].sort((a, b) => {
+      if (knownForDepartment && a.type === knownForDepartment) {
+        return -1;
+      } else if (knownForDepartment && b.type === knownForDepartment) {
+        return 1;
+      }
+
+      return 0;
+    });
+  }, [
+    knownForDepartment,
+    actorsMovies,
+    directorsMovies,
+    productorsMovies,
+    wrtiterMovies,
+  ]);
 
   return (
     <DialogWrapperResponsivness
@@ -234,4 +266,54 @@ export default function DialogPersonDetail({
       )}
     </DialogWrapperResponsivness>
   );
+}
+
+function normalizeMovie(
+  movies,
+  field,
+  filterField = null,
+  sortingFields = ["popularity", "vote_count"],
+  orderBy = "desc"
+) {
+  if (!movies || !movies?.[field]) {
+    return null;
+  }
+
+  const withFilters = filterField
+    ? movies[field].filter((dMovie) => dMovie?.department === filterField)
+    : movies[field];
+
+  const uniqueMoviesList = uniqueArray(withFilters);
+
+  return uniqueMoviesList?.sort((a, b) =>
+    sortByField(a, b, sortingFields, orderBy)
+  );
+}
+
+function sortByField(a, b, sortingFields, orderBy) {
+  const flatSortingNumberA = sortingFields?.reduce((prevFields, currField) => {
+    return prevFields + (a[currField] || 0);
+  }, 0);
+
+  const flatSortingNumberB = sortingFields?.reduce((prevFields, currField) => {
+    return prevFields + (b[currField] || 0);
+  }, 0);
+
+  if (flatSortingNumberA && flatSortingNumberB && orderBy === "desc") {
+    return flatSortingNumberB - flatSortingNumberA;
+  }
+
+  if (flatSortingNumberA && flatSortingNumberB && orderBy === "asc") {
+    return flatSortingNumberB - flatSortingNumberA;
+  }
+
+  if (flatSortingNumberA) {
+    return -1;
+  }
+
+  if (flatSortingNumberB) {
+    return 1;
+  }
+
+  return 0;
 }
