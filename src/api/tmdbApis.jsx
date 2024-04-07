@@ -1378,7 +1378,7 @@ export async function fetchProfileData(user) {
 
   const { data, error } = await supabase
     .from("profile")
-    .select("movie,tv")
+    .select("movie,tv,premium")
     .eq("id", user?.id)
     .limit(1);
 

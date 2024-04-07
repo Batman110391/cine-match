@@ -28,11 +28,6 @@ export default function App() {
     initialStateStore
   );
 
-  const [configPermission, setConfigPermission] = useSessionStorage(
-    "permission",
-    { isAdmin: false }
-  );
-
   const fetchLastExecutionDate = async () => {
     try {
       const { data, error } = await supabase
@@ -99,19 +94,6 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (configPermission && configPermission.isAdmin) {
-      console.log("sei admin");
-    } else {
-      const queryParams = new URLSearchParams(search);
-      const isAdmin = queryParams.get("user");
-
-      if (isAdmin && isAdmin === "admin") {
-        setConfigPermission({
-          isAdmin: true,
-        });
-      }
-    }
-
     if (configCineMatch) {
       dispatch(setQuery(configCineMatch));
     }

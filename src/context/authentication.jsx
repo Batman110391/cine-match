@@ -30,6 +30,7 @@ export const AuthContextProvider = ({ children }) => {
         initializeProfileState({
           tv: result?.tv || {},
           movie: result?.movie || {},
+          premium: result?.premium || false,
           userID: user.id,
         })
       );

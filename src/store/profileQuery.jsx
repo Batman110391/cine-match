@@ -4,6 +4,7 @@ export const initialState = {
   loading: false,
   error: false,
   userID: null,
+  premium: false,
   tv: {},
   movie: {},
 };
@@ -72,7 +73,7 @@ export const profileQuerySlice = createSlice({
       };
     },
     updateProfileError: (state, action) => {
-      return { error: true, loading: false, ...action.payload };
+      return { ...state, error: true, loading: false, ...action.payload };
     },
     upsertSeenTvEpisode: (state, action) => {
       const { itemID, seasonID, infoTv, value } = action.payload;

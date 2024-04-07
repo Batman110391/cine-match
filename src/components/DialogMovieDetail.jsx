@@ -52,6 +52,7 @@ import Tmdb from "./icons/Tmdb";
 import WatchLaterTwoToneIcon from "@mui/icons-material/WatchLaterTwoTone";
 import AuthContext from "../context/authentication";
 import UserController from "./UserController";
+import { uniqueArray } from "../utils/uniqueArray";
 
 const RELEASE_TYPE = [
   { label: "Prima" },
@@ -82,9 +83,7 @@ export default function DialogMovieDetail({
 
   const [infoMovieRef, { height }] = useElementSize();
 
-  const [configPermission] = useSessionStorage("permission", {
-    isAdmin: false,
-  });
+  const isPremium = useSelector((state) => state.profileQuery.premium) || false;
 
   const { isLoading, error, data } = useQuery(
     ["detailMovie", movieID, type],
@@ -104,6 +103,16 @@ export default function DialogMovieDetail({
   // )?.file_path;
 
   const isProviderStreaming = detail?.providers ? true : false;
+
+  const flatProviders = uniqueArray(
+    [
+      ...(detail?.providers?.flatrate || []),
+      ...(detail?.providers?.buy || []),
+      ...(detail?.providers?.rent || []),
+    ],
+    [],
+    "provider_name"
+  );
 
   const director =
     type === "movie"
@@ -461,21 +470,18 @@ export default function DialogMovieDetail({
                         </Button>
                       )}
 
-                      {isProviderStreaming &&
-                        detail?.imdb_id &&
-                        configPermission &&
-                        configPermission.isAdmin && (
-                          <Button
-                            component={"a"}
-                            href={`https://guardahd.stream/movie/${detail?.imdb_id}`}
-                            target="_blank"
-                            sx={{ pl: 0, mt: 1 }}
-                            variant="text"
-                            startIcon={<PlayArrowIcon />}
-                          >
-                            Riproduci
-                          </Button>
-                        )}
+                      {isProviderStreaming && detail?.imdb_id && isPremium && (
+                        <Button
+                          component={"a"}
+                          href={`https://guardahd.stream/movie/${detail?.imdb_id}`}
+                          target="_blank"
+                          sx={{ pl: 0, mt: 1 }}
+                          variant="text"
+                          startIcon={<PlayArrowIcon />}
+                        >
+                          Riproduci
+                        </Button>
+                      )}
 
                       {detail?.tagline && (
                         <Box sx={{ my: 2 }}>
@@ -511,39 +517,31 @@ export default function DialogMovieDetail({
                         {detail?.overview}
                       </Typography>
 
-                      {detail?.providers?.flatrate &&
-                        detail.providers.flatrate.length > 0 && (
-                          <Box sx={{ mt: 2 }}>
-                            <SubHeader title={"Disponibile sulle piattaforme"}>
-                              <Stack
-                                flexDirection={"row"}
-                                flexWrap={"wrap"}
-                                gap={2}
-                                sx={{ mt: 2 }}
-                              >
-                                {[
-                                  ...(detail?.providers?.flatrate || []),
-                                  ...(detail?.providers?.buy || []),
-                                ]
-                                  ?.filter((prov) =>
-                                    PROVIDERS.includes(prov.provider_id)
-                                  )
-                                  ?.map((provider) => (
-                                    <a
-                                      key={provider?.provider_id}
-                                      href={detail?.providers?.link}
-                                      target="_blank"
-                                    >
-                                      <Avatar
-                                        alt={provider?.provider_name}
-                                        src={`http://image.tmdb.org/t/p/w500${provider?.logo_path}`}
-                                      />
-                                    </a>
-                                  ))}
-                              </Stack>
-                            </SubHeader>
-                          </Box>
-                        )}
+                      {flatProviders && flatProviders.length > 0 && (
+                        <Box sx={{ mt: 2 }}>
+                          <SubHeader title={"Disponibile sulle piattaforme"}>
+                            <Stack
+                              flexDirection={"row"}
+                              flexWrap={"wrap"}
+                              gap={2}
+                              sx={{ mt: 2 }}
+                            >
+                              {flatProviders?.map((provider) => (
+                                <a
+                                  key={provider?.provider_id}
+                                  href={detail?.providers?.link}
+                                  target="_blank"
+                                >
+                                  <Avatar
+                                    alt={provider?.provider_name}
+                                    src={`http://image.tmdb.org/t/p/w500${provider?.logo_path}`}
+                                  />
+                                </a>
+                              ))}
+                            </Stack>
+                          </SubHeader>
+                        </Box>
+                      )}
                     </Box>
                   </Grid>
 

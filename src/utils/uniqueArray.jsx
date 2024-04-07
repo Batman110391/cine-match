@@ -1,11 +1,11 @@
-export function uniqueArray(arr1 = [], arr2 = []) {
+export function uniqueArray(arr1 = [], arr2 = [], fieldCompare = "id") {
   const uniqueIds = [];
 
   const filterUniqueResult = [...arr1, ...arr2].filter((element) => {
-    const isDuplicate = uniqueIds.includes(element.id);
+    const isDuplicate = uniqueIds.includes(element?.[fieldCompare]);
 
     if (!isDuplicate) {
-      uniqueIds.push(element.id);
+      uniqueIds.push(element?.[fieldCompare]);
 
       return true;
     }
