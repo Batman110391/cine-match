@@ -53,6 +53,7 @@ import WatchLaterTwoToneIcon from "@mui/icons-material/WatchLaterTwoTone";
 import AuthContext from "../context/authentication";
 import UserController from "./UserController";
 import { uniqueArray } from "../utils/uniqueArray";
+import { useSelector } from "react-redux";
 
 const RELEASE_TYPE = [
   { label: "Prima" },
