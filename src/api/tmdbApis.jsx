@@ -54,8 +54,8 @@ async function useProxy(url, customProxy) {
 
   const urlNetlifyProxy2 =
     process.env.NODE_ENV === "development"
-      ? "http://localhost:8888/.netlify/functions/cors-binary/"
-      : "https://cinematicmatch.netlify.app/.netlify/functions/cors-binary/";
+      ? "http://localhost:8888/.netlify/functions/cors2/"
+      : "https://cinematicmatch.netlify.app/.netlify/functions/cors2/";
 
   const proxyUrls = [
     "https://api.allorigins.win/get?url=",
@@ -64,13 +64,11 @@ async function useProxy(url, customProxy) {
     urlNetlifyProxy2,
     "https://cors-proxy-share-chi.vercel.app/api?url=",
     "https://cors-proxy-share-2.vercel.app/api?url=",
-    "https://cors-proxy-share-3.vercel.app/api?url=",
   ];
 
   const myServerProxy = [
     "https://cors-proxy-share-chi.vercel.app/api?url=",
     "https://cors-proxy-share-2.vercel.app/api?url=",
-    "https://cors-proxy-share-3.vercel.app/api?url=",
     urlNetlifyProxy1,
     urlNetlifyProxy2,
   ];

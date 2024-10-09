@@ -1,4 +1,5 @@
-var fetch = require("node-fetch");
+import axios from "axios";
+
 exports.handler = async (event, context) => {
   var url = event.path;
   url = url.split(".netlify/functions/cors/")[1];
@@ -31,9 +32,9 @@ exports.handler = async (event, context) => {
   )
     delete options.body;
 
-  var response = await fetch(url, options);
-  var response_text = await response.text();
-  var headers = response.headers.raw();
+  var response = await axios.get(url, options);
+  var response_text = await response.data;
+  var headers = response.headers;
 
   var cookie_header = null;
   if (headers["set-cookie"]) cookie_header = headers["set-cookie"];

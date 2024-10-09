@@ -1,7 +1,8 @@
-var fetch = require("node-fetch");
+import axios from "axios";
+
 exports.handler = async (event, context) => {
   var url = event.path;
-  url = url.split(".netlify/functions/cors-binary/")[1];
+  url = url.split(".netlify/functions/cors2/")[1];
   url = decodeURIComponent(url);
   url = new URL(url);
 
@@ -31,18 +32,16 @@ exports.handler = async (event, context) => {
   )
     delete options.body;
 
-  var response = await fetch(url, options);
-  var response_buffer = await response.buffer();
-  var base64_encoded = response_buffer.toString("base64");
-  var headers = response.headers.raw();
+  var response = await axios.get(url, options);
+  var response_text = await response.data;
+  var headers = response.headers;
 
   var cookie_header = null;
   if (headers["set-cookie"]) cookie_header = headers["set-cookie"];
 
   return {
     statusCode: 200,
-    isBase64Encoded: true,
-    body: base64_encoded,
+    body: response_text,
     headers: {
       "content-type": String(headers["content-type"]) || "text/plain",
     },
