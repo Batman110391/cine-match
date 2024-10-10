@@ -98,7 +98,7 @@ export default function App() {
       dispatch(setQuery(configCineMatch));
     }
 
-    fetchLastExecutionDate();
+    // fetchLastExecutionDate();
 
     setInitialLoading(false);
   }, []);
