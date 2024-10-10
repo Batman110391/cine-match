@@ -33,7 +33,7 @@ exports.handler = async (event, context) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify(res),
+      body: JSON.stringify("Ok"),
       headers: {
         "content-type": "application/json; charset=utf-8",
       },
@@ -78,7 +78,6 @@ async function updateMovies(event) {
         console.error(error);
       } else {
         console.log("Data saved successfully!");
-        return result;
       }
     } else {
       console.log("No movies found!");
