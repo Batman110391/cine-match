@@ -12,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { routes } from "../routes";
 import { setQuery } from "../store/movieQuery";
+import Logo from "../icons/Logo";
 
 const drawerWidth = 70;
 
@@ -41,6 +42,16 @@ export default function NavigationDesktop({ children }) {
         variant="permanent"
         anchor="left"
       >
+        <Box
+          sx={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+            mt: 3,
+          }}
+        >
+          <Logo color="#FF5733" style={{ fontSize: 35 }} />
+        </Box>
         <Toolbar />
         <List sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
           {routes

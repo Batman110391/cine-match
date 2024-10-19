@@ -202,6 +202,7 @@ export default function SearchPageDialog({ open, setOpen }) {
             </SearchIconWrapper>
             <StyledInputBase
               placeholder="Cerca film, serie tv, cast..."
+              autoFocus
               value={searchInput}
               onChange={handleSearchInputChange}
               endAdornment={

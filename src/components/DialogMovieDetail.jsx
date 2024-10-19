@@ -44,6 +44,7 @@ import ListImagesMovie from "./ListImagesMovie";
 import ListNewsMovie from "./ListNewsMovie";
 import ListSeasonTv from "./ListSeasonTv";
 import ListSimilarMoviesAndTv from "./ListSimilarMoviesAndTv";
+import ListRelatedMovies from "./ListRelatedMovies";
 import MovieCard from "./MovieCard";
 import RatingsWorld from "./RatingsWorld";
 import SpeedDialShare from "./SpeedDialShare";
@@ -55,7 +56,7 @@ import UserController from "./UserController";
 import { uniqueArray } from "../utils/uniqueArray";
 import { useSelector } from "react-redux";
 
-const RELEASE_TYPE = [
+export const RELEASE_TYPE = [
   { label: "Prima" },
   { label: "Cinematografica (in edizione limitata)" },
   { label: "Cinematografica" },
@@ -117,7 +118,7 @@ export default function DialogMovieDetail({
 
   const director =
     type === "movie"
-      ? detail?.credits?.crew?.find((c) => c?.department === "Directing")
+      ? detail?.credits?.crew?.find((c) => c?.job === "Director")
       : detail?.created_by;
 
   const handleClickOpenDialogTrailer = () => {
@@ -264,7 +265,7 @@ export default function DialogMovieDetail({
                 }}
               >
                 <Grid container spacing={5}>
-                  <Grid item xs={12} sm={8}>
+                  <Grid item xs={12} sm={12} md={7}>
                     <Box ref={infoMovieRef}>
                       <Stack flexDirection={"row"} gap={2}>
                         <Box>
@@ -568,9 +569,27 @@ export default function DialogMovieDetail({
                       </Grid>
                     )}
 
-                  <Grid item xs={12} sm={4}>
+                  <Grid item xs={12} sm={12} md={5}>
                     <CastListDetail
                       person={detail?.credits?.cast}
+                      crew={detail?.credits?.crew}
+                      release={detail?.release}
+                      info={{
+                        studio: detail?.production_companies,
+                        paese: detail?.production_countries,
+                        lingua: detail?.spoken_languages,
+                        incassi: [
+                          {
+                            id: "revenue",
+                            name: detail?.revenue
+                              ? detail?.revenue?.toLocaleString("en-US", {
+                                  style: "currency",
+                                  currency: "USD",
+                                })
+                              : "Non definito",
+                          },
+                        ],
+                      }}
                       height={height}
                       openDialogPersonDetail={openPersonDialog}
                       isDesktop={isDesktop}
@@ -612,6 +631,25 @@ export default function DialogMovieDetail({
                       />
                     </SubHeader>
                   </Grid>
+                  {detail?.belongs_to_collection?.id && (
+                    <Grid item xs={12}>
+                      <SubHeader
+                        title={
+                          type === "movie"
+                            ? "Film correlati"
+                            : "Serie Tv correlata"
+                        }
+                      >
+                        <ListRelatedMovies
+                          id={detail?.id}
+                          idCollection={detail?.belongs_to_collection?.id}
+                          type={type}
+                          isDesktop={isDesktop}
+                          subItemClick={subItemClick}
+                        />
+                      </SubHeader>
+                    </Grid>
+                  )}
                   {detail?.news &&
                     Array.isArray(detail?.news) &&
                     detail?.news?.length > 0 && (

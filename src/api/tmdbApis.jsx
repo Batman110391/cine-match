@@ -672,6 +672,18 @@ export async function fetchSimilarMoviesOrTvById(id, type) {
   });
 }
 
+export async function fetchRelatedMovies(idCollection) {
+  return fetchPromise(
+    `https://api.themoviedb.org/3/collection/${idCollection}?api_key=${API_KEY}&page=${1}&${CURRENT_LANGUAGE}`
+  ).then((data) => {
+    if (data && data?.parts?.length > 0) {
+      return data?.parts;
+    } else {
+      return [];
+    }
+  });
+}
+
 export async function fetchMoviesDiscover(page = 1) {
   const keywordsMovies = KEYWORDS_SEARCH_MOVIE.map((ksm) => {
     return {
