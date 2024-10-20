@@ -56,7 +56,7 @@ export default function MoviesAndTvPages({ typeSearch }) {
 
   const [viewGrid, setViewGrid] = useState("compact");
 
-  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {

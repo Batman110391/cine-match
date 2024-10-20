@@ -11,7 +11,7 @@ export default function AdaptiveStreamingVideoPlayer() {
 
   const theme = useTheme();
 
-  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   const options = bg
     ? {

@@ -7,7 +7,7 @@ import NavigationMobile from "./NavigationMobile";
 export default function Navigation({ children }) {
   const theme = useTheme();
 
-  const isMobile = useMediaQuery(theme.breakpoints.up("sm"));
+  const isMobile = useMediaQuery(theme.breakpoints.up("md"));
 
   if (isMobile) {
     return <NavigationDesktop>{children}</NavigationDesktop>;

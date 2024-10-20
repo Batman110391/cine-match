@@ -200,7 +200,7 @@ export default function ChartCompatibility({ movie, cast, genres }) {
   });
 
   return (
-    <Stack flexDirection={{ xs: "column", sm: "row" }} gap={4}>
+    <Stack flexDirection={{ xs: "column", md: "row" }} gap={4}>
       <Box>
         <Box
           sx={{

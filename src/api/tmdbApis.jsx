@@ -702,11 +702,27 @@ export async function fetchMoviesDiscover(page = 1) {
   const resourcesAll = [
     {
       name: "trending_movie",
-      api: fetchTrending("movie"),
+      api: fetchPromise(
+        `${getUrlMoviesWithCustomParams({
+          from: "1970-01-01",
+          to: CURRENT_DATE_FORMATTING,
+          order_by: "popularity.desc",
+          with_genres: [],
+          with_ott_providers: [],
+        })}&page=${page}`
+      ),
     },
     {
       name: "trending_tv",
-      api: fetchTrending("tv"),
+      api: fetchPromise(
+        `${getUrlSerieTvWithCustomParams({
+          from: "1970-01-01",
+          to: CURRENT_DATE_FORMATTING,
+          order_by: "popularity.desc",
+          with_genres: [],
+          with_ott_providers: [],
+        })}&page=${page}`
+      ),
     },
     {
       name: "incoming_movie",

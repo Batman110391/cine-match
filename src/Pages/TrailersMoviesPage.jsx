@@ -88,7 +88,7 @@ export default function TrailersMoviesPage() {
     }
   }
 
-  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   const handleVideoRef = (index) => (ref) => {
     // if (index !== currentVideoPos) {

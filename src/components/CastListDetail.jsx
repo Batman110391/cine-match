@@ -107,8 +107,8 @@ export default function CastListDetail({
     <List
       sx={{
         width: "100%",
-        maxHeight: { xs: "inherit", sm: height ? `${height}px` : "50vh" },
-        overflowY: { xs: "inherit", sm: "auto" },
+        maxHeight: { xs: "inherit", md: height ? `${height}px` : "50vh" },
+        overflowY: { xs: "inherit", md: "auto" },
         ...sx,
       }}
       subheader={
@@ -302,13 +302,18 @@ export default function CastListDetail({
             </Box>
           )}
       </CustomTabPanel>
-      <CustomTabPanel value={value} sx={{ py: 2 }} index={2}>
+      <CustomTabPanel value={value} sx={{ p: 2, pl: 0 }} index={2}>
         {release && release?.results?.length ? (
           release?.results?.map(({ iso_3166_1, release_dates }) => {
             return (
               <ListItem
                 key={iso_3166_1}
-                sx={{ paddingLeft: 1, alignItems: "flex-start", gap: 1 }}
+                sx={{
+                  paddingLeft: 1,
+                  alignItems: "flex-start",
+                  gap: 1,
+                  flexDirection: isDesktop ? "row" : "column",
+                }}
                 disableGutters
               >
                 <ListItemAvatar
@@ -337,7 +342,9 @@ export default function CastListDetail({
                       sx={{
                         display: "flex",
                         flexDirection: "column",
+
                         gap: 1,
+                        ml: isDesktop ? 0 : 3.5,
                       }}
                     >
                       {release_dates?.map((rd) => {
@@ -346,6 +353,7 @@ export default function CastListDetail({
                             sx={{
                               display: "flex",
                               alignItems: "center",
+                              flexWrap: "wrap",
                             }}
                             key={rd.release_date + iso_3166_1}
                           >
@@ -371,7 +379,7 @@ export default function CastListDetail({
                               <Typography
                                 color="text.secondary"
                                 variant={"caption"}
-                                noWrap
+                                // noWrap
                               >
                                 {`- ${rd.note}`}
                               </Typography>

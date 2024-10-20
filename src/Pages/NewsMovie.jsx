@@ -87,7 +87,7 @@ export default function NewsMovie() {
 
   const [searchInput, setSearchInput] = useState("");
 
-  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {

@@ -47,7 +47,7 @@ export default function DialogPersonDetail({
     fetchPersonDetailById(personID)
   );
 
-  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   const knownForDepartment = useMemo(() => {
     const currDepartment = data && data?.["known_for_department"];

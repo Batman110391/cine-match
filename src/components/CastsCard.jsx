@@ -29,7 +29,7 @@ export default function CastsCard({
         backgroundRepeat: "no-repeat",
         backgroundPosition: "center center",
         objectFit: "cover",
-        height: h ? h : { xs: "240px", sm: "360px" },
+        height: h ? h : { xs: "240px", md: "360px" },
         width: w ? w : "280px",
         display: "flex",
         alignItems: "end",

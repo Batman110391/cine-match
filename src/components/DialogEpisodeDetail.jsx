@@ -50,7 +50,7 @@ export default function DialogEpisodeDetail({
 
   const detail = data;
 
-  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   const director = detail?.crew?.find((c) => c?.department === "Directing");
 

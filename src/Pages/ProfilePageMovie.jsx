@@ -17,7 +17,7 @@ export default function ProfilePageMovie() {
   const theme = useTheme();
   const { openDialogMovieDetail } = React.useContext(DialogMovieDetailContext);
 
-  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   const data = useSelector((state) => state.profileQuery) || {};
 

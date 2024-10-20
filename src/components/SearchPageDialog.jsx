@@ -176,7 +176,7 @@ export default function SearchPageDialog({ open, setOpen }) {
     setOpen(false);
   };
 
-  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   return (
     <DialogWrapperResponsivness

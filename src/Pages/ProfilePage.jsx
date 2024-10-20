@@ -35,7 +35,7 @@ export default function ProfilePage() {
       : null;
   }, [user]);
 
-  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   const handleClickItem = (movieID, type) => {
     openDialogMovieDetail(movieID, type);

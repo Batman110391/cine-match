@@ -143,7 +143,7 @@ export default function SearchPage() {
     };
   }, {});
 
-  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   return (
     <Box sx={{ p: 2, height: "100%" }}>

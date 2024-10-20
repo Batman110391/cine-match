@@ -150,7 +150,7 @@ export default function DialogMovieDetail({
     );
   };
 
-  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   return (
     <div>

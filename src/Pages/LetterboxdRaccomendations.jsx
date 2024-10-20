@@ -57,7 +57,7 @@ export default function LetterboxdRaccomendations() {
 
   const theme = useTheme();
 
-  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   const formattingUsername = username && username.toString().toLowerCase();
 

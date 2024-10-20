@@ -30,7 +30,7 @@ export default function DialogNewsDetail({ open, onClose, newsID }) {
 
   const detail = data;
 
-  const isDesktop = useMediaQuery(theme.breakpoints.up("sm"));
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
 
   return (
     <DialogWrapperResponsivness
