@@ -454,11 +454,8 @@ export default function DialogMovieDetail({
                         </Typography>
                       </Box>
 
-                      {type === "movie" && (
-                        <RatingsWorld
-                          id={detail?.id}
-                          originalTitle={detail?.original_title}
-                        />
+                      {type === "movie" && detail?.id && (
+                        <RatingsWorld id={detail?.id} />
                       )}
 
                       {detail?.videos?.results[0]?.key && (

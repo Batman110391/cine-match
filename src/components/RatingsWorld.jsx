@@ -6,10 +6,9 @@ import Letterboxd from "./icons/Letterboxd";
 import Imdb from "../components/icons/Imdb";
 import { roundToHalf } from "../utils/numberFormatting";
 
-export default function RatingsWorld({ id, originalTitle }) {
-  const { isLoading, error, data } = useQuery(
-    ["ratingsMovie", id, originalTitle],
-    () => fetchRatingMovieById(id, originalTitle)
+export default function RatingsWorld({ id }) {
+  const { isLoading, error, data } = useQuery(["ratingsMovie", id], () =>
+    fetchRatingMovieById(id)
   );
 
   if (error) {

@@ -95,8 +95,8 @@ async function useProxy(url, customProxy) {
   return responseJson;
 }
 
-export async function fetchRatingMovieById(id, originalTitle) {
-  if (!originalTitle || !id) {
+export async function fetchRatingMovieById(id) {
+  if (!id) {
     return null;
   }
 
@@ -104,6 +104,8 @@ export async function fetchRatingMovieById(id, originalTitle) {
     const { imdb_id } = await fetchPromise(
       `https://api.themoviedb.org/3/movie/${id}/external_ids?api_key=${API_KEY}`
     );
+
+    console.log("imdb_id", imdb_id);
 
     const { data, error } = await supabase
       .from("flickmetrix-movies")
