@@ -8,6 +8,7 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
+import TuneIcon from "@mui/icons-material/Tune";
 import React, {
   useCallback,
   useEffect,
@@ -19,7 +20,12 @@ import YouTubePlayer from "react-player/youtube";
 import { useInfiniteQuery } from "react-query";
 import { Mousewheel } from "swiper";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { fetchTrailersMovies, genresList, genresListTv } from "../api/tmdbApis";
+import {
+  fetchTrailersMovies,
+  genresList,
+  genresListTv,
+  fetchMoviesPage,
+} from "../api/tmdbApis";
 
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import VolumeOffIcon from "@mui/icons-material/VolumeOff";
@@ -28,6 +34,8 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import { DialogMovieDetailContext } from "../components/DialogMovieDetailProvider";
 import { Link } from "react-router-dom";
 import { memo } from "react";
+import DialogSettingMovies from "../components/DialogSettingMovies";
+import { useSelector } from "react-redux";
 
 import "swiper/css";
 import "swiper/css/free-mode";
@@ -55,9 +63,13 @@ export default function TrailersMoviesPage() {
   const [openMessage, setOpenMessage] = useState(false);
   const [videoInLight, setVideoInLight] = useState(new Set());
 
+  const [changeFilters, setChangeFilters] = useState(false);
+  const [openSettingMovie, setOpenSettingMovie] = useState(false);
+  const querySearch = useSelector((state) => state.movieQuery?.querySearch);
+
   // Query per i trailers
   const { status, error, data, hasNextPage, fetchNextPage } = useInfiniteQuery({
-    queryKey: ["trailerMovies"],
+    queryKey: ["trailerMovies", changeFilters, querySearch],
     getNextPageParam: (prevData) => prevData.nextPage,
     queryFn: ({ pageParam = 1 }) => {
       // Quando cambia pagina, muta automaticamente l'audio
@@ -65,7 +77,7 @@ export default function TrailersMoviesPage() {
         setMuted(true);
         setOpenMessage(true);
       }
-      return fetchTrailersMovies(pageParam);
+      return fetchTrailersMovies(pageParam, querySearch);
     },
   });
 
@@ -74,6 +86,8 @@ export default function TrailersMoviesPage() {
     if (status !== "success" || !data) return [];
     return data.pages?.flatMap((page) => page.results || []) || [];
   }, [data, status]);
+
+  console.log("trailers", trailers);
 
   // ==================== GESTIONE VIDEO PLAYERS ====================
 
@@ -146,6 +160,8 @@ export default function TrailersMoviesPage() {
 
       // Precarica le prossime pagine se necessario
       if (trailers.length - newPosition <= FETCH_THRESHOLD && hasNextPage) {
+        console.log("precarica");
+
         fetchNextPage();
       }
     },
@@ -340,10 +356,18 @@ export default function TrailersMoviesPage() {
               videoInLight={videoInLight}
               registerPlayer={registerPlayer}
               handleClickItem={handleClickItem}
+              handleOpenFiltersDialog={setOpenSettingMovie}
             />
           </SwiperSlide>
         ))}
       </Swiper>
+      <DialogSettingMovies
+        open={openSettingMovie}
+        setOpen={setOpenSettingMovie}
+        changeFilters={changeFilters}
+        setChangeFilters={setChangeFilters}
+        movieQueryType={"movie"}
+      />
     </Box>
   );
 }
@@ -365,6 +389,7 @@ const VideoWrapper = memo(function VideoWrapper({
   videoInLight,
   registerPlayer,
   handleClickItem,
+  handleOpenFiltersDialog,
 }) {
   const ytRef = useRef(null);
   const isSeeking = useRef(false);
@@ -548,6 +573,7 @@ const VideoWrapper = memo(function VideoWrapper({
       isReady={isReady}
       isPlaying={isPlaying}
       handleClickItem={handleClickItem}
+      handleOpenFiltersDialog={handleOpenFiltersDialog}
     >
       <Box sx={playerContainerStyle}>
         <YouTubePlayer
@@ -611,6 +637,7 @@ const CustomController = memo(function CustomController({
   isPlaying,
   children,
   handleClickItem,
+  handleOpenFiltersDialog,
 }) {
   const [isPaused, setIsPaused] = useState(false);
   const [sliderValue, setSliderValue] = useState(0);
@@ -760,6 +787,7 @@ const CustomController = memo(function CustomController({
           height={dimensions.heightHeaderBar}
           movie={movie}
           handleClickItem={handleClickItem}
+          handleOpenFiltersDialog={handleOpenFiltersDialog}
         />
       </Box>
 
@@ -907,6 +935,7 @@ const HeaderController = memo(function HeaderController({
   height,
   movie,
   handleClickItem,
+  handleOpenFiltersDialog,
 }) {
   return (
     <Box
@@ -914,41 +943,57 @@ const HeaderController = memo(function HeaderController({
         height: `${height}px`,
         display: "flex",
         alignItems: "center",
-        // justifyContent: "space-between",
+        justifyContent: "space-between",
         padding: "0 16px",
         gap: 2,
       }}
     >
-      {/* Pulsante indietro */}
-
-      <IconButton
-        component={Link}
-        to="/home"
+      <Box
         sx={{
-          color: "#fff",
-          "&:hover": {
-            backgroundColor: "rgba(255, 255, 255, 0.1)",
-          },
+          display: "flex",
+          alignItems: "center",
+          gap: 2,
+          flex: 2,
+          minWidth: 0,
         }}
       >
-        <ArrowBackIosNewIcon fontSize="small" />
-      </IconButton>
-      {/* Titolo film */}
-      <Button onClick={() => handleClickItem(movie.id, "movie")}>
-        <Typography
-          // variant={isDesktop ? "h6" : "body1"}
+        {/* Pulsante indietro */}
+
+        <IconButton
+          component={Link}
+          to="/home"
           sx={{
-            flex: 1,
-            fontWeight: 600,
-            textAlign: "center",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
+            color: "#fff",
+            "&:hover": {
+              backgroundColor: "rgba(255, 255, 255, 0.1)",
+            },
           }}
         >
-          {movie?.title}
-        </Typography>
-      </Button>
+          <ArrowBackIosNewIcon fontSize="small" />
+        </IconButton>
+        {/* Titolo film */}
+        <Button onClick={() => handleClickItem(movie.id, "movie")}>
+          <Typography
+            // variant={isDesktop ? "h6" : "body1"}
+            sx={{
+              flex: 1,
+              fontWeight: 600,
+              textAlign: "center",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {movie?.title}
+          </Typography>
+        </Button>
+      </Box>
+      <IconButton
+        // sx={{ minWidth: "90px" }}
+        onClick={() => handleOpenFiltersDialog(true)}
+      >
+        <TuneIcon />
+      </IconButton>
     </Box>
   );
 });

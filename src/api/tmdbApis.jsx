@@ -1264,12 +1264,14 @@ async function fetchFlickMetrixMovies({ page = 0, pageSize = 20, year }) {
   return [];
 }
 
-export async function fetchTrailersMovies(page) {
+export async function fetchTrailersMovies(page, querySearch) {
   const baseUrl = "https://api.themoviedb.org/3";
-  const trendingMoviesUrl = `${baseUrl}/trending/movie/day?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}`;
+  // const trendingMoviesUrl = `${baseUrl}/trending/movie/day?api_key=${API_KEY}&page=${page}&${CURRENT_LANGUAGE}`;
 
   try {
-    const response = await fetchPromise(trendingMoviesUrl);
+    const response = await fetchPromise(
+      `${getUrlMoviesWithCustomParams(querySearch)}&page=${page}`
+    );
 
     const hasNext = page <= response.total_pages;
 
