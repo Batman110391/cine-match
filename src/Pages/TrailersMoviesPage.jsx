@@ -686,7 +686,7 @@ const CustomController = memo(function CustomController({
 
   const dimensions = useMemo(() => {
     const heightHeaderBar = isDesktop ? 60 : 70;
-    const heightFooter = isDesktop ? 60 : 80;
+    const heightFooter = isDesktop ? 60 : 140;
     const clickableAreaTop = heightHeaderBar;
     const clickableAreaHeight = `calc(100% - ${
       heightHeaderBar + heightFooter
@@ -735,11 +735,12 @@ const CustomController = memo(function CustomController({
     <Box
       sx={{
         position: "relative",
-        height: "100%",
+        height: "100svh",
         width: "100%",
         display: "flex",
         flexDirection: "column",
         backgroundColor: "#000",
+        touchAction: "pan-y",
       }}
     >
       {/* Header */}
@@ -844,6 +845,10 @@ const CustomController = memo(function CustomController({
           background:
             "linear-gradient(0deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%)",
           padding: isDesktop ? "20px 24px" : "20px 16px",
+          // paddingBottom: isDesktop
+          //   ? "20px"
+          //   : "calc(env(safe-area-inset-bottom, 0px) + 100px)",
+          pointerEvents: "auto",
         }}
       >
         <Box
@@ -852,6 +857,7 @@ const CustomController = memo(function CustomController({
             alignItems: "center",
             gap: 2,
             width: "100%",
+            pointerEvents: "auto",
           }}
         >
           {/* Slider progresso */}
@@ -908,105 +914,41 @@ const HeaderController = memo(function HeaderController({
         height: `${height}px`,
         display: "flex",
         alignItems: "center",
-        justifyContent: "space-between",
+        // justifyContent: "space-between",
         padding: "0 16px",
         gap: 2,
       }}
     >
-      <Box
+      {/* Pulsante indietro */}
+
+      <IconButton
+        component={Link}
+        to="/home"
         sx={{
-          display: "flex",
-          alignItems: "center",
-          gap: 2,
+          color: "#fff",
+          "&:hover": {
+            backgroundColor: "rgba(255, 255, 255, 0.1)",
+          },
         }}
       >
-        {/* Pulsante indietro */}
-
-        <IconButton
-          component={Link}
-          to="/home"
-          sx={{
-            color: "#fff",
-            "&:hover": {
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-            },
-          }}
-        >
-          <ArrowBackIosNewIcon fontSize="small" />
-        </IconButton>
-        {/* Titolo film */}
+        <ArrowBackIosNewIcon fontSize="small" />
+      </IconButton>
+      {/* Titolo film */}
+      <Button onClick={() => handleClickItem(movie.id, "movie")}>
         <Typography
-          variant={isDesktop ? "h6" : "body1"}
+          // variant={isDesktop ? "h6" : "body1"}
           sx={{
             flex: 1,
-            color: "#fff",
             fontWeight: 600,
             textAlign: "center",
             overflow: "hidden",
             textOverflow: "ellipsis",
             whiteSpace: "nowrap",
-            textShadow: "0 1px 3px rgba(0,0,0,0.5)",
           }}
         >
-          <Button onClick={() => handleClickItem(movie.id, "movie")}>
-            {movie?.title}
-          </Button>
+          {movie?.title}
         </Typography>
-      </Box>
-
-      {/* Generi */}
-      <InfoGenresList isDesktop={isDesktop} movie={movie} />
-    </Box>
-  );
-});
-
-// ==================== INFO GENRES LIST ====================
-
-const InfoGenresList = memo(function InfoGenresList({
-  mediaType = "movie",
-  movie,
-  isDesktop,
-}) {
-  const currGenres = useMemo(() => {
-    if (!movie?.genre_ids) return [];
-
-    const currentGenresList = mediaType === "movie" ? genresList : genresListTv;
-
-    return currentGenresList
-      .filter(({ id }) => movie.genre_ids.includes(id))
-      .map(({ name }) => name)
-      .slice(0, isDesktop ? 3 : 2); // Limita il numero di generi visualizzati
-  }, [mediaType, movie?.genre_ids, isDesktop]);
-
-  if (currGenres.length === 0) return null;
-
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        gap: 1,
-        flexShrink: 0,
-      }}
-    >
-      {currGenres.map((name) => (
-        <Chip
-          key={name}
-          size="small"
-          label={name}
-          sx={{
-            backgroundColor: "rgba(255, 255, 255, 0.2)",
-            color: "#fff",
-            backdropFilter: "blur(10px)",
-            fontWeight: 500,
-            fontSize: isDesktop ? "0.75rem" : "0.65rem",
-            height: isDesktop ? 28 : 24,
-            "& .MuiChip-label": {
-              padding: "0 8px",
-            },
-          }}
-        />
-      ))}
+      </Button>
     </Box>
   );
 });
